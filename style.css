@@ -1,0 +1,40 @@
+body{
+    background-color: aliceblue;
+}
+
+#tablero{
+    margin-top: 100px;
+    justify-self: center;
+}
+
+.casilla{
+    display: flex;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.casillaCoord{
+    display: flex;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.blanca{
+    background-color: white;
+}
+
+.negra{
+    background-color: black;
+}
+
+
+.pieza{
+    width: 30px;
+    height: 30px;
+}
