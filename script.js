@@ -25,12 +25,12 @@ function generarTablero(){
             const casilla = document.createElement("div");
             casilla.className = "casilla";
             casilla.id = posiciones[posicionCasilla];
-            // const pieza = document.createElement("img");
-            // pieza.src = "/img/chesspieces/peonBlanco.webp";
-            // pieza.alt = "peonBlanco";
-            // pieza.className = "pieza";
-            // casilla.appendChild(pieza);
-            // casilla.id = posiciones[posicionCasilla];
+            //Añadir funcionalidad de soltar pieza
+            casilla.addEventListener("dragenter", dragEnter);
+            casilla.addEventListener("dragleave", dragLeave);
+            casilla.addEventListener("dragover", dragOver);
+            casilla.addEventListener("drop", drop);
+            
             //Asignar color de las piezas dependiendo de si son pares o no 
             if((i + j)% 2 == 0){
                 casilla.style.backgroundColor = "#ffffff";
@@ -61,6 +61,12 @@ function generarTablero(){
 generarTablero();
 
 function colocarPiezas(){
+    let id = 0;
+    const idPiezas = ["negro-torre-1","negro-caballo-1","negro-alfil-1","negro-dama","negro-rey","negro-alfil-2","negro-caballo-2","negro-torre-2",
+        "negro-peon-1","negro-peon-2","negro-peon-3","negro-peon-4","negro-peon-5","negro-peon-6","negro-peon-7","negro-peon-8","blanco-peon-1",
+        "blanco-peon-2","blanco-peon-3","blanco-peon-4","blanco-peon-5","blanco-peon-6","blanco-peon-7","blanco-peon-8","blanco-torre-1",
+        "blanco-caballo-1","blanco-alfil-1","blanco-dama","blanco-rey","blanco-alfil-2","blanco-caballo-2","blanco-torre-2",
+        ];
     const casillas = document.querySelectorAll(".casilla");
     for(let i = 0; i < 64; i++){
         let nombrePieza = "none";
@@ -111,9 +117,51 @@ function colocarPiezas(){
             pieza.src = src;
             pieza.alt = nombrePieza;
             pieza.className = "pieza";
+            pieza.id = idPiezas[id];
+            id++;
+            // pieza.addEventListener("dragstart", arrastrarPieza);
+            // pieza.onclick = arrastrarPieza;
+            pieza.addEventListener("dragstart", arrastrarPieza);
+            pieza.addEventListener("dragend", soltarPieza);
+            //Esto permite arrastrar las piezas
+            pieza.draggable = "true";
             casillas[i].appendChild(pieza);
         }
     }
 
 }
 colocarPiezas()
+
+
+
+function arrastrarPieza(evento) {
+    console.log(evento.target.id);
+    evento.dataTransfer.setDragImage(evento.target.id, 0, 0);
+    evento.dataTransfer.setData('text/plain', evento.target.id);
+}   
+
+function arrastrarPieza2(){
+    console.log("Me estan arrastrando")
+}
+
+function soltarPieza(){
+    console.log("soltar");
+}
+
+
+
+function dragEnter(e){
+    console.log("han entrado en: " + e.target.id)
+}
+
+function dragLeave(e){
+    console.log("han salido de: " + e.target.id)
+}
+
+function drop(e){
+    console.log("Pieza: " + e.id + " soltada en: " + e.target.id);
+}
+
+function dragOver(e){
+    e.preventDefault();
+}
