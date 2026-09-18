@@ -6,3 +6,13 @@ Las piezas de inicio se colocan en forma de barrido escaneando todas las casilla
 Si quiero colocar una pieza o filtrar una casilla solo tengo que hacer un foreach del query selector all y comparar el element.id con ="a5" por ejemplo
 
 ahora las img de las piezas tienen id representativo por lo que se puede filtrar las img dentro de tablero y tienes una lista de piezas que puedes separar con el id
+
+
+
+Piezas:
+
+Arrastrables _/
+Arrastrar con su imagen /
+Colocar sobre una casilla
+Colocar sobre una pieza
+Quitar mouse raro de arrastrar
