@@ -26,10 +26,10 @@ function generarTablero(){
             casilla.className = "casilla";
             casilla.id = posiciones[posicionCasilla];
             //Añadir funcionalidad de soltar pieza
-            casilla.addEventListener("dragenter", dragEnter);
-            casilla.addEventListener("dragleave", dragLeave);
-            casilla.addEventListener("dragover", dragOver);
-            casilla.addEventListener("drop", drop);
+            // casilla.addEventListener("dragenter", dragEnter);
+            // casilla.addEventListener("dragleave", dragLeave);
+            // casilla.addEventListener("dragover", dragOver);
+            // casilla.addEventListener("drop", drop);
             
             //Asignar color de las piezas dependiendo de si son pares o no 
             if((i + j)% 2 == 0){
@@ -119,12 +119,16 @@ function colocarPiezas(){
             pieza.className = "pieza";
             pieza.id = idPiezas[id];
             id++;
+
+
             // pieza.addEventListener("dragstart", arrastrarPieza);
             // pieza.onclick = arrastrarPieza;
-            pieza.addEventListener("dragstart", arrastrarPieza);
-            pieza.addEventListener("dragend", soltarPieza);
-            //Esto permite arrastrar las piezas
-            pieza.draggable = "true";
+            // pieza.addEventListener("dragstart", arrastrarPieza);
+            // pieza.addEventListener("dragend", soltarPieza);
+
+
+            pieza.draggable = "false";
+            pieza.addEventListener("mousedown", clicarPieza);
             casillas[i].appendChild(pieza);
         }
     }
@@ -134,56 +138,106 @@ colocarPiezas()
 
 
 
-function arrastrarPieza(evento) {
-    //Crear copia de la pieza para que no se arrastre el fondo
-    const imgCopia = new Image()
-    imgCopia.src = evento.target.src;
-    imgCopia.style.width = "50px";
-    imgCopia.style.height = "50px";
-    imgCopia.style.position = "absolute";
-    imgCopia.style.top = "-9999px";
-    imgCopia.style.left = "-9999px";
-    imgCopia.className = "copiaPieza";
-    imgCopia.style.opacity = "0.2";
-    //Añadimos al body pero fuera de la pantalla
-    document.body.appendChild(imgCopia)
-    //Le pasamos el elemento y la posicion para que este centrado
-    evento.dataTransfer.setDragImage(imgCopia, 30, 30);
-    //Si da error añadir 0,01 en el timeout para que se asegure de terminar la "foto" de la copia y luego lo borra
-    setTimeout(() => {
-        document.querySelector("#copiaPieza").remove();
-    }, 0);
+// function arrastrarPieza(evento) {
+//     //Crear copia de la pieza para que no se arrastre el fondo
+//     const imgCopia = new Image()
+//     imgCopia.src = evento.target.src;
+//     imgCopia.style.width = "50px";
+//     imgCopia.style.height = "50px";
+//     imgCopia.style.position = "absolute";
+//     imgCopia.style.top = "-9999px";
+//     imgCopia.style.left = "-9999px";
+//     imgCopia.className = "copiaPieza";
+//     imgCopia.style.opacity = "0.2";
+//     //Añadimos al body pero fuera de la pantalla
+//     document.body.appendChild(imgCopia)
+//     //Le pasamos el elemento y la posicion para que este centrado
+//     evento.dataTransfer.setDragImage(imgCopia, 30, 30);
+//     //Si da error añadir 0,01 en el timeout para que se asegure de terminar la "foto" de la copia y luego lo borra
+//     setTimeout(() => {
+//         document.querySelector("#copiaPieza").remove();
+//     }, 0);
 
-    evento.dataTransfer.setData('text/plain', evento.target.id);
-}   
+//     evento.dataTransfer.setData('text/plain', evento.target.id);
+// }   
 
-function arrastrarPieza2(){
-    console.log("Me estan arrastrando")
+// function arrastrarPieza2(){
+//     console.log("Me estan arrastrando")
+// }
+
+// function soltarPieza(){
+//     console.log("soltar");
+// }
+
+
+
+// function dragEnter(e){
+//     console.log("han entrado en: " + e.target.id)
+// }
+
+// function dragLeave(e){
+//     console.log("han salido de: " + e.target.id)
+// }
+
+// function drop(event){
+//     event.preventDefault();
+//     const data = event.dataTransfer.getData("text");
+//     const idPieza = tablero.querySelectorAll(data);
+//     console.log("Pieza: " + event.id + " soltada en: " + event.target.id);
+//     console.log(idPieza)
+//     event.target.appendChild(idPieza)
+// }
+
+// function dragOver(e){
+//     e.preventDefault();
+// }
+
+
+
+//Variables de pieza, para pasarlas entre mouseDown y mouseMove es decir que cuando mueva la pieza la funcion de clicar pieza 
+// no desaparezca los datos si no que los pase a una variable local
+let agarreX = 0;
+let agarreY = 0;
+let piezaAgarrada = "null";
+let click = "null";
+
+
+function clicarPieza(evento){
+    click = "true"
+    //Esto desactiva el comportamiento por defecto que deja arrastrar imagenes
+    evento.preventDefault();
+    console.log("Pieza agarrada: " , evento.target);
+    piezaAgarrada = evento.target;
+    piezaAgarrada.style.position = "absolute";
+    piezaAgarrada.style.zIndex = "100";
+    //Restamos la posicion del raton menos la esquina de la img para no solo anclarla al raton sino anclarla 
+    // con el mismo margen sin que haya un salto
+    agarreX = evento.clientX - piezaAgarrada.getBoundingClientRect().left;
+    agarreY = evento.clientY - piezaAgarrada.getBoundingClientRect().top;
+    console.log("CoordenadasX pieza: " + evento.clientX);
+    click = "false";
 }
 
-function soltarPieza(){
-    console.log("soltar");
+//La añadimos al documento porque si se añade a pieza y muevo el raton muy rapido la puede perder
+document.addEventListener("mousemove", moverPieza);
+function moverPieza(evento){
+    if(piezaAgarrada == "null"){
+        return
+    }if(!(piezaAgarrada == "null")){
+        const posX = evento.clientX - agarreX;
+        const posY = evento.clientY - agarreY;
+        piezaAgarrada.style.left = posX + "px";
+        piezaAgarrada.style.top = posY + "px";
+    }
 }
 
 
-
-function dragEnter(e){
-    console.log("han entrado en: " + e.target.id)
-}
-
-function dragLeave(e){
-    console.log("han salido de: " + e.target.id)
-}
-
-function drop(event){
-    event.preventDefault();
-    const data = event.dataTransfer.getData("text");
-    const idPieza = tablero.querySelectorAll(data);
-    console.log("Pieza: " + event.id + " soltada en: " + event.target.id);
-    console.log(idPieza)
-    event.target.appendChild(idPieza)
-}
-
-function dragOver(e){
-    e.preventDefault();
+document.addEventListener("mouseup", soltarClick);
+function soltarClick(evento){
+    //Con esto hacemos que se suelte la pieza y reseteamos sus valores para que no pase por encima de otras y este en la misma capa que la casilla        piezaAgarrada.style.position = "";
+    piezaAgarrada.style.zIndex = "";
+    piezaAgarrada.style.left = "";
+    piezaAgarrada.style.top = "";
+    piezaAgarrada = "null";
+    console.log(evento)
 }
