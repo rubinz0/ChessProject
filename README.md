@@ -13,8 +13,16 @@ Piezas:
 
 Arrastrables _/
 Arrastrar con su imagen /
-Colocar sobre una casilla
-Colocar sobre una pieza
+Colocar sobre una casilla _/
+Colocar sobre una pieza _/ Eliminar la pieza de debajo
+Movimiento de:
+Peon
+Torre
+Caballo
+Alfil
+Dama
+Rey
+
 Quitar mouse raro de arrastrar
 
 

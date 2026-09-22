@@ -137,6 +137,7 @@ let agarreY = 0;
 let piezaAgarrada = "null";
 let click = "null";
 let casillaDestino = "";
+let casillaInicio = "";
 
 
 function clicarPieza(evento){
@@ -153,6 +154,7 @@ function clicarPieza(evento){
     agarreY = evento.clientY - piezaAgarrada.getBoundingClientRect().top;
     console.log("CoordenadasX pieza: " + evento.clientX);
     click = "false";
+    casillaInicio = evento.target.parentElement;
 }
 
 //La añadimos al documento porque si se añade a pieza y muevo el raton muy rapido la puede perder
@@ -183,28 +185,57 @@ function soltarClick(evento){
         //Lannzo el "rayo"
         casillaDestino = document.elementFromPoint(evento.clientX,evento.clientY);
         if(casillaDestino.className == "casilla"){
-            validarMovimiento(piezaAgarrada, casillaDestino);
-            casillaDestino.appendChild(piezaAgarrada);
+            let valido = validarMovimiento(piezaAgarrada, casillaInicio,casillaDestino);
+            if(valido){
+                casillaDestino.appendChild(piezaAgarrada);
+            }
         }if(casillaDestino.className == "pieza"){
-            validarMovimiento(piezaAgarrada, casillaDestino);
+            validarMovimiento(piezaAgarrada, casillaInicio,casillaDestino);
             casillaDestino = casillaDestino.parentElement;
         }
         piezaAgarrada.style.visibility = "visible";
-    
         piezaAgarrada = "null";
-        console.log(evento);
     }
 
 }
 
 
 //Esta funcion comprueba si puedes soltar la pieza en esa casilla. En un futuro se puede modificar para diferentes modos de juego o desactivar para un tablero de analisis;
-function validarMovimiento(piezaAgarrada, casillaDestino){
-    const pieza = piezaAgarrada.id;
-    pieza = pieza.split("")
-    console.log(pieza)
+function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
+    let valido = false;
+    let pieza = piezaAgarrada.id;
+    pieza = pieza.split("-");
+    const letraCasillaInicio = casillaInicio.id[0];
+    const numeroCasillaInicio = parseInt(casillaInicio.id[1]);
+    const letraCasillaDestino = casillaDestino.id[0];
+    const numeroCasillaDestino = parseInt(casillaDestino.id[1]);
     //Peones
+    if(pieza[1] === "peon"){
+        //Unica pieza que comprueba esto
+        if(pieza[0] === "blanco"){
+            //Si estan en la misma fila
+            if(letraCasillaDestino == letraCasillaInicio){
+                //Si avanza una o dos casillas desde la posicion de inicio de partida
+                if(numeroCasillaInicio == 2 && (numeroCasillaDestino == 3 | numeroCasillaDestino == 4)){
+                    valido = true;
+                }if(numeroCasillaDestino == numeroCasillaInicio +1){
+                    valido = true;
+                }
+            }
+        }else{
+            //Si estan en la misma fila
+            if(letraCasillaDestino == letraCasillaInicio){
+                //Si avanza una o dos casillas desde la posicion de inicio de partida
+                if(numeroCasillaInicio == 7 && (numeroCasillaDestino == 6 | numeroCasillaDestino == 5)){
+                    valido = true;
+                }
+                if(numeroCasillaDestino == numeroCasillaInicio -1){
+                    valido = true;
+                }
+            }
+        }
 
+    }
     //Torres
 
     //Caballos
@@ -215,4 +246,8 @@ function validarMovimiento(piezaAgarrada, casillaDestino){
 
     //Rey
 
+    if(valido){
+        console.log(piezaAgarrada.id,casillaDestino.id)
+    }
+    return valido;
 }
