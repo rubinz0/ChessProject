@@ -26,10 +26,7 @@ function generarTablero(){
             casilla.className = "casilla";
             casilla.id = posiciones[posicionCasilla];
             //Añadir funcionalidad de soltar pieza
-            // casilla.addEventListener("dragenter", dragEnter);
-            // casilla.addEventListener("dragleave", dragLeave);
-            // casilla.addEventListener("dragover", dragOver);
-            // casilla.addEventListener("drop", drop);
+
             
             //Asignar color de las piezas dependiendo de si son pares o no 
             if((i + j)% 2 == 0){
@@ -120,13 +117,6 @@ function colocarPiezas(){
             pieza.id = idPiezas[id];
             id++;
 
-
-            // pieza.addEventListener("dragstart", arrastrarPieza);
-            // pieza.onclick = arrastrarPieza;
-            // pieza.addEventListener("dragstart", arrastrarPieza);
-            // pieza.addEventListener("dragend", soltarPieza);
-
-
             pieza.draggable = "false";
             pieza.addEventListener("mousedown", clicarPieza);
             casillas[i].appendChild(pieza);
@@ -138,60 +128,6 @@ colocarPiezas()
 
 
 
-// function arrastrarPieza(evento) {
-//     //Crear copia de la pieza para que no se arrastre el fondo
-//     const imgCopia = new Image()
-//     imgCopia.src = evento.target.src;
-//     imgCopia.style.width = "50px";
-//     imgCopia.style.height = "50px";
-//     imgCopia.style.position = "absolute";
-//     imgCopia.style.top = "-9999px";
-//     imgCopia.style.left = "-9999px";
-//     imgCopia.className = "copiaPieza";
-//     imgCopia.style.opacity = "0.2";
-//     //Añadimos al body pero fuera de la pantalla
-//     document.body.appendChild(imgCopia)
-//     //Le pasamos el elemento y la posicion para que este centrado
-//     evento.dataTransfer.setDragImage(imgCopia, 30, 30);
-//     //Si da error añadir 0,01 en el timeout para que se asegure de terminar la "foto" de la copia y luego lo borra
-//     setTimeout(() => {
-//         document.querySelector("#copiaPieza").remove();
-//     }, 0);
-
-//     evento.dataTransfer.setData('text/plain', evento.target.id);
-// }   
-
-// function arrastrarPieza2(){
-//     console.log("Me estan arrastrando")
-// }
-
-// function soltarPieza(){
-//     console.log("soltar");
-// }
-
-
-
-// function dragEnter(e){
-//     console.log("han entrado en: " + e.target.id)
-// }
-
-// function dragLeave(e){
-//     console.log("han salido de: " + e.target.id)
-// }
-
-// function drop(event){
-//     event.preventDefault();
-//     const data = event.dataTransfer.getData("text");
-//     const idPieza = tablero.querySelectorAll(data);
-//     console.log("Pieza: " + event.id + " soltada en: " + event.target.id);
-//     console.log(idPieza)
-//     event.target.appendChild(idPieza)
-// }
-
-// function dragOver(e){
-//     e.preventDefault();
-// }
-
 
 
 //Variables de pieza, para pasarlas entre mouseDown y mouseMove es decir que cuando mueva la pieza la funcion de clicar pieza 
@@ -200,6 +136,7 @@ let agarreX = 0;
 let agarreY = 0;
 let piezaAgarrada = "null";
 let click = "null";
+let casillaDestino = "";
 
 
 function clicarPieza(evento){
@@ -234,10 +171,48 @@ function moverPieza(evento){
 
 document.addEventListener("mouseup", soltarClick);
 function soltarClick(evento){
-    //Con esto hacemos que se suelte la pieza y reseteamos sus valores para que no pase por encima de otras y este en la misma capa que la casilla        piezaAgarrada.style.position = "";
-    piezaAgarrada.style.zIndex = "";
-    piezaAgarrada.style.left = "";
-    piezaAgarrada.style.top = "";
-    piezaAgarrada = "null";
-    console.log(evento)
+    if(piezaAgarrada == "null"){
+        return;
+    }if(!(piezaAgarrada == "null")){
+        //Con esto hacemos que se suelte la pieza y reseteamos sus valores para que no pase por encima de otras y este en la misma capa que la casilla        piezaAgarrada.style.position = "";
+        piezaAgarrada.style.zIndex = "";
+        piezaAgarrada.style.left = "";
+        piezaAgarrada.style.top = "";
+        //Oculto la pieza para poder lanzar el "rayo" que impacta contra la casilla de debajo
+        piezaAgarrada.style.visibility = "hidden"
+        //Lannzo el "rayo"
+        casillaDestino = document.elementFromPoint(evento.clientX,evento.clientY);
+        if(casillaDestino.className == "casilla"){
+            validarMovimiento(piezaAgarrada, casillaDestino);
+            casillaDestino.appendChild(piezaAgarrada);
+        }if(casillaDestino.className == "pieza"){
+            validarMovimiento(piezaAgarrada, casillaDestino);
+            casillaDestino = casillaDestino.parentElement;
+        }
+        piezaAgarrada.style.visibility = "visible";
+    
+        piezaAgarrada = "null";
+        console.log(evento);
+    }
+
+}
+
+
+//Esta funcion comprueba si puedes soltar la pieza en esa casilla. En un futuro se puede modificar para diferentes modos de juego o desactivar para un tablero de analisis;
+function validarMovimiento(piezaAgarrada, casillaDestino){
+    const pieza = piezaAgarrada.id;
+    pieza = pieza.split("")
+    console.log(pieza)
+    //Peones
+
+    //Torres
+
+    //Caballos
+
+    //Alfiles
+
+    //Dama
+
+    //Rey
+
 }
