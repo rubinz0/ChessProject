@@ -1,5 +1,6 @@
 const tablero = document.getElementById("tablero");
 const coordenadasArray = ["a8","b8","c8","d8","e8","f8","g8","h8","a7","b7","c7","d7","e7","f7","g7","h7","a6","b6","c6","d6","e6","f6","g6","h6","a5","b5","c5","d5","e5","f5","g5","h5","a4","b4","c4","d4","e4","f4","g4","h4","a3","b3","c3","d3","e3","f3","g3","h3","a2","b2","c2","d2","e2","f2","g2","h2","a1","b1","c1","d1","e1","f1","g1","h1"];
+const letras = ["null","a","b", "c", "d", "e", "f", "g","h"];
 //Diccionario donde guardo la posicion actual del tablero (FEN)
 let tableroDigital = {}
 function generarTablero(){
@@ -201,7 +202,9 @@ function soltarClick(evento){
         if(casillaDestino.className == "pieza"){
             casillaDestino = casillaDestino.parentElement;
         }
-        let valido = validarMovimiento(piezaAgarrada, casillaInicio,casillaDestino);
+        //Comprueba que el movimiento sea valido
+        // let valido = validarMovimiento(piezaAgarrada, casillaInicio,casillaDestino);
+        let valido = calcularMovimientos(piezaAgarrada);   
         if(valido){
             casillaDestino.appendChild(piezaAgarrada);
         }
@@ -221,6 +224,8 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
     const numeroCasillaInicio = parseInt(casillaInicio.id[1]);
     const letraCasillaDestino = casillaDestino.id[0];
     const numeroCasillaDestino = parseInt(casillaDestino.id[1]);
+    //En esta variable se guarda la distancia entre las filas si es de 1 son adyacentes
+    let filaAdyacente = 0;
 
     //Peones
     if(pieza[1] === "peon"){
@@ -233,8 +238,8 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
                     //Calculamos la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
                     let numeroCasillaDestinoNueva = numeroCasillaDestino - 1;
                     let coordenadaNueva = letraCasillaDestino + numeroCasillaDestinoNueva;
-                    //Comprueba si una casilla antes hay una pieza
-                    if(tableroDigital[coordenadaNueva] === "null"){
+                    //Comprueba si una casilla antes hay una pieza y en la casilla final
+                    if(tableroDigital[coordenadaNueva] === "null" && tableroDigital[casillaDestino.id] === "null"){
                         valido = true;
                     }else{
                         valido = false;
@@ -249,6 +254,19 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
                     }
                 }
             }
+
+            //Si la casilla esta en las filas adyacentes
+            //Calcula fila esta izquierda o derecha
+            if(letras.indexOf(letraCasillaDestino) > letras.indexOf(letraCasillaInicio)){
+                filaAdyacente = letras.indexOf(letraCasillaDestino) - letras.indexOf(letraCasillaInicio);
+            }else{
+                filaAdyacente = letras.indexOf(letraCasillaInicio) - letras.indexOf(letraCasillaDestino);
+            }
+            //Si esta, es una casilla 1 posicion mas adelante (1 diagonal) y hay una pieza. Mueve
+            if(filaAdyacente == 1 && (numeroCasillaDestino - numeroCasillaInicio) == 1 && !(tableroDigital[casillaDestino.id] == "null")){
+                valido = true
+            }
+
         }else{
             //Si estan en la misma fila
             if(letraCasillaDestino == letraCasillaInicio){
@@ -257,7 +275,7 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
                     let numeroCasillaDestinoNueva = numeroCasillaDestino + 1;
                     let coordenadaNueva = letraCasillaDestino + numeroCasillaDestinoNueva;
                     //Comprueba si una casilla antes hay una pieza
-                    if(tableroDigital[coordenadaNueva] === "null"){
+                    if(tableroDigital[coordenadaNueva] === "null" && tableroDigital[casillaDestino.id] === "null"){
                         valido = true;
                     }else{
                         valido = false;
@@ -271,6 +289,16 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
                         valido = false;
                     }
                 }
+            }
+            //Calcula fila esta izquierda o derecha
+            if(letras.indexOf(letraCasillaDestino) > letras.indexOf(letraCasillaInicio)){
+                filaAdyacente = letras.indexOf(letraCasillaDestino) - letras.indexOf(letraCasillaInicio);
+            }else{
+                filaAdyacente = letras.indexOf(letraCasillaInicio) - letras.indexOf(letraCasillaDestino);
+            }
+            //Si esta, es una casilla 1 posicion mas adelante (1 diagonal) y hay una pieza. Mueve
+            if(filaAdyacente == 1 && (numeroCasillaInicio - numeroCasillaDestino) == 1 && !(tableroDigital[casillaDestino.id] == "null")){
+                valido = true
             }
         }
     }
@@ -291,8 +319,10 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
     if(valido){
         //Comprobar si hay una pieza en la casilla destino
         if(!(tableroDigital[casillaDestino.id] === "null")){
-            console.log("hay una pieza");
-            comprobarCaptura(pieza, casillaDestino.id)
+            //Comer pieza
+            const piezaComida = casillaDestino.querySelector(".pieza");
+            piezaComida.remove();
+            // capturarPieza(piezaAgarrada, casillaDestino)
         }
         //Actualiza tablero en memoria con la jugada actual
         tableroDigital[casillaInicio.id] = "null";
@@ -302,8 +332,20 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
     return valido;
 }
 
-function comprobarCaptura(piezaAgarrada, casillaDestino){
-    if(piezaAgarrada[1] == "peon"){
-        console.log("z")
+// function capturarPieza(piezaAgarrada, casillaDestino){
+    
+// }
+
+
+function calcularMovimientos(piezaAgarrada, casillaInicio){
+    let valido = false;
+    let pieza = piezaAgarrada.id;
+
+    let arriba = []
+    pieza = pieza.split("-");
+    if(pieza[1] == "torre"){
+        console.log("asd")
     }
+    valido = true;
+    return valido;
 }

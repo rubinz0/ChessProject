@@ -16,7 +16,7 @@ Arrastrar con su imagen /
 Colocar sobre una casilla _/
 Colocar sobre una pieza _/ Eliminar la pieza de debajo
 Movimiento de:
-Peon
+Peon _/ Falta en passant
 Torre
 Caballo
 Alfil
