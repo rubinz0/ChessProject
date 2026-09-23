@@ -1,8 +1,10 @@
 const tablero = document.getElementById("tablero");
-const posiciones = ["a8","b8","c8","d8","e8","f8","g8","h8","a7","b7","c7","d7","e7","f7","g7","h7","a6","b6","c6","d6","e6","f6","g6","h6","a5","b5","c5","d5","e5","f5","g5","h5","a4","b4","c4","d4","e4","f4","g4","h4","a3","b3","c3","d3","e3","f3","g3","h3","a2","b2","c2","d2","e2","f2","g2","h2","a1","b1","c1","d1","e1","f1","g1","h1"];
+const coordenadasArray = ["a8","b8","c8","d8","e8","f8","g8","h8","a7","b7","c7","d7","e7","f7","g7","h7","a6","b6","c6","d6","e6","f6","g6","h6","a5","b5","c5","d5","e5","f5","g5","h5","a4","b4","c4","d4","e4","f4","g4","h4","a3","b3","c3","d3","e3","f3","g3","h3","a2","b2","c2","d2","e2","f2","g2","h2","a1","b1","c1","d1","e1","f1","g1","h1"];
+//Diccionario donde guardo la posicion actual del tablero (FEN)
+let tableroDigital = {}
 function generarTablero(){
     //Crear filas
-    let posicionCasilla = 0;
+    let posicionCoordenada = 0;
     for(let i = 0; i < 8; i++){
         const fila = document.createElement("div");
         fila.style.display = "flex";
@@ -24,7 +26,8 @@ function generarTablero(){
             }
             const casilla = document.createElement("div");
             casilla.className = "casilla";
-            casilla.id = posiciones[posicionCasilla];
+            casilla.id = coordenadasArray[posicionCoordenada];
+
             //Añadir funcionalidad de soltar pieza
 
             
@@ -35,7 +38,7 @@ function generarTablero(){
                 casilla.style.backgroundColor = "#69923e";
             }
             fila.appendChild(casilla);
-            posicionCasilla++;
+            posicionCoordenada++;
 
             
         }
@@ -115,12 +118,23 @@ function colocarPiezas(){
             pieza.alt = nombrePieza;
             pieza.className = "pieza";
             pieza.id = idPiezas[id];
+
+            //Colocar piezas en tablero digital (Diccionario)
+            tableroDigital[coordenadasArray[i]] = idPiezas[id];
+
             id++;
 
             pieza.draggable = "false";
             pieza.addEventListener("mousedown", clicarPieza);
             casillas[i].appendChild(pieza);
+
+
+
+        }else{
+            // Colocar null en casillas tablero digital (Diccionario)
+            tableroDigital[coordenadasArray[i]] = "null";
         }
+        
     }
 
 }
@@ -184,14 +198,12 @@ function soltarClick(evento){
         piezaAgarrada.style.visibility = "hidden"
         //Lannzo el "rayo"
         casillaDestino = document.elementFromPoint(evento.clientX,evento.clientY);
-        if(casillaDestino.className == "casilla"){
-            let valido = validarMovimiento(piezaAgarrada, casillaInicio,casillaDestino);
-            if(valido){
-                casillaDestino.appendChild(piezaAgarrada);
-            }
-        }if(casillaDestino.className == "pieza"){
-            validarMovimiento(piezaAgarrada, casillaInicio,casillaDestino);
+        if(casillaDestino.className == "pieza"){
             casillaDestino = casillaDestino.parentElement;
+        }
+        let valido = validarMovimiento(piezaAgarrada, casillaInicio,casillaDestino);
+        if(valido){
+            casillaDestino.appendChild(piezaAgarrada);
         }
         piezaAgarrada.style.visibility = "visible";
         piezaAgarrada = "null";
@@ -209,6 +221,7 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
     const numeroCasillaInicio = parseInt(casillaInicio.id[1]);
     const letraCasillaDestino = casillaDestino.id[0];
     const numeroCasillaDestino = parseInt(casillaDestino.id[1]);
+
     //Peones
     if(pieza[1] === "peon"){
         //Unica pieza que comprueba esto
@@ -216,10 +229,24 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
             //Si estan en la misma fila
             if(letraCasillaDestino == letraCasillaInicio){
                 //Si avanza una o dos casillas desde la posicion de inicio de partida
-                if(numeroCasillaInicio == 2 && (numeroCasillaDestino == 3 | numeroCasillaDestino == 4)){
-                    valido = true;
+                if(numeroCasillaInicio == 2 &&  numeroCasillaDestino == 4){
+                    //Calculamos la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
+                    let numeroCasillaDestinoNueva = numeroCasillaDestino - 1;
+                    let coordenadaNueva = letraCasillaDestino + numeroCasillaDestinoNueva;
+                    //Comprueba si una casilla antes hay una pieza
+                    if(tableroDigital[coordenadaNueva] === "null"){
+                        valido = true;
+                    }else{
+                        valido = false;
+                    }
+                    
                 }if(numeroCasillaDestino == numeroCasillaInicio +1){
-                    valido = true;
+                    //Si la casilla esta vacia avanza
+                    if(tableroDigital[casillaDestino.id] === "null"){
+                        valido = true;
+                    }else{
+                        valido = false;
+                    }
                 }
             }
         }else{
@@ -227,17 +254,32 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
             if(letraCasillaDestino == letraCasillaInicio){
                 //Si avanza una o dos casillas desde la posicion de inicio de partida
                 if(numeroCasillaInicio == 7 && (numeroCasillaDestino == 6 | numeroCasillaDestino == 5)){
-                    valido = true;
+                    let numeroCasillaDestinoNueva = numeroCasillaDestino + 1;
+                    let coordenadaNueva = letraCasillaDestino + numeroCasillaDestinoNueva;
+                    //Comprueba si una casilla antes hay una pieza
+                    if(tableroDigital[coordenadaNueva] === "null"){
+                        valido = true;
+                    }else{
+                        valido = false;
+                    }
                 }
                 if(numeroCasillaDestino == numeroCasillaInicio -1){
-                    valido = true;
+                    //Si la casilla esta vacia avanza
+                    if(tableroDigital[casillaDestino.id] === "null"){
+                        valido = true;
+                    }else{
+                        valido = false;
+                    }
                 }
             }
         }
-
     }
     //Torres
-
+    if(pieza[1] === "torre"){
+        if(letraCasillaDestino == letraCasillaInicio){
+            
+        }
+    }
     //Caballos
 
     //Alfiles
@@ -247,7 +289,21 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
     //Rey
 
     if(valido){
-        console.log(piezaAgarrada.id,casillaDestino.id)
+        //Comprobar si hay una pieza en la casilla destino
+        if(!(tableroDigital[casillaDestino.id] === "null")){
+            console.log("hay una pieza");
+            comprobarCaptura(pieza, casillaDestino.id)
+        }
+        //Actualiza tablero en memoria con la jugada actual
+        tableroDigital[casillaInicio.id] = "null";
+        tableroDigital[casillaDestino.id] = piezaAgarrada.id;
+        console.log(tableroDigital)
     }
     return valido;
+}
+
+function comprobarCaptura(piezaAgarrada, casillaDestino){
+    if(piezaAgarrada[1] == "peon"){
+        console.log("z")
+    }
 }
