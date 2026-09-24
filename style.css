@@ -17,6 +17,10 @@ body{
     align-items: center;
 }
 
+.casillaPermitida{
+    background-color: green !important;
+    opacity: 50%;
+}
 
 .casillaCoord{
     display: flex;

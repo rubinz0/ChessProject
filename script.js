@@ -1,6 +1,18 @@
 const tablero = document.getElementById("tablero");
 const coordenadasArray = ["a8","b8","c8","d8","e8","f8","g8","h8","a7","b7","c7","d7","e7","f7","g7","h7","a6","b6","c6","d6","e6","f6","g6","h6","a5","b5","c5","d5","e5","f5","g5","h5","a4","b4","c4","d4","e4","f4","g4","h4","a3","b3","c3","d3","e3","f3","g3","h3","a2","b2","c2","d2","e2","f2","g2","h2","a1","b1","c1","d1","e1","f1","g1","h1"];
 const letras = ["null","a","b", "c", "d", "e", "f", "g","h"];
+const numeroColumna = {
+    a : 1,
+    b : 2,
+    c : 3,
+    d : 4,
+    e : 5,
+    f : 6,
+    g : 7,
+    h : 8
+}
+let casillasPermitidas = [];
+
 //Diccionario donde guardo la posicion actual del tablero (FEN)
 let tableroDigital = {}
 function generarTablero(){
@@ -170,6 +182,24 @@ function clicarPieza(evento){
     console.log("CoordenadasX pieza: " + evento.clientX);
     click = "false";
     casillaInicio = evento.target.parentElement;
+    casillasPermitidas = calcularMovimientos(piezaAgarrada, casillaInicio);
+
+    let casillasHTML = document.querySelectorAll(".casilla");
+    const casillasPintar = [];
+
+
+    for(let i = 0; i < casillasHTML.length; i++){
+        for(let j = 0; j < casillasPermitidas.length; j++){
+            if(casillasHTML[i].id === casillasPermitidas[j]){
+                casillasPintar.push(casillasHTML[i]);
+                j = casillasPermitidas.length;
+            }
+        }
+    }
+    casillasPintar.forEach(casilla => {
+        casilla.classList.add("casillaPermitida");
+    });
+
 }
 
 //La añadimos al documento porque si se añade a pieza y muevo el raton muy rapido la puede perder
@@ -183,6 +213,7 @@ function moverPieza(evento){
         piezaAgarrada.style.left = posX + "px";
         piezaAgarrada.style.top = posY + "px";
     }
+
 }
 
 
@@ -203,13 +234,25 @@ function soltarClick(evento){
             casillaDestino = casillaDestino.parentElement;
         }
         //Comprueba que el movimiento sea valido
-        let valido = validarMovimiento(piezaAgarrada, casillaInicio,casillaDestino);
-        // let valido = calcularMovimientos(piezaAgarrada);   
+        casillasPermitidas.forEach(casilla => {
+            if(casillaDestino == casilla){
+                casillaDestino.appendChild(piezaAgarrada);
+            }
+        });
+        // let valido = validarMovimiento(piezaAgarrada, casillaInicio,casillaDestino);
+
         if(valido){
             casillaDestino.appendChild(piezaAgarrada);
         }
         piezaAgarrada.style.visibility = "visible";
         piezaAgarrada = "null";
+
+
+        //Reseteamos estilo de las casillas a las que podemos mover
+        let casillasPermitidas = document.querySelectorAll(".casillaPermitida");
+        casillasPermitidas.forEach(casilla => {
+            casilla.classList.remove("casillaPermitida");
+        });
     }
 
 }
@@ -337,7 +380,6 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
         tableroDigital[casillaDestino.id] = piezaAgarrada.id;
         console.log(tableroDigital)
     }
-    calcularMovimientos(piezaAgarrada, casillaInicio)
     return valido;
 }
 
@@ -351,24 +393,55 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
     let pieza = piezaAgarrada.id;
     pieza = pieza.split("-");
 
+
+
+    //El orden es el de las agujas del reloj por lo que al recorrer la brujula cada bucle sabra si sumar o restar las coordenadas
+    const brujula = [1,1,-1,-1];
+
     const letraCasillaInicio = casillaInicio.id[0];
     const numeroCasillaInicio = parseInt(casillaInicio.id[1]);
+    //Aqui restamos o sumamos el numero de la casilla en la que esta el bucle ej: h2, h3, h4
+    let numeroActualCasilla = numeroCasillaInicio;
+    let letraActualCasilla = letraCasillaInicio;
 
+    //Calcula cuantas casillas quedan hasta salirse del tablero
+    let casillasRestantes = 0;
 
-    let casillasPermitidas = []
 
     if(pieza[1] == "torre"){
-        const maxX = 8 - numeroCasillaInicio;
-        //Bucle controla las casillas hacia arriba
-        console.log(maxX)
-        for(let i = maxX; i < 8; i++){
-            if(tableroDigital[letraCasillaInicio+i] == "null"){
-                casillasPermitidas.push(letraCasillaInicio+i);
-            }
-            console.log(letraCasillaInicio+i)
-        }
-        console.log(letras.indexOf(casillaInicio.id[0]))
+        // for(let i = 0; i < 4; i++){
+        //     if(i == 0 | i == 2){
+        //         casillasRestantes = 8 - numeroCasillaInicio;
+        //     }
+        //     if(i == 1 | i == 3){
+        //         casillasRestantes = 8 - parseInt(numeroColumna[letraCasillaInicio]);
+        //     }
 
+
+        // }
+            casillasRestantes = 8 - numeroCasillaInicio;
+            //Bucle controla las casillas hacia arriba
+            while(casillasRestantes > 0){
+            numeroActualCasilla++;
+            if(tableroDigital[letraCasillaInicio+numeroActualCasilla] == "null"){
+                casillasPermitidas.push(letraCasillaInicio+numeroActualCasilla);
+            }else{
+                break;
+            }
+            casillasRestantes--;
+            }
+        
+            casillasRestantes = 8 - parseInt(numeroColumna[letraCasillaInicio]);
+            //Bucle controla las casillas hacia derecha
+            while(casillasRestantes > 0){
+                letraActualCasilla = letras.indexOf([letraCasillaInicio]) + 1;
+            if(tableroDigital[letras[letraActualCasilla]+numeroCasillaInicio] == "null"){
+                casillasPermitidas.push(letraCasillaInicio+numeroActualCasilla);
+            }else{
+                break;
+            }
+            casillasRestantes--;
+            }
 
         //Recorre tantas veces como casillas a la derecha alla 
         // for(let i = letras.indexOf(casillaInicio.id[0]); i == 8; i++){
@@ -377,7 +450,9 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
         //         casillasPermitidas.push(casillaComprobar);
         //     }
         // }
-        console.log(casillasPermitidas)
+        // console.log(casillasPermitidas)
     }
-    return valido;
+    
+    
+    return casillasPermitidas;
 }
