@@ -203,8 +203,8 @@ function soltarClick(evento){
             casillaDestino = casillaDestino.parentElement;
         }
         //Comprueba que el movimiento sea valido
-        // let valido = validarMovimiento(piezaAgarrada, casillaInicio,casillaDestino);
-        let valido = calcularMovimientos(piezaAgarrada);   
+        let valido = validarMovimiento(piezaAgarrada, casillaInicio,casillaDestino);
+        // let valido = calcularMovimientos(piezaAgarrada);   
         if(valido){
             casillaDestino.appendChild(piezaAgarrada);
         }
@@ -259,12 +259,16 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
             //Calcula fila esta izquierda o derecha
             if(letras.indexOf(letraCasillaDestino) > letras.indexOf(letraCasillaInicio)){
                 filaAdyacente = letras.indexOf(letraCasillaDestino) - letras.indexOf(letraCasillaInicio);
-            }else{
+            }
+            if(letras.indexOf(letraCasillaDestino) < letras.indexOf(letraCasillaInicio)){
                 filaAdyacente = letras.indexOf(letraCasillaInicio) - letras.indexOf(letraCasillaDestino);
             }
-            //Si esta, es una casilla 1 posicion mas adelante (1 diagonal) y hay una pieza. Mueve
+            //Si esta, es una casilla 1 posicion mas adelante (1 diagonal) y hay una pieza. Mueve (Comprueba que no sea blanco)
             if(filaAdyacente == 1 && (numeroCasillaDestino - numeroCasillaInicio) == 1 && !(tableroDigital[casillaDestino.id] == "null")){
-                valido = true
+                const color = tableroDigital[casillaDestino.id].split("-");
+                if(color[0] == "negro"){
+                    valido = true;
+                }
             }
 
         }else{
@@ -296,9 +300,13 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
             }else{
                 filaAdyacente = letras.indexOf(letraCasillaInicio) - letras.indexOf(letraCasillaDestino);
             }
-            //Si esta, es una casilla 1 posicion mas adelante (1 diagonal) y hay una pieza. Mueve
+            //Si esta, es una casilla 1 posicion mas adelante (1 diagonal) y hay una pieza. Mueve(Comprueba que no sea negro)
             if(filaAdyacente == 1 && (numeroCasillaInicio - numeroCasillaDestino) == 1 && !(tableroDigital[casillaDestino.id] == "null")){
-                valido = true
+                const color = tableroDigital[casillaDestino.id].split("-");
+                if(color[0] == "blanco"){
+                    valido = true;
+                }
+                
             }
         }
     }
@@ -329,6 +337,7 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
         tableroDigital[casillaDestino.id] = piezaAgarrada.id;
         console.log(tableroDigital)
     }
+    calcularMovimientos(piezaAgarrada, casillaInicio)
     return valido;
 }
 
@@ -340,12 +349,35 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
 function calcularMovimientos(piezaAgarrada, casillaInicio){
     let valido = false;
     let pieza = piezaAgarrada.id;
-
-    let arriba = []
     pieza = pieza.split("-");
+
+    const letraCasillaInicio = casillaInicio.id[0];
+    const numeroCasillaInicio = parseInt(casillaInicio.id[1]);
+
+
+    let casillasPermitidas = []
+
     if(pieza[1] == "torre"){
-        console.log("asd")
+        const maxX = 8 - numeroCasillaInicio;
+        //Bucle controla las casillas hacia arriba
+        console.log(maxX)
+        for(let i = maxX; i < 8; i++){
+            if(tableroDigital[letraCasillaInicio+i] == "null"){
+                casillasPermitidas.push(letraCasillaInicio+i);
+            }
+            console.log(letraCasillaInicio+i)
+        }
+        console.log(letras.indexOf(casillaInicio.id[0]))
+
+
+        //Recorre tantas veces como casillas a la derecha alla 
+        // for(let i = letras.indexOf(casillaInicio.id[0]); i == 8; i++){
+        //     const casillaComprobar = letraCasillaDestino + (numeroCasillaDestino + 1)
+        //     if(tableroDigital[casillaComprobar] == "null"){
+        //         casillasPermitidas.push(casillaComprobar);
+        //     }
+        // }
+        console.log(casillasPermitidas)
     }
-    valido = true;
     return valido;
 }
