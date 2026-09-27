@@ -100,3 +100,169 @@ pieza ....
 // function dragOver(e){
 //     e.preventDefault();
 // }
+
+
+
+
+
+Codigo peon antes de simplificar blanco y negro
+        //Unica pieza que comprueba esto
+        // if(pieza[0] === "blanco"){
+        //     console.log("Casilla: ", tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1]+(numeroCasillaInicio + 1)][0])
+        //     //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
+        //     if(numeroCasillaInicio == 2 && tableroDigital[letraCasillaInicio+(numeroCasillaInicio+1)] === "null"){
+        //         casillasPermitidas.push(letraCasillaInicio+(numeroCasillaInicio+2));
+        //     }
+        //     if(tableroDigital[letraCasillaInicio+(numeroCasillaInicio+1)] === "null"){
+        //         casillasPermitidas.push(letraCasillaInicio+(numeroCasillaInicio+1));
+        //     }
+        //     //Calcula la fila izquierda y derecha
+        //     //Calcula
+        //     if(!(tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1]+(numeroCasillaInicio + 1)] === "null")){
+        //         if(tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1]+(numeroCasillaInicio + 1)][0] === "n"){
+        //             casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] + 1]+ (numeroCasillaInicio + 1));
+        //             console.log(tableroDigital[letras[(letras.indexOf(letraCasillaInicio) + 1)]+ (numeroCasillaInicio + 1)])
+        //         }
+        //     }
+        // }else{
+        //     //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
+        //     if(numeroCasillaInicio == 7 && tableroDigital[letraCasillaInicio+(numeroCasillaInicio-1)] === "null"){
+        //         casillasPermitidas.push(letraCasillaInicio+(numeroCasillaInicio-2));
+        //     }
+        //     if(tableroDigital[letraCasillaInicio+(numeroCasillaInicio-1)] === "null"){
+        //         casillasPermitidas.push(letraCasillaInicio+(numeroCasillaInicio-1));
+        //     }
+        //     //Calcula la fila izquierda y derecha
+        //     //Calcula
+        //     if(!(tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1]+(numeroCasillaInicio - 1)] === "null")){
+        //         if(tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1]+(numeroCasillaInicio - 1)][0] === "b"){
+        //             casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] - 1]+ (numeroCasillaInicio - 1));
+        //             console.log(tableroDigital[letras[(letras.indexOf(letraCasillaInicio) + 1)]+ (numeroCasillaInicio + 1)])
+        //         }
+        //     }
+        // }
+
+
+
+
+Funcion antigua de validar movimiento
+
+//Esta funcion comprueba si puedes soltar la pieza en esa casilla. En un futuro se puede modificar para diferentes modos de juego o desactivar para un tablero de analisis;
+function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
+    let valido = false;
+    let pieza = piezaAgarrada.id;
+    pieza = pieza.split("-");
+    const letraCasillaInicio = casillaInicio.id[0];
+    const numeroCasillaInicio = parseInt(casillaInicio.id[1]);
+    const letraCasillaDestino = casillaDestino.id[0];
+    const numeroCasillaDestino = parseInt(casillaDestino.id[1]);
+    //En esta variable se guarda la distancia entre las filas si es de 1 son adyacentes
+    let filaAdyacente = 0;
+
+    //Peones
+    if(pieza[1] === "peon"){
+        //Unica pieza que comprueba esto
+        if(pieza[0] === "blanco"){
+            //Si estan en la misma fila
+            if(letraCasillaDestino == letraCasillaInicio){
+                //Si avanza una o dos casillas desde la posicion de inicio de partida
+                if(numeroCasillaInicio == 2 &&  numeroCasillaDestino == 4){
+                    //Calculamos la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
+                    let numeroCasillaDestinoNueva = numeroCasillaDestino - 1;
+                    let coordenadaNueva = letraCasillaDestino + numeroCasillaDestinoNueva;
+                    //Comprueba si una casilla antes hay una pieza y en la casilla final
+                    if(tableroDigital[coordenadaNueva] === "null" && tableroDigital[casillaDestino.id] === "null"){
+                        valido = true;
+                    }else{
+                        valido = false;
+                    }
+                    
+                }if(numeroCasillaDestino == numeroCasillaInicio +1){
+                    //Si la casilla esta vacia avanza
+                    if(tableroDigital[casillaDestino.id] === "null"){
+                        valido = true;
+                    }else{
+                        valido = false;
+                    }
+                }
+            }
+
+            //Si la casilla esta en las filas adyacentes
+            //Calcula fila esta izquierda o derecha
+            if(letras.indexOf(letraCasillaDestino) > letras.indexOf(letraCasillaInicio)){
+                filaAdyacente = letras.indexOf(letraCasillaDestino) - letras.indexOf(letraCasillaInicio);
+            }
+            if(letras.indexOf(letraCasillaDestino) < letras.indexOf(letraCasillaInicio)){
+                filaAdyacente = letras.indexOf(letraCasillaInicio) - letras.indexOf(letraCasillaDestino);
+            }
+            //Si esta, es una casilla 1 posicion mas adelante (1 diagonal) y hay una pieza. Mueve (Comprueba que no sea blanco)
+            if(filaAdyacente == 1 && (numeroCasillaDestino - numeroCasillaInicio) == 1 && !(tableroDigital[casillaDestino.id] == "null")){
+                const color = tableroDigital[casillaDestino.id].split("-");
+                if(color[0] == "negro"){
+                    valido = true;
+                }
+            }
+
+        }else{
+            //Si estan en la misma fila
+            if(letraCasillaDestino == letraCasillaInicio){
+                //Si avanza una o dos casillas desde la posicion de inicio de partida
+                if(numeroCasillaInicio == 7 && (numeroCasillaDestino == 6 | numeroCasillaDestino == 5)){
+                    let numeroCasillaDestinoNueva = numeroCasillaDestino + 1;
+                    let coordenadaNueva = letraCasillaDestino + numeroCasillaDestinoNueva;
+                    //Comprueba si una casilla antes hay una pieza
+                    if(tableroDigital[coordenadaNueva] === "null" && tableroDigital[casillaDestino.id] === "null"){
+                        valido = true;
+                    }else{
+                        valido = false;
+                    }
+                }
+                if(numeroCasillaDestino == numeroCasillaInicio -1){
+                    //Si la casilla esta vacia avanza
+                    if(tableroDigital[casillaDestino.id] === "null"){
+                        valido = true;
+                    }else{
+                        valido = false;
+                    }
+                }
+            }
+            //Calcula fila esta izquierda o derecha
+            if(letras.indexOf(letraCasillaDestino) > letras.indexOf(letraCasillaInicio)){
+                filaAdyacente = letras.indexOf(letraCasillaDestino) - letras.indexOf(letraCasillaInicio);
+            }else{
+                filaAdyacente = letras.indexOf(letraCasillaInicio) - letras.indexOf(letraCasillaDestino);
+            }
+            //Si esta, es una casilla 1 posicion mas adelante (1 diagonal) y hay una pieza. Mueve(Comprueba que no sea negro)
+            if(filaAdyacente == 1 && (numeroCasillaInicio - numeroCasillaDestino) == 1 && !(tableroDigital[casillaDestino.id] == "null")){
+                const color = tableroDigital[casillaDestino.id].split("-");
+                if(color[0] == "blanco"){
+                    valido = true;
+                }
+                
+            }
+        }
+    }
+    //Torres
+    //Caballos
+
+    //Alfiles
+
+    //Dama
+
+    //Rey
+
+    if(valido){
+        //Comprobar si hay una pieza en la casilla destino
+        if(!(tableroDigital[casillaDestino.id] === "null")){
+            //Comer pieza
+            const piezaComida = casillaDestino.querySelector(".pieza");
+            piezaComida.remove();
+            // capturarPieza(piezaAgarrada, casillaDestino)
+        }
+        //Actualiza tablero en memoria con la jugada actual
+        tableroDigital[casillaInicio.id] = "null";
+        tableroDigital[casillaDestino.id] = piezaAgarrada.id;
+        console.log(tableroDigital)
+    }
+    return valido;
+}
