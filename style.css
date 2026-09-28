@@ -23,6 +23,8 @@ body{
 }
 
 .casillaCoord{
+    /*Para no poder subrayar y arrastrar las coordenadas*/
+    user-select: none;
     display: flex;
     width: 60px;
     height: 60px;

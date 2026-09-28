@@ -269,3 +269,81 @@ function validarMovimiento(piezaAgarrada, casillaInicio, casillaDestino){
     }
     return valido;
 }
+
+
+
+TORRES ANTES DE OPTIMIZAR
+            casillasRestantes = 8 - numeroCasillaInicio;
+            //Bucle controla las casillas hacia arriba
+            while(casillasRestantes > 0){
+                numeroActualCasilla++;
+                if(tableroDigital[letraCasillaInicio+numeroActualCasilla] == "null"){
+                    casillasPermitidas.push(letraCasillaInicio+numeroActualCasilla);
+                }else{
+                    //Comprueba si despues de la ultima casilla hay una pieza que pueda comer
+                    if(tableroDigital[letraCasillaInicio+numeroActualCasilla].split("-")[0] != piezaAgarrada.id.split("-")[0]){
+                        casillasPermitidas.push(letraCasillaInicio+numeroActualCasilla);
+                    }
+                    break;
+                }
+                casillasRestantes--;
+            }
+            casillasRestantes = numeroCasillaInicio - 1;
+            numeroActualCasilla = numeroCasillaInicio;
+            //Bucle controla las casillas hacia abajo
+            while(casillasRestantes > 0){
+                numeroActualCasilla--;
+                if(tableroDigital[letraCasillaInicio+numeroActualCasilla] == "null"){
+                    casillasPermitidas.push(letraCasillaInicio+numeroActualCasilla);
+                }else{
+                    //Comprueba si despues de la ultima casilla hay una pieza que pueda comer
+                    if(tableroDigital[letraCasillaInicio+numeroActualCasilla].split("-")[0] != piezaAgarrada.id.split("-")[0]){
+                        casillasPermitidas.push(letraCasillaInicio+numeroActualCasilla);
+                    }
+                    break;
+                }
+                casillasRestantes--;
+            }
+
+            casillasRestantes = 8 - parseInt(numeroColumna[letraCasillaInicio]);
+            //Bucle controla las casillas hacia derecha
+            let i = 0;
+            while(casillasRestantes > 0){
+                letraActualCasilla = letras.indexOf(letraCasillaInicio) + 1;
+                if(tableroDigital[letras[letraActualCasilla + i]+numeroCasillaInicio] == "null"){
+                    casillasPermitidas.push(letras[letraActualCasilla + i] + numeroCasillaInicio);
+                }else{
+                    //Comprueba si despues de la ultima casilla hay una pieza que pueda comer
+                    if(tableroDigital[letras[letraActualCasilla + i]+numeroCasillaInicio].split("-")[0] != piezaAgarrada.id.split("-")[0]){
+                        casillasPermitidas.push(letras[letraActualCasilla + i] + numeroCasillaInicio);
+                    }
+                    break;
+                }
+                casillasRestantes--;
+                i++;
+            }
+            casillasRestantes = parseInt(numeroColumna[letraCasillaInicio]) - 1;
+            //Bucle controla las casillas hacia izquierda
+            i = 0;
+            while(casillasRestantes > 0){
+                letraActualCasilla = letras.indexOf(letraCasillaInicio) - 1;
+                if(tableroDigital[letras[letraActualCasilla - i]+numeroCasillaInicio] == "null"){
+                    casillasPermitidas.push(letras[letraActualCasilla - i] + numeroCasillaInicio);
+                }else{
+                    //Comprueba si despues de la ultima casilla hay una pieza que pueda comer
+                    if(tableroDigital[letras[letraActualCasilla + i]+numeroCasillaInicio].split("-")[0] != piezaAgarrada.id.split("-")[0]){
+                        casillasPermitidas.push(letras[letraActualCasilla + i] + numeroCasillaInicio);
+                    }
+                    break;
+                }
+                casillasRestantes--;
+                i++;
+            }
+
+DESPUES DE OPTIMIZAR
+        movimientosDeslizantes = [
+            [1,0],
+            [-1,0],
+            [0,1],
+            [0,-1]
+        ];
