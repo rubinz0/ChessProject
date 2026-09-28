@@ -1,6 +1,6 @@
 const tablero = document.getElementById("tablero");
 const coordenadasArray = ["a8","b8","c8","d8","e8","f8","g8","h8","a7","b7","c7","d7","e7","f7","g7","h7","a6","b6","c6","d6","e6","f6","g6","h6","a5","b5","c5","d5","e5","f5","g5","h5","a4","b4","c4","d4","e4","f4","g4","h4","a3","b3","c3","d3","e3","f3","g3","h3","a2","b2","c2","d2","e2","f2","g2","h2","a1","b1","c1","d1","e1","f1","g1","h1"];
-const letras = ["null","a","b", "c", "d", "e", "f", "g","h"];
+const letras = [null,"a","b", "c", "d", "e", "f", "g","h"];
 const numeroColumna = {
     a : 1,
     b : 2,
@@ -231,25 +231,26 @@ function soltarClick(evento){
         //Oculto la pieza para poder lanzar el "rayo" que impacta contra la casilla de debajo
         piezaAgarrada.style.visibility = "hidden"
         //Lannzo el "rayo"
+        let piezaComida;
         casillaDestino = document.elementFromPoint(evento.clientX,evento.clientY);
         if(casillaDestino.className == "pieza"){
             casillaDestino = casillaDestino.parentElement;
+            piezaComida = casillaDestino.querySelector(".pieza");
         }
         //Comprueba que el movimiento sea valido
         casillasPermitidas.forEach(casilla => {
             if(casillaDestino.id == casilla){
+                //Comer pieza (Añadir funcion para comprobar jaques en el futuro)
+                if(!(piezaComida == undefined)) piezaComida.remove();
                 casillaDestino.appendChild(piezaAgarrada);
                 //Actualiza tablero en memoria con la jugada actual
                 tableroDigital[casillaInicio.id] = "null";
                 tableroDigital[casillaDestino.id] = piezaAgarrada.id;
+
             }
         });
 
-        // let valido = validarMovimiento(piezaAgarrada, casillaInicio,casillaDestino);
 
-        // if(valido){
-        //     casillaDestino.appendChild(piezaAgarrada);
-        // }
         piezaAgarrada.style.visibility = "visible";
         piezaAgarrada = "null";
 
@@ -264,19 +265,14 @@ function soltarClick(evento){
 }
 
 
-
-
-// function capturarPieza(piezaAgarrada, casillaDestino){
-    
-// }
-
-
 function calcularMovimientos(piezaAgarrada, casillaInicio){
     let valido = false;
     let pieza = piezaAgarrada.id;
     pieza = pieza.split("-");
 
-
+    let movX;
+    let movY;
+    let movimientos = [];
 
     //El orden es el de las agujas del reloj por lo que al recorrer la brujula cada bucle sabra si sumar o restar las coordenadas
     const brujula = [1,1,-1,-1];
@@ -291,88 +287,172 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
     let casillasRestantes = 0;
     //Peones
     if(pieza[1] == "peon"){
-        // i = numero resta positivo o negativo j = casilla inicio peon 7 o 2 e = numero que avanza o retrocede desde la casilla inicio
-        let i;
-        let j;
-        let e;
-        let color;
-        if(pieza[0] === "blanco"){
-            i = 1;
-            j = 2;
-            e = 2;
-            color = "n";
-        }else{
-            i = -1;
-            j = 7;
-            e = -2;
-            color = "b";
-        }
-        //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
-        if (numeroCasillaInicio == j && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + i)] === "null") {
-            casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio + e));
-        }
-        if (tableroDigital[letraCasillaInicio + (numeroCasillaInicio + i)] === "null" && !(tableroDigital[letraCasillaInicio + (numeroCasillaInicio + i)] === undefined)) {
-            casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio + i));
-        }
-        //Calcula la fila izquierda y derecha
-        //Calcula
-        if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] + i] + (numeroCasillaInicio + i)] === "null")) {
-            if (tableroDigital[letras[numeroColumna[letraCasillaInicio] + i] + (numeroCasillaInicio + i)][0] === color) {
-                casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] + i] + (numeroCasillaInicio + i));
+        //Unica pieza que comprueba esto
+        if (pieza[0] === "blanco") {
+            //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
+            if (numeroCasillaInicio == 2 && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + 1)] === "null") {
+                casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio + 2));
             }
-        }
-        if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] - i] + (numeroCasillaInicio + i)] === "null")) {
-            if (tableroDigital[letras[numeroColumna[letraCasillaInicio] - i] + (numeroCasillaInicio + i)][0] === color) {
-                casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] - i] + (numeroCasillaInicio + i));
+            if (tableroDigital[letraCasillaInicio + (numeroCasillaInicio + 1)] === "null") {
+                casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio + 1));
             }
+            //Calcula
+
+            //Calcula la fila izquierda y derecha y calcula si hay una fila a la derecha o la izquierda para que no se salga del tablero y de error
+            if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + 1)] === "null") && !(letraCasillaInicio === "h")) {
+                if (tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + 1)][0] === "n") {
+                    casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + 1));
+                }
+            }
+
+            if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + 1)] === "null") && !(letraCasillaInicio === "a")) {
+                if (tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + 1)][0] === "n") {
+                    casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + 1));
+                }
+            }
+        } else {
+            //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
+            if (numeroCasillaInicio == 7 && tableroDigital[letraCasillaInicio + (numeroCasillaInicio - 1)] === "null") {
+                casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio - 2));
+            }
+            if (tableroDigital[letraCasillaInicio + (numeroCasillaInicio - 1)] === "null") {
+                casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio - 1));
+            }
+            //Calcula la fila izquierda y derecha
+            //Calcula
+            if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio - 1)] === "null") && !(letraCasillaInicio === "a")) {
+                if (tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio - 1)][0] === "b") {
+                    casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio - 1));
+                }
+            }
+            if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio - 1)] === "null") && !(letraCasillaInicio === "h")) {
+                if (tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio - 1)][0] === "b") {
+                    casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio - 1));
+                }
+            }
+            
         }
     }
+    
     //Torres
     if(pieza[1] == "torre"){
-        // for(let i = 0; i < 4; i++){
-        //     if(i == 0 | i == 2){
-        //         casillasRestantes = 8 - numeroCasillaInicio;
-        //     }
-        //     if(i == 1 | i == 3){
-        //         casillasRestantes = 8 - parseInt(numeroColumna[letraCasillaInicio]);
-        //     }
-
-
-        // }
             casillasRestantes = 8 - numeroCasillaInicio;
             //Bucle controla las casillas hacia arriba
             while(casillasRestantes > 0){
-            numeroActualCasilla++;
-            if(tableroDigital[letraCasillaInicio+numeroActualCasilla] == "null"){
-                casillasPermitidas.push(letraCasillaInicio+numeroActualCasilla);
-            }else{
-                break;
+                numeroActualCasilla++;
+                if(tableroDigital[letraCasillaInicio+numeroActualCasilla] == "null"){
+                    casillasPermitidas.push(letraCasillaInicio+numeroActualCasilla);
+                }else{
+                    //Comprueba si despues de la ultima casilla hay una pieza que pueda comer
+                    if(tableroDigital[letraCasillaInicio+numeroActualCasilla].split("-")[0] === "negro" && piezaAgarrada.id.split("-")[0] === "blanco"){
+                        casillasPermitidas.push(letraCasillaInicio+numeroActualCasilla);
+                    }
+                    if(tableroDigital[letraCasillaInicio+numeroActualCasilla].split("-")[0] === "blanco" && piezaAgarrada.id.split("-")[0] === "negro"){
+                        casillasPermitidas.push(letraCasillaInicio+numeroActualCasilla);
+                    }
+                    break;
+                }
+                casillasRestantes--;
             }
-            casillasRestantes--;
-            }
-        
-            casillasRestantes = 8 - parseInt(numeroColumna[letraCasillaInicio]);
-            //Bucle controla las casillas hacia derecha
+            casillasRestantes = numeroCasillaInicio - 1;
+            numeroActualCasilla = numeroCasillaInicio;
+            //Bucle controla las casillas hacia abajo
             while(casillasRestantes > 0){
-                letraActualCasilla = letras.indexOf([letraCasillaInicio]) + 1;
-            if(tableroDigital[letras[letraActualCasilla]+numeroCasillaInicio] == "null"){
-                casillasPermitidas.push(letraCasillaInicio+numeroActualCasilla);
-            }else{
-                break;
-            }
-            casillasRestantes--;
+                numeroActualCasilla--;
+                if(tableroDigital[letraCasillaInicio+numeroActualCasilla] == "null"){
+                    casillasPermitidas.push(letraCasillaInicio+numeroActualCasilla);
+                }else{
+                    //Comprueba si despues de la ultima casilla hay una pieza que pueda comer
+                    if(tableroDigital[letraCasillaInicio+numeroActualCasilla].split("-")[0] === "negro" && piezaAgarrada.id.split("-")[0] === "blanco"){
+                        casillasPermitidas.push(letraCasillaInicio+numeroActualCasilla);
+                    }
+                    if(tableroDigital[letraCasillaInicio+numeroActualCasilla].split("-")[0] === "blanco" && piezaAgarrada.id.split("-")[0] === "negro"){
+                        casillasPermitidas.push(letraCasillaInicio+numeroActualCasilla);
+                    }
+                    break;
+                }
+                casillasRestantes--;
             }
 
-        //Recorre tantas veces como casillas a la derecha alla 
-        // for(let i = letras.indexOf(casillaInicio.id[0]); i == 8; i++){
-        //     const casillaComprobar = letraCasillaDestino + (numeroCasillaDestino + 1)
-        //     if(tableroDigital[casillaComprobar] == "null"){
-        //         casillasPermitidas.push(casillaComprobar);
-        //     }
-        // }
-        // console.log(casillasPermitidas)
+            casillasRestantes = 8 - parseInt(numeroColumna[letraCasillaInicio]);
+            //Bucle controla las casillas hacia derecha
+            let i = 0;
+            while(casillasRestantes > 0){
+                letraActualCasilla = letras.indexOf(letraCasillaInicio) + 1;
+                if(tableroDigital[letras[letraActualCasilla + i]+numeroCasillaInicio] == "null"){
+                    casillasPermitidas.push(letras[letraActualCasilla + i] + numeroCasillaInicio);
+                }else{
+                    //Comprueba si despues de la ultima casilla hay una pieza que pueda comer
+                    if(tableroDigital[letras[letraActualCasilla + i]+numeroCasillaInicio].split("-")[0] === "negro" && piezaAgarrada.id.split("-")[0] === "blanco"){
+                        casillasPermitidas.push(letras[letraActualCasilla + i] + numeroCasillaInicio);
+                    }
+                    if(tableroDigital[letras[letraActualCasilla + i]+numeroCasillaInicio].split("-")[0] === "blanco" && piezaAgarrada.id.split("-")[0] === "negro"){
+                        casillasPermitidas.push(letras[letraActualCasilla + i] + numeroCasillaInicio);
+                    }
+                    break;
+                }
+                casillasRestantes--;
+                i++;
+            }
+            casillasRestantes = parseInt(numeroColumna[letraCasillaInicio]) - 1;
+            //Bucle controla las casillas hacia izquierda
+            i = 0;
+            while(casillasRestantes > 0){
+                letraActualCasilla = letras.indexOf(letraCasillaInicio) - 1;
+                if(tableroDigital[letras[letraActualCasilla - i]+numeroCasillaInicio] == "null"){
+                    casillasPermitidas.push(letras[letraActualCasilla - i] + numeroCasillaInicio);
+                }else{
+                    //Comprueba si despues de la ultima casilla hay una pieza que pueda comer
+                    if(tableroDigital[letras[letraActualCasilla + i]+numeroCasillaInicio].split("-")[0] === "negro" && piezaAgarrada.id.split("-")[0] === "blanco"){
+                        casillasPermitidas.push(letras[letraActualCasilla + i] + numeroCasillaInicio);
+                    }
+                    if(tableroDigital[letras[letraActualCasilla + i]+numeroCasillaInicio].split("-")[0] === "blanco" && piezaAgarrada.id.split("-")[0] === "negro"){
+                        casillasPermitidas.push(letras[letraActualCasilla + i] + numeroCasillaInicio);
+                    }
+                    break;
+                }
+                casillasRestantes--;
+                i++;
+            }
     }
-    
-    
+    //Caballos
+    if(pieza[1] === "caballo"){
+        // let columnaDerecha = letras[letras.indexOf(letraCasillaInicio) + 1];
+        // if(tableroDigital[columnaDerecha + (numeroCasillaInicio + 2)] === "null"){
+        //     casillasPermitidas.push(columnaDerecha + (numeroCasillaInicio + 2));
+        // }
+        // let columnaIzquierda = letras[letras.indexOf(letraCasillaInicio) - 1]
+        // if(tableroDigital[columnaIzquierda + (numeroCasillaInicio + 2)] === "null"){
+        //     casillasPermitidas.push(columnaIzquierda + (numeroCasillaInicio + 2));
+        // }
+        // if(tableroDigital[columnaDerecha + (numeroCasillaInicio + 2)] === "null"){
+        //     casillasPermitidas.push(columnaDerecha + (numeroCasillaInicio - 2));
+        // }
+        // if(tableroDigital[columnaIzquierda + (numeroCasillaInicio + 2)] === "null"){
+        //     casillasPermitidas.push(columnaIzquierda + (numeroCasillaInicio - 2));
+        // }
+        movimientos = [
+            [-1,2],
+            [1,2],
+            [2,1],
+            [2,-1],
+            [1,-2],
+            [-1,-2],
+            [-2,-1],
+            [-2,1]
+        ];
+    }
+        console.log(tableroDigital)
+
+    movimientos.forEach(movimiento => {
+        let columna = letras[letras.indexOf(letraCasillaInicio) - movimiento[0]];
+        let fila = numeroCasillaInicio + movimiento[1]
+        if(tableroDigital[columna+fila] === "null"){
+            casillasPermitidas.push(columna+fila);
+        }
+        if(!(tableroDigital[columna+fila] === "null") && tableroDigital[columna+fila].split("-")[0] === "negro" && piezaAgarrada.id.split("-")[0] === "blanco"){
+            casillasPermitidas.push(columna+fila);
+        }
+    });
     return casillasPermitidas;
 }

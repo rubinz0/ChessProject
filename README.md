@@ -106,41 +106,44 @@ pieza ....
 
 
 Codigo peon antes de simplificar blanco y negro
-        //Unica pieza que comprueba esto
-        // if(pieza[0] === "blanco"){
-        //     console.log("Casilla: ", tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1]+(numeroCasillaInicio + 1)][0])
-        //     //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
-        //     if(numeroCasillaInicio == 2 && tableroDigital[letraCasillaInicio+(numeroCasillaInicio+1)] === "null"){
-        //         casillasPermitidas.push(letraCasillaInicio+(numeroCasillaInicio+2));
-        //     }
-        //     if(tableroDigital[letraCasillaInicio+(numeroCasillaInicio+1)] === "null"){
-        //         casillasPermitidas.push(letraCasillaInicio+(numeroCasillaInicio+1));
-        //     }
-        //     //Calcula la fila izquierda y derecha
-        //     //Calcula
-        //     if(!(tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1]+(numeroCasillaInicio + 1)] === "null")){
-        //         if(tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1]+(numeroCasillaInicio + 1)][0] === "n"){
-        //             casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] + 1]+ (numeroCasillaInicio + 1));
-        //             console.log(tableroDigital[letras[(letras.indexOf(letraCasillaInicio) + 1)]+ (numeroCasillaInicio + 1)])
-        //         }
-        //     }
-        // }else{
-        //     //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
-        //     if(numeroCasillaInicio == 7 && tableroDigital[letraCasillaInicio+(numeroCasillaInicio-1)] === "null"){
-        //         casillasPermitidas.push(letraCasillaInicio+(numeroCasillaInicio-2));
-        //     }
-        //     if(tableroDigital[letraCasillaInicio+(numeroCasillaInicio-1)] === "null"){
-        //         casillasPermitidas.push(letraCasillaInicio+(numeroCasillaInicio-1));
-        //     }
-        //     //Calcula la fila izquierda y derecha
-        //     //Calcula
-        //     if(!(tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1]+(numeroCasillaInicio - 1)] === "null")){
-        //         if(tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1]+(numeroCasillaInicio - 1)][0] === "b"){
-        //             casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] - 1]+ (numeroCasillaInicio - 1));
-        //             console.log(tableroDigital[letras[(letras.indexOf(letraCasillaInicio) + 1)]+ (numeroCasillaInicio + 1)])
-        //         }
-        //     }
-        // }
+Codigo peon simplificado
+    if(pieza[1] == "peon"){
+        // i = numero resta positivo o negativo j = casilla inicio peon 7 o 2 e = numero que avanza o retrocede desde la casilla inicio
+        let i;
+        let j;
+        let e;
+        let color;
+        if(pieza[0] === "blanco"){
+            i = 1;
+            j = 2;
+            e = 2;
+            color = "n";
+        }else{
+            i = -1;
+            j = 7;
+            e = -2;
+            color = "b";
+        }
+        //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
+        if (numeroCasillaInicio == j && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + i)] === "null") {
+            casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio + e));
+        }
+        if (tableroDigital[letraCasillaInicio + (numeroCasillaInicio + i)] === "null" && !(tableroDigital[letraCasillaInicio + (numeroCasillaInicio + i)] === undefined)) {
+            casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio + i));
+        }
+        //Calcula la fila izquierda y derecha
+        //Calcula
+        if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] + i] + (numeroCasillaInicio + i)] === "null")) {
+            if (tableroDigital[letras[numeroColumna[letraCasillaInicio] + i] + (numeroCasillaInicio + i)][0] === color) {
+                casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] + i] + (numeroCasillaInicio + i));
+            }
+        }
+        if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] - i] + (numeroCasillaInicio + i)] === "null")) {
+            if (tableroDigital[letras[numeroColumna[letraCasillaInicio] - i] + (numeroCasillaInicio + i)][0] === color) {
+                casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] - i] + (numeroCasillaInicio + i));
+            }
+        }
+    }
 
 
 
