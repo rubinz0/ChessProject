@@ -55,3 +55,28 @@ body{
 .pieza:active{
     cursor: grabbing;
 }
+
+
+/*Navbar*/
+.navbar{
+    background-color: black;
+    height: 100px;
+}
+
+#home{
+    font-size: 30px;
+    text-align: center;
+    color: white;
+    border: 5px, solid, black;
+    border-radius: 10px;
+    width: 100px;
+    padding: 5px;
+}
+
+#home:hover{
+    border-color: white;
+}
+
+#home:active{
+
+}

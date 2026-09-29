@@ -242,7 +242,7 @@ function soltarClick(evento){
                 //Actualiza tablero en memoria con la jugada actual
                 tableroDigital[casillaInicio.id] = "null";
                 tableroDigital[casillaDestino.id] = piezaAgarrada.id;
-
+                contenedor.innerHTML += piezaAgarrada.id.split("-")[1][0] + casillaDestino.id + " + ";
             }
         });
 
@@ -290,7 +290,7 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
         //Unica pieza que comprueba esto
         if (pieza[0] === "blanco") {
             //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
-            if (numeroCasillaInicio == 2 && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + 1)] === "null") {
+            if (numeroCasillaInicio == 2 && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + 2)] === "null") {
                 casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio + 2));
             }
             if (tableroDigital[letraCasillaInicio + (numeroCasillaInicio + 1)] === "null") {
@@ -312,7 +312,7 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
             }
         } else {
             //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
-            if (numeroCasillaInicio == 7 && tableroDigital[letraCasillaInicio + (numeroCasillaInicio - 1)] === "null") {
+            if (numeroCasillaInicio == 7 && tableroDigital[letraCasillaInicio + (numeroCasillaInicio - 2)] === "null") {
                 casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio - 2));
             }
             if (tableroDigital[letraCasillaInicio + (numeroCasillaInicio - 1)] === "null") {
@@ -429,3 +429,5 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
     });
     return casillasPermitidas;
 }
+
+const contenedor = document.getElementById("contenedor");
