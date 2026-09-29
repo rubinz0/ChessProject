@@ -1,4 +1,5 @@
 const tablero = document.getElementById("tablero");
+const PGN = [];
 const coordenadasArray = ["a8","b8","c8","d8","e8","f8","g8","h8","a7","b7","c7","d7","e7","f7","g7","h7","a6","b6","c6","d6","e6","f6","g6","h6","a5","b5","c5","d5","e5","f5","g5","h5","a4","b4","c4","d4","e4","f4","g4","h4","a3","b3","c3","d3","e3","f3","g3","h3","a2","b2","c2","d2","e2","f2","g2","h2","a1","b1","c1","d1","e1","f1","g1","h1"];
 const letras = [null,"a","b", "c", "d", "e", "f", "g","h"];
 const numeroColumna = {
@@ -238,11 +239,13 @@ function soltarClick(evento){
             if(casillaDestino.id == casilla){
                 //Comer pieza (Añadir funcion para comprobar jaques en el futuro)
                 if(!(piezaComida == undefined)) piezaComida.remove();
+                //Genera el PGN de esa jugada
+                generarPGN(piezaAgarrada,casillaDestino,piezaComida,casillaInicio);
                 casillaDestino.appendChild(piezaAgarrada);
                 //Actualiza tablero en memoria con la jugada actual
                 tableroDigital[casillaInicio.id] = "null";
                 tableroDigital[casillaDestino.id] = piezaAgarrada.id;
-                contenedor.innerHTML += piezaAgarrada.id.split("-")[1][0] + casillaDestino.id + " + ";
+
             }
         });
 
@@ -431,3 +434,27 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
 }
 
 const contenedor = document.getElementById("contenedor");
+//Funcion para generar el codigo PGN de la partida, cada vez que se mueve una pieza se añade el movimiento
+function generarPGN(piezaAgarrada, casillaDestino, piezaComida, casillaInicio){
+    captura = false;
+    //Con esto consigo cambiar las letras a ingles que es la notacion oficial sin tener que hacer bucles (tambien consigo vaciar la letra en caso de ser peon)
+    const diccionario = {
+        "P":"",
+        "T":"R",
+        "C":"N",
+        "A":"B",
+        "D":"Q",
+        "R":"K"
+    };
+    if(!(piezaComida == undefined)) captura = true;
+    let pieza = diccionario[(piezaAgarrada.id.split("-")[1][0]).toUpperCase()];
+    const casilla = casillaDestino.id; 
+    if(captura && !(pieza === "")) pieza += "x";
+    //Si captura un peon añadimos su columna
+    if(captura && pieza === "") {
+        pieza += casillaDestino.id[0]+"x";
+    }
+    //Añade el movimiento al html
+    contenedor.innerHTML += pieza+casilla + " + ";
+    
+}
