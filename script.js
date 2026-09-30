@@ -12,6 +12,14 @@ const numeroColumna = {
     g : 7,
     h : 8
 }
+let comprobacionesEnroque = {
+    "blanco-rey":false,
+    "blanco-torre-1":false,
+    "blanco-torre-2":false,
+    "negro-rey":false,
+    "blanco-torre-1":false,
+    "negro-torre-2":false
+}
 let casillasPermitidas = [];
 //Diccionario donde guardo la posicion actual del tablero (FEN)
 let tableroDigital = {}
@@ -173,9 +181,10 @@ function clicarPieza(evento){
     piezaAgarrada.style.position = "absolute";
     piezaAgarrada.style.zIndex = "100";
     //Restamos la posicion del raton menos la esquina de la img para no solo anclarla al raton sino anclarla 
-    // con el mismo margen sin que haya un salto
+    // con el mismo margen sin que haya un salto hay que añadirle el scroll de la pantalla ya que mide cuanta distancia
+    //hay desde el principio del documento
     agarreX = evento.clientX - piezaAgarrada.getBoundingClientRect().left;
-    agarreY = evento.clientY - piezaAgarrada.getBoundingClientRect().top;
+    agarreY = evento.clientY - piezaAgarrada.getBoundingClientRect().top - window.scrollY;
     click = "false";
     casillaInicio = evento.target.parentElement;
     //Vaciamos las casillas de la pieza anterior
@@ -243,10 +252,16 @@ function soltarClick(evento){
                 //Guardar el movimiento en memoria
                 guardarMovimiento(piezaAgarrada,casillaInicio,casillaDestino, piezaComida);
                 casillaDestino.appendChild(piezaAgarrada);
+                //Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es 2 es el corto 3 el largo, 
+                // Math.abs para valor absoluto ya que puede moverse -2 o -3
+                if(piezaAgarrada.id === "blanco-rey" && Math.abs(numeroColumna[casillaInicio[0]]-numeroColumna[casillaDestino]) == 2){
+                    tableroDigital[h1] == "null"
+                }
+            
                 //Actualiza tablero en memoria con la jugada actual
                 tableroDigital[casillaInicio.id] = "null";
                 tableroDigital[casillaDestino.id] = piezaAgarrada.id;
-
+                
             }
         });
 
@@ -395,6 +410,13 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
             [-1,0],
             [-1,1],
         ];
+        //Comprueba si el rey se ha movido y si ha movido su torre si no, añade el enroque de ese lado como movimiento, 
+        // ademas de comprobar que las casillas intermedias esten vacias
+        if(pieza[0] === "blanco" && !comprobacionesEnroque["blanco-rey"] && !comprobacionesEnroque["blanco-torre-1"] && tableroDigital["g1"] === "null" && tableroDigital["f1"] === "null") movimientosDirectos.push([2,0]);
+        if(pieza[0] === "blanco" && !comprobacionesEnroque["blanco-rey"] && !comprobacionesEnroque["blanco-torre-2"] && tableroDigital["d1"] === "null" && tableroDigital["c1"] === "null" && tableroDigital["b1"] === "null") movimientosDirectos.push([-2,0]);
+        if(pieza[0] === "negro" && !comprobacionesEnroque["negro-rey"] && !comprobacionesEnroque["negro-torre-1"] && tableroDigital["d8"] === "null" && tableroDigital["c8"] === "null" && tableroDigital["b8"] === "null") movimientosDirectos.push([-2,0]);
+        if(pieza[0] === "negro" && !comprobacionesEnroque["negro-rey"] && !comprobacionesEnroque["negro-torre-2"] && tableroDigital["g8"] === "null" && tableroDigital["f8"] === "null" ) movimientosDirectos.push([2,0]);
+        console.log(movimientosDirectos)
     }
 
             
@@ -404,6 +426,7 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
         if(tableroDigital[columna+fila] === "null"){
             casillasPermitidas.push(columna+fila);
         }
+        //Calcula si es una casilla ocupada, dentro del tablero y de una pieza rival
         if(tableroDigital[columna+fila] != "null" && tableroDigital[columna+fila] != undefined && tableroDigital[columna+fila].split("-")[0] != piezaAgarrada.id.split("-")[0]){
             casillasPermitidas.push(columna+fila);
         }
@@ -460,12 +483,28 @@ function generarPGN(piezaAgarrada, casillaDestino, piezaComida, casillaInicio){
     
 }
 
-function guardarMovimiento(piezaAgarrada, casillaInicio, casillaDestino, piezaComida,jaque){
+function guardarMovimiento(piezaAgarrada, casillaInicio, casillaDestino, piezaComida){
+    //Volvemos a calcular movimientos posibles pero desde la casilla que aterriza simulando que en el siguiente turno podriamos comer el rey
+    const posiblesJaques = calcularMovimientos(piezaAgarrada, casillaDestino);
+    let jaque = false;
+    //Comprobamos que en esa casilla halla una pieza y que sea el rey
+    posiblesJaques.forEach(casilla => {
+        if(document.getElementById(casilla).querySelector("img") && document.getElementById(casilla).querySelector("img").id.split("-")[1] === "rey") jaque = true;
+    });
+    //Si movemos algun rey o torre lo guardamos para saber si podemos enrocar
+    if(piezaAgarrada.id === "blanco-rey") comprobacionesEnroque["blanco-rey"] = true;
+    if(piezaAgarrada.id === "blanco-torre-1") comprobacionesEnroque["blanco-torre-1"] = true;
+    if(piezaAgarrada.id === "blanco-torre-2") comprobacionesEnroque["blanco-torre-2"] = true;
+    if(piezaAgarrada.id === "negro-rey") comprobacionesEnroque ["negro-rey"]= true;
+    if(piezaAgarrada.id === "negro-torre-1") comprobacionesEnroque["negro-torre-1"] = true;
+    if(piezaAgarrada.id === "negro-torre-2") comprobacionesEnroque["negro-torre-2"] = true;
+
+
     let movimiento = {
         "pieza": piezaAgarrada.id,
         "casillaInicio": casillaInicio.id,
         "casillaDestino":casillaDestino.id,
-        "piezaComida":piezaComida.id,
+        "piezaComida":piezaComida,
         "jaque":jaque
     }
     console.log(movimiento);
