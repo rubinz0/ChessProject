@@ -181,7 +181,6 @@ function clicarPieza(evento){
     //Vaciamos las casillas de la pieza anterior
     casillasPermitidas = [];
     casillasPermitidas = calcularMovimientos(piezaAgarrada, casillaInicio);
-    console.log("Casillas permitidas: " , casillasPermitidas)
 
     let casillasHTML = document.querySelectorAll(".casilla");
     const casillasPintar = [];
@@ -241,6 +240,8 @@ function soltarClick(evento){
                 if(!(piezaComida == undefined)) piezaComida.remove();
                 //Genera el PGN de esa jugada
                 generarPGN(piezaAgarrada,casillaDestino,piezaComida,casillaInicio);
+                //Guardar el movimiento en memoria
+                guardarMovimiento(piezaAgarrada,casillaInicio,casillaDestino, piezaComida);
                 casillaDestino.appendChild(piezaAgarrada);
                 //Actualiza tablero en memoria con la jugada actual
                 tableroDigital[casillaInicio.id] = "null";
@@ -452,9 +453,21 @@ function generarPGN(piezaAgarrada, casillaDestino, piezaComida, casillaInicio){
     if(captura && !(pieza === "")) pieza += "x";
     //Si captura un peon añadimos su columna
     if(captura && pieza === "") {
-        pieza += casillaDestino.id[0]+"x";
+        pieza += casillaInicio.id[0]+"x";
     }
     //Añade el movimiento al html
     contenedor.innerHTML += pieza+casilla + " + ";
+    
+}
+
+function guardarMovimiento(piezaAgarrada, casillaInicio, casillaDestino, piezaComida,jaque){
+    let movimiento = {
+        "pieza": piezaAgarrada.id,
+        "casillaInicio": casillaInicio.id,
+        "casillaDestino":casillaDestino.id,
+        "piezaComida":piezaComida.id,
+        "jaque":jaque
+    }
+    console.log(movimiento);
     
 }
