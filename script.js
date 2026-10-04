@@ -12,12 +12,13 @@ const numeroColumna = {
     g : 7,
     h : 8
 }
+let movimientos = [];
 let comprobacionesEnroque = {
     "blanco-rey":false,
     "blanco-torre-1":false,
     "blanco-torre-2":false,
     "negro-rey":false,
-    "blanco-torre-1":false,
+    "negro-torre-1":false,
     "negro-torre-2":false
 }
 let casillasPermitidas = [];
@@ -247,17 +248,30 @@ function soltarClick(evento){
             if(casillaDestino.id == casilla){
                 //Comer pieza (Añadir funcion para comprobar jaques en el futuro)
                 if(!(piezaComida == undefined)) piezaComida.remove();
-                //Genera el PGN de esa jugada
-                generarPGN(piezaAgarrada,casillaDestino,piezaComida,casillaInicio);
                 //Guardar el movimiento en memoria
                 guardarMovimiento(piezaAgarrada,casillaInicio,casillaDestino, piezaComida);
                 casillaDestino.appendChild(piezaAgarrada);
                 //Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es 2 es el corto 3 el largo, 
                 // Math.abs para valor absoluto ya que puede moverse -2 o -3
-                if(piezaAgarrada.id === "blanco-rey" && Math.abs(numeroColumna[casillaInicio[0]]-numeroColumna[casillaDestino]) == 2){
-                    tableroDigital[h1] == "null"
+                if(piezaAgarrada.id.split("-")[1] === "rey" && Math.abs(numeroColumna[casillaInicio.id[0]]-numeroColumna[casillaDestino.id[0]]) == 2){
+                    let fila = casillaDestino.id[1];
+                    if(casillaDestino.id[0] === "g"){
+                        //Busca la casilla f1 o f8 dependiendo y inserta la torre correspondiente
+                        document.getElementById("f"+fila).appendChild(document.getElementById(tableroDigital["h" +fila]));
+                        //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
+                        tableroDigital["f"+fila] = tableroDigital["h"+fila];
+                        tableroDigital["h"+fila] = "null";
+                    }
+                    if(casillaDestino.id[0] === "c"){
+                        //Busca la casilla f1 o f8 dependiendo y inserta la torre correspondiente
+                        document.getElementById("d"+fila).appendChild(document.getElementById(tableroDigital["a" +fila]));
+                        //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
+                        tableroDigital["d"+fila] = tableroDigital["a"+fila];
+                        tableroDigital["a"+fila] = "null";
+                    }
+                    console.log(tableroDigital)
                 }
-            
+                
                 //Actualiza tablero en memoria con la jugada actual
                 tableroDigital[casillaInicio.id] = "null";
                 tableroDigital[casillaDestino.id] = piezaAgarrada.id;
@@ -416,7 +430,6 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
         if(pieza[0] === "blanco" && !comprobacionesEnroque["blanco-rey"] && !comprobacionesEnroque["blanco-torre-2"] && tableroDigital["d1"] === "null" && tableroDigital["c1"] === "null" && tableroDigital["b1"] === "null") movimientosDirectos.push([-2,0]);
         if(pieza[0] === "negro" && !comprobacionesEnroque["negro-rey"] && !comprobacionesEnroque["negro-torre-1"] && tableroDigital["d8"] === "null" && tableroDigital["c8"] === "null" && tableroDigital["b8"] === "null") movimientosDirectos.push([-2,0]);
         if(pieza[0] === "negro" && !comprobacionesEnroque["negro-rey"] && !comprobacionesEnroque["negro-torre-2"] && tableroDigital["g8"] === "null" && tableroDigital["f8"] === "null" ) movimientosDirectos.push([2,0]);
-        console.log(movimientosDirectos)
     }
 
             
@@ -507,6 +520,6 @@ function guardarMovimiento(piezaAgarrada, casillaInicio, casillaDestino, piezaCo
         "piezaComida":piezaComida,
         "jaque":jaque
     }
-    console.log(movimiento);
+    movimientos.push(movimiento);
     
 }
