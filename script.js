@@ -248,11 +248,10 @@ function soltarClick(evento){
             if(casillaDestino.id == casilla){
                 //Comer pieza (Añadir funcion para comprobar jaques en el futuro)
                 if(!(piezaComida == undefined)) piezaComida.remove();
-                //Guardar el movimiento en memoria
-                guardarMovimiento(piezaAgarrada,casillaInicio,casillaDestino, piezaComida);
                 casillaDestino.appendChild(piezaAgarrada);
                 //Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es 2 es el corto 3 el largo, 
                 // Math.abs para valor absoluto ya que puede moverse -2 o -3
+                let enroque;
                 if(piezaAgarrada.id.split("-")[1] === "rey" && Math.abs(numeroColumna[casillaInicio.id[0]]-numeroColumna[casillaDestino.id[0]]) == 2){
                     let fila = casillaDestino.id[1];
                     if(casillaDestino.id[0] === "g"){
@@ -261,6 +260,7 @@ function soltarClick(evento){
                         //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
                         tableroDigital["f"+fila] = tableroDigital["h"+fila];
                         tableroDigital["h"+fila] = "null";
+                        enroque = "corto";
                     }
                     if(casillaDestino.id[0] === "c"){
                         //Busca la casilla f1 o f8 dependiendo y inserta la torre correspondiente
@@ -268,9 +268,12 @@ function soltarClick(evento){
                         //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
                         tableroDigital["d"+fila] = tableroDigital["a"+fila];
                         tableroDigital["a"+fila] = "null";
+                        enroque = "largo";
                     }
                     console.log(tableroDigital)
                 }
+                //Guardar el movimiento en memoria
+                guardarMovimiento(piezaAgarrada,casillaInicio,casillaDestino, piezaComida, enroque);
                 
                 //Actualiza tablero en memoria con la jugada actual
                 tableroDigital[casillaInicio.id] = "null";
@@ -298,6 +301,9 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
     let valido = false;
     let pieza = piezaAgarrada.id;
     pieza = pieza.split("-");
+    //Esto resetea las casillas y permite calcular los movimientos posibles sobre la casilla destino. (Al guardar movimiento tengo que saber si doy jaque y para eso 
+    // calculo si en el siguiente movimiento encuentra al rey por lo que vuelvo a calcular los movimientos)
+    casillasPermitidas = []
 
     let movX;
     let movY;
@@ -426,8 +432,8 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
         ];
         //Comprueba si el rey se ha movido y si ha movido su torre si no, añade el enroque de ese lado como movimiento, 
         // ademas de comprobar que las casillas intermedias esten vacias
-        if(pieza[0] === "blanco" && !comprobacionesEnroque["blanco-rey"] && !comprobacionesEnroque["blanco-torre-1"] && tableroDigital["g1"] === "null" && tableroDigital["f1"] === "null") movimientosDirectos.push([2,0]);
-        if(pieza[0] === "blanco" && !comprobacionesEnroque["blanco-rey"] && !comprobacionesEnroque["blanco-torre-2"] && tableroDigital["d1"] === "null" && tableroDigital["c1"] === "null" && tableroDigital["b1"] === "null") movimientosDirectos.push([-2,0]);
+        if(pieza[0] === "blanco" && !comprobacionesEnroque["blanco-rey"] && !comprobacionesEnroque["blanco-torre-2"] && tableroDigital["g1"] === "null" && tableroDigital["f1"] === "null") movimientosDirectos.push([2,0]);
+        if(pieza[0] === "blanco" && !comprobacionesEnroque["blanco-rey"] && !comprobacionesEnroque["blanco-torre-1"] && tableroDigital["d1"] === "null" && tableroDigital["c1"] === "null" && tableroDigital["b1"] === "null") movimientosDirectos.push([-2,0]);
         if(pieza[0] === "negro" && !comprobacionesEnroque["negro-rey"] && !comprobacionesEnroque["negro-torre-1"] && tableroDigital["d8"] === "null" && tableroDigital["c8"] === "null" && tableroDigital["b8"] === "null") movimientosDirectos.push([-2,0]);
         if(pieza[0] === "negro" && !comprobacionesEnroque["negro-rey"] && !comprobacionesEnroque["negro-torre-2"] && tableroDigital["g8"] === "null" && tableroDigital["f8"] === "null" ) movimientosDirectos.push([2,0]);
     }
@@ -467,12 +473,13 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
         }
 
     });
+    console.log(casillasPermitidas)
     return casillasPermitidas;
 }
 
-const contenedor = document.getElementById("contenedor");
+const contenedorPGN = document.getElementById("contenedorPGN");
 //Funcion para generar el codigo PGN de la partida, cada vez que se mueve una pieza se añade el movimiento
-function generarPGN(piezaAgarrada, casillaDestino, piezaComida, casillaInicio){
+function generarPGN(piezaAgarrada, casillaDestino, piezaComida, casillaInicio, enroque){
     captura = false;
     //Con esto consigo cambiar las letras a ingles que es la notacion oficial sin tener que hacer bucles (tambien consigo vaciar la letra en caso de ser peon)
     const diccionario = {
@@ -483,20 +490,33 @@ function generarPGN(piezaAgarrada, casillaDestino, piezaComida, casillaInicio){
         "D":"Q",
         "R":"K"
     };
-    if(!(piezaComida == undefined)) captura = true;
-    let pieza = diccionario[(piezaAgarrada.id.split("-")[1][0]).toUpperCase()];
-    const casilla = casillaDestino.id; 
-    if(captura && !(pieza === "")) pieza += "x";
-    //Si captura un peon añadimos su columna
-    if(captura && pieza === "") {
-        pieza += casillaInicio.id[0]+"x";
+    let casilla = "";
+    let pieza;
+    //Calculo si es un enroque corto o largo para cancelar la logica del PGN y poner 0-0 o 0-0-0
+
+    if(enroque === undefined){
+        if(!(piezaComida == undefined)) captura = true;
+        pieza = diccionario[(piezaAgarrada.id.split("-")[1][0]).toUpperCase()];
+        casilla = casillaDestino.id; 
+        if(captura && !(pieza === "")) pieza += "x";
+        //Si captura un peon añadimos su columna
+        if(captura && pieza === "") {
+            pieza += casillaInicio.id[0]+"x";
+        }
+    }else{
+        if(enroque === "corto"){
+            pieza = "0-0";
+        }else{
+            pieza = "0-0-0";
+        }
     }
+    
     //Añade el movimiento al html
-    contenedor.innerHTML += pieza+casilla + " + ";
+    contenedorPGN.innerHTML += pieza+casilla + " + ";
     
 }
 
-function guardarMovimiento(piezaAgarrada, casillaInicio, casillaDestino, piezaComida){
+function guardarMovimiento(piezaAgarrada, casillaInicio, casillaDestino, piezaComida, enroque){
     //Volvemos a calcular movimientos posibles pero desde la casilla que aterriza simulando que en el siguiente turno podriamos comer el rey
     const posiblesJaques = calcularMovimientos(piezaAgarrada, casillaDestino);
     let jaque = false;
@@ -518,8 +538,12 @@ function guardarMovimiento(piezaAgarrada, casillaInicio, casillaDestino, piezaCo
         "casillaInicio": casillaInicio.id,
         "casillaDestino":casillaDestino.id,
         "piezaComida":piezaComida,
-        "jaque":jaque
+        "jaque":jaque,
+        "enroque":enroque,
+        "fotografiaEnroque": {...comprobacionesEnroque}
     }
     movimientos.push(movimiento);
+    console.log(movimiento)
+    generarPGN(piezaAgarrada, casillaDestino, piezaComida, casillaInicio, enroque);
     
 }
