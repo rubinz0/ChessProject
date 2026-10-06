@@ -22,6 +22,11 @@ body{
     opacity: 50%;
 }
 
+.casillaAmenazada{
+    background-color: red !important;
+    opacity: 50%;
+}
+
 .casillaCoord{
     /*Para no poder subrayar y arrastrar las coordenadas*/
     user-select: none;
