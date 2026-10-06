@@ -268,7 +268,7 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
     pieza = pieza.split("-");
     //Esto resetea las casillas y permite calcular los movimientos posibles sobre la casilla destino. (Al guardar movimiento tengo que saber si doy jaque y para eso 
     // calculo si en el siguiente movimiento encuentra al rey por lo que vuelvo a calcular los movimientos)
-    casillasPermitidas = []
+    let casillasPermitidas = []
 
     let movX;
     let movY;
@@ -514,45 +514,55 @@ function guardarMovimiento(piezaAgarrada, casillaInicio, casillaDestino, piezaCo
 }
 
 
-function validarMovimiento(piezaComida){
-    //Comprueba que el movimiento sea valido
-    casillasPermitidas.forEach(casilla => {
-        if (casillaDestino.id == casilla) {
-            //Comer pieza (Añadir funcion para comprobar jaques en el futuro)
-            if (!(piezaComida == undefined)) piezaComida.remove();
-            casillaDestino.appendChild(piezaAgarrada);
-            //ENROQUES Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es 2 es el corto 3 el largo, 
-            // Math.abs para valor absoluto ya que puede moverse -2 o -3
-            let enroque;
-            if (piezaAgarrada.id.split("-")[1] === "rey" && Math.abs(numeroColumna[casillaInicio.id[0]] - numeroColumna[casillaDestino.id[0]]) == 2) {
-                let fila = casillaDestino.id[1];
-                if (casillaDestino.id[0] === "g") {
-                    //Busca la casilla f1 o f8 dependiendo y inserta la torre correspondiente
-                    document.getElementById("f" + fila).appendChild(document.getElementById(tableroDigital["h" + fila]));
-                    //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
-                    tableroDigital["f" + fila] = tableroDigital["h" + fila];
-                    tableroDigital["h" + fila] = "null";
-                    enroque = "corto";
-                }
-                if (casillaDestino.id[0] === "c") {
-                    //Busca la casilla f1 o f8 dependiendo y inserta la torre correspondiente
-                    document.getElementById("d" + fila).appendChild(document.getElementById(tableroDigital["a" + fila]));
-                    //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
-                    tableroDigital["d" + fila] = tableroDigital["a" + fila];
-                    tableroDigital["a" + fila] = "null";
-                    enroque = "largo";
-                }
-                console.log(tableroDigital)
-            }
-            //Guardar el movimiento en memoria
-            guardarMovimiento(piezaAgarrada,casillaInicio,casillaDestino, piezaComida, enroque);
-            
-            //Actualiza tablero en memoria con la jugada actual
-            tableroDigital[casillaInicio.id] = "null";
-            tableroDigital[casillaDestino.id] = piezaAgarrada.id;        
-        }
+function validarMovimiento(piezaComida, piezaAgarrada){
+    let casillasAmenazadas = calcularCasillasAmenazadas(piezaAgarrada);
+    let jaque = false;
+    casillasAmenazadas.forEach(casillasAmenazada => {
+        if(casillasAmenazada === casillaDestino.id && tableroDigital[casillaDestino.id].split("-")[1] === "rey") jaque = true;
     });
-    calcularCasillasAmenazadas(piezaAgarrada)
+    if(!jaque){
+        //Comprueba que el movimiento sea valido
+        casillasPermitidas.forEach(casilla => {
+            if (casillaDestino.id == casilla) {
+                //Comer pieza (Añadir funcion para comprobar jaques en el futuro)
+                if (!(piezaComida == undefined)) piezaComida.remove();
+                casillaDestino.appendChild(piezaAgarrada);
+                //ENROQUES Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es 2 es el corto 3 el largo, 
+                // Math.abs para valor absoluto ya que puede moverse -2 o -3
+                let enroque;
+                if (piezaAgarrada.id.split("-")[1] === "rey" && Math.abs(numeroColumna[casillaInicio.id[0]] - numeroColumna[casillaDestino.id[0]]) == 2) {
+                    let fila = casillaDestino.id[1];
+                    if (casillaDestino.id[0] === "g") {
+                        //Busca la casilla f1 o f8 dependiendo y inserta la torre correspondiente
+                        document.getElementById("f" + fila).appendChild(document.getElementById(tableroDigital["h" + fila]));
+                        //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
+                        tableroDigital["f" + fila] = tableroDigital["h" + fila];
+                        tableroDigital["h" + fila] = "null";
+                        enroque = "corto";
+                    }
+                    if (casillaDestino.id[0] === "c") {
+                        //Busca la casilla f1 o f8 dependiendo y inserta la torre correspondiente
+                        document.getElementById("d" + fila).appendChild(document.getElementById(tableroDigital["a" + fila]));
+                        //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
+                        tableroDigital["d" + fila] = tableroDigital["a" + fila];
+                        tableroDigital["a" + fila] = "null";
+                        enroque = "largo";
+                    }
+                    console.log(tableroDigital)
+                }
+                //Guardar el movimiento en memoria
+                guardarMovimiento(piezaAgarrada, casillaInicio, casillaDestino, piezaComida, enroque);
+
+                //Actualiza tablero en memoria con la jugada actual
+                tableroDigital[casillaInicio.id] = "null";
+                tableroDigital[casillaDestino.id] = piezaAgarrada.id;
+            }
+        });
+    }else{
+        console.log("jaque")
+    }
+    
+
 }
 
 //Calcula que casillas pueden comer las piezas del color distinto al tuyo
@@ -583,7 +593,6 @@ function calcularCasillasAmenazadas(piezaAgarrada){
                 //Nos sirve para diferenciar entre peon negro y blanco ya que mueven hacia arriba o abajo (si es negro es que mueve el blanco +1)
                 let direccion = -1;
                 if(color === "negro") direccion = 1;
-                console.log(color)
                 //Calcula que la diagonal exista y no se salga del tablero
                 if(tableroDigital[letras[numeroColumna[casilla[0]] - 1]+(fila+direccion)] != undefined) casillasAmenazadas.push(letras[numeroColumna[casilla[0]] - 1]+(fila+direccion));
                 if(tableroDigital[letras[numeroColumna[casilla[0]] + 1]+(fila+direccion)] != undefined) casillasAmenazadas.push(letras[numeroColumna[casilla[0]] + 1]+(fila+direccion));
@@ -612,5 +621,5 @@ function calcularCasillasAmenazadas(piezaAgarrada){
             }
         }
     }
-    console.log(casillasAmenazadas)
+    return casillasAmenazadas;
 }
