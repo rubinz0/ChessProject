@@ -444,7 +444,7 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
         }
 
     });
-    console.log(casillasPermitidas)
+    console.log("CasillasPermitidas: " + casillasPermitidas)
     return casillasPermitidas;
 }
 
@@ -527,8 +527,8 @@ function validarMovimiento(piezaComida, piezaAgarrada){
             //Comer pieza (Añadir funcion para comprobar jaques en el futuro)
             if (!(piezaComida == undefined)) piezaComida.remove();
             casillaDestino.appendChild(piezaAgarrada);
-            //ENROQUES Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es 2 es el corto 3 el largo, 
-            // Math.abs para valor absoluto ya que puede moverse -2 o -3
+            //ENROQUES Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es en la columna g es el corto y el largo si es en c, 
+            // Math.abs para valor absoluto ya que puede moverse -2
             let enroque;
             if (piezaAgarrada.id.split("-")[1] === "rey" && Math.abs(numeroColumna[casillaInicio.id[0]] - numeroColumna[casillaDestino.id[0]]) == 2) {
                 let fila = casillaDestino.id[1];
@@ -609,33 +609,82 @@ function calcularCasillasAmenazadas(piezaAgarrada){
     }
 
     //Añade la clase amenazada para marcar las casillas amenazadas por el rival
-    for(let i = 0; i < casillasHTML.length; i++){
-        for(let j = 0; j < casillasAmenazadas.length; j++){
-            if(casillasHTML[i].id === casillasAmenazadas[j]){
-                casillasHTML[i].classList.add("casillaAmenazada");
-            }
-        }
-    }
+    // for(let i = 0; i < casillasHTML.length; i++){
+    //     for(let j = 0; j < casillasAmenazadas.length; j++){
+    //         if(casillasHTML[i].id === casillasAmenazadas[j]){
+    //             casillasHTML[i].classList.add("casillaAmenazada");
+    //         }
+    //     }
+    // }
     return casillasAmenazadas;
 }
 
-
-function simularMovimiento(casillasPermitidas, piezaAgarrada, casillaInicio){
-    casillasPermitidas = casillasPermitidas;
+//Simula el movimiento de la pieza para comprobar si deja al rey en jaque
+function simularMovimiento(casillas, piezaAgarrada, casillaInicio){
+    let casillasPermitidas = casillas;
     let casillaEliminar = [];
     let color = piezaAgarrada.id.split("-")[0];
+    //Aqui se guarda el id de la pieza que ocupaba la casilla a la que simulamos el movimiento
+    let piezaAnterior;
+
+    //Recorre casillas permitidas
     casillasPermitidas.forEach(casillaPermitida => {
-        tableroDigital[casillaInicio.id] = "null";
-        tableroDigital[casillaPermitida] = piezaAgarrada.id;
-        let casillasAmenazadas = calcularCasillasAmenazadas(piezaAgarrada);
-        casillasAmenazadas.forEach(casillaAmenazada => {
-            if(tableroDigital[casillaAmenazada].split("-")[1] === "rey" && color === tableroDigital[casillaAmenazada].split("-")[0]  && !(casillaEliminar.includes(casillaAmenazada))) casillaEliminar.push(casillaPermitida);
-        });
-        tableroDigital[casillaInicio.id] = piezaAgarrada.id;
-        tableroDigital[casillaPermitida] = "null";
+        //Excepcion del rey ya que hay que comprobar que si se enroca no pase por una casilla amenazada
+        if (piezaAgarrada.id.split("-")[1] === "rey") {
+            //ENROQUES Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es en la columna g es el corto y el largo si es en c, 
+            // Math.abs para valor absoluto ya que puede moverse -2
+            if(Math.abs(numeroColumna[casillaInicio.id[0]] - numeroColumna[casillaPermitida[0]]) == 2){
+                let casillasAmenazadas = calcularCasillasAmenazadas(piezaAgarrada);
+                //Si esta en jaque eliminamos directamente porque no pude enrocar
+                if(casillasAmenazadas.includes(casillaInicio.id)){
+                     casillaEliminar.push(casillaPermitida);
+                }else{
+                    //Si la casilla destino es mayor que la inicio el enroque es a la derecha (enroque corto)
+                    if (numeroColumna[casillaPermitida[0]] > numeroColumna[casillaInicio.id[0]]) {
+                        //Si es enroque corto comprobamos la casilla destino y la de la izquierda
+                        if (casillasAmenazadas.includes(letras[numeroColumna[casillaInicio.id[0]] + 1] + casillaInicio.id[1]) | casillasAmenazadas.includes(letras[numeroColumna[casillaInicio.id[0]] + 2] + casillaInicio.id[1])) casillaEliminar.push(casillaPermitida);
+                    } else {
+                        //Si es enroque largo comprobamos la casilla destino y la de la derecha
+                        if (casillasAmenazadas.includes(letras[numeroColumna[casillaInicio.id[0]] - 1] + casillaInicio.id[1]) | casillasAmenazadas.includes(letras[numeroColumna[casillaInicio.id[0]] - 2] + casillaInicio.id[1])) casillaEliminar.push(casillaPermitida);
+                    }
+                }
+            }else{
+                //REPITO EL CODIGO PARA EL REY (MEJORABLE???)
+                //Avanza la pieza a la casilla permitida para calcular si deja en jaque al rey
+                tableroDigital[casillaInicio.id] = "null";
+                //Guarda la pieza que hay en la casilla que movemos
+                piezaAnterior = tableroDigital[casillaPermitida];
+                tableroDigital[casillaPermitida] = piezaAgarrada.id;
+                let casillasAmenazadas = calcularCasillasAmenazadas(piezaAgarrada);
+                //Calcula si al haber movido el rey está amenazado. Si lo esta lo añade a casillasEliminar
+                casillasAmenazadas.forEach(casillaAmenazada => {
+                    if (tableroDigital[casillaAmenazada].split("-")[1] === "rey" && color === tableroDigital[casillaAmenazada].split("-")[0] && !(casillaEliminar.includes(casillaAmenazada))) casillaEliminar.push(casillaPermitida);
+                });
+                //Devuelve la pieza a su inicio
+                tableroDigital[casillaInicio.id] = piezaAgarrada.id;
+                //Devuelve la pieza que habia en esa posicion
+                tableroDigital[casillaPermitida] = piezaAnterior;
+                }
+        } else {
+            //Avanza la pieza a la casilla permitida para calcular si deja en jaque al rey
+            tableroDigital[casillaInicio.id] = "null";
+            //Guarda la pieza que hay en la casilla que movemos
+            piezaAnterior = tableroDigital[casillaPermitida];
+            tableroDigital[casillaPermitida] = piezaAgarrada.id;
+            let casillasAmenazadas = calcularCasillasAmenazadas(piezaAgarrada);
+            //Calcula si al haber movido el rey está amenazado. Si lo esta lo añade a casillasEliminar
+            casillasAmenazadas.forEach(casillaAmenazada => {
+                if (tableroDigital[casillaAmenazada].split("-")[1] === "rey" && color === tableroDigital[casillaAmenazada].split("-")[0] && !(casillaEliminar.includes(casillaAmenazada))) casillaEliminar.push(casillaPermitida);
+            });
+            //Devuelve la pieza a su inicio
+            tableroDigital[casillaInicio.id] = piezaAgarrada.id;
+            //Devuelve la pieza que habia en esa posicion
+            tableroDigital[casillaPermitida] = piezaAnterior;
+        }
     });
-    console.log(casillaEliminar)
+    console.log("CasillasELiminar: " + casillaEliminar)
+    //Filtra las casillas permitidas para quitar las que coinciden con casillaEliminar
     casillasPermitidas = casillasPermitidas.filter(casillaPermitida => !(casillaEliminar.includes(casillaPermitida)));
-    console.log(casillasPermitidas)
+    console.log("CasillasPermitidas: " + casillasPermitidas)
     return casillasPermitidas;
 }
