@@ -298,50 +298,85 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
     //Peones
     if(pieza[1] == "peon"){
         //Unica pieza que comprueba esto
-        if (pieza[0] === "blanco") {
-            //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
-            if (numeroCasillaInicio == 2 && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + 2)] === "null") {
-                casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio + 2));
-            }
-            if (tableroDigital[letraCasillaInicio + (numeroCasillaInicio + 1)] === "null") {
-                casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio + 1));
-            }
-            //Calcula
+        // if (pieza[0] === "blanco") {
+        //     //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
+        //     if (numeroCasillaInicio == 2 && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + 2)] === "null") {
+        //         casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio + 2));
+        //     }
+        //     if (tableroDigital[letraCasillaInicio + (numeroCasillaInicio + 1)] === "null") {
+        //         casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio + 1));
+        //     }
+        //     //Calcula
 
-            //Calcula la fila izquierda y derecha y calcula si hay una fila a la derecha o la izquierda para que no se salga del tablero y de error
-            if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + 1)] === "null") && !(letraCasillaInicio === "h")) {
-                if (tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + 1)][0] === "n") {
-                    casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + 1));
-                }
-            }
+        //     //Calcula la fila izquierda y derecha y calcula si hay una fila a la derecha o la izquierda para que no se salga del tablero y de error
+        //     if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + 1)] === "null") && !(letraCasillaInicio === "h")) {
+        //         if (tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + 1)][0] === "n") {
+        //             casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + 1));
+        //         }
+        //     }
 
-            if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + 1)] === "null") && !(letraCasillaInicio === "a")) {
-                if (tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + 1)][0] === "n") {
-                    casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + 1));
-                }
-            }
-        } else {
-            //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
-            if (numeroCasillaInicio == 7 && tableroDigital[letraCasillaInicio + (numeroCasillaInicio - 2)] === "null") {
-                casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio - 2));
-            }
-            if (tableroDigital[letraCasillaInicio + (numeroCasillaInicio - 1)] === "null") {
-                casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio - 1));
-            }
-            //Calcula la fila izquierda y derecha
-            //Calcula
-            if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio - 1)] === "null") && !(letraCasillaInicio === "a")) {
-                if (tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio - 1)][0] === "b") {
-                    casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio - 1));
-                }
-            }
-            if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio - 1)] === "null") && !(letraCasillaInicio === "h")) {
-                if (tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio - 1)][0] === "b") {
-                    casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio - 1));
-                }
-            }
+        //     if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + 1)] === "null") && !(letraCasillaInicio === "a")) {
+        //         if (tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + 1)][0] === "n") {
+        //             casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + 1));
+        //         }
+        //     }
+        // } else {
+        //     //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
+        //     if (numeroCasillaInicio == 7 && tableroDigital[letraCasillaInicio + (numeroCasillaInicio - 2)] === "null") {
+        //         casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio - 2));
+        //     }
+        //     if (tableroDigital[letraCasillaInicio + (numeroCasillaInicio - 1)] === "null") {
+        //         casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio - 1));
+        //     }
+        //     //Calcula la fila izquierda y derecha
+        //     //Calcula
+        //     if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio - 1)] === "null") && !(letraCasillaInicio === "a")) {
+        //         if (tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio - 1)][0] === "b") {
+        //             casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio - 1));
+        //         }
+        //     }
+        //     if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio - 1)] === "null") && !(letraCasillaInicio === "h")) {
+        //         if (tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio - 1)][0] === "b") {
+        //             casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio - 1));
+        //         }
+        //     }
             
+        // }
+        let avance = 1;
+        if(pieza[0] === "negro"){
+            avance = -1;
         }
+        //Calcula si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
+        if ((numeroCasillaInicio === 2 | numeroCasillaInicio === 7) && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + avance)] === "null" && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + 2 * avance)] === "null") {
+            movimientosDirectos.push([0, 2*avance]);
+        }
+        if (tableroDigital[letraCasillaInicio + (numeroCasillaInicio + avance)] === "null") {
+            movimientosDirectos.push([0, avance]);
+        }
+        //Calcula la fila izquierda y derecha y calcula si hay una fila a la derecha o la izquierda para que no se salga del tablero y de error
+        if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] + avance] + (numeroCasillaInicio + avance)] === "null") && !(letraCasillaInicio === "h")) {
+            if (tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + avance)][0] === "n") {
+                movimientosDirectos.push([1, avance]);
+            }
+        }
+
+        if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] - avance] + (numeroCasillaInicio + avance)] === "null") && !(letraCasillaInicio === "a")) {
+            if (tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + avance)][0] === "n") {
+                movimientosDirectos.push([-1, avance]);
+            }
+        }
+        let ultimoMovimiento = movimientos[movimientos.length - 1];
+        //Calcula que en el ultimo movimiento se moviese un peon de diferente color
+        if (movimientos.length > 0 && ultimoMovimiento.pieza.split("-")[1] === "peon" && ultimoMovimiento.pieza.split("-")[0] !== piezaAgarrada.id.split("-")[0]) {
+            console.log("asdads")
+            //Comprueba que se mueva 2 casillas restando la posicion final e inicial del ultimo movimiento, tambien comprueba que el peon que quieres mover este a la misma altura que el peon que ha movido doble 
+            if (Math.abs(ultimoMovimiento.casillaInicio[1] - ultimoMovimiento.casillaDestino[1]) === 2*avance && casillaInicio.id[1] === ultimoMovimiento.casillaDestino[1]) {
+                console.log("si")
+                //Comprueba que este en una casilla de su lado y dependiendo del lado en el que este añade una diagonal o otra a las casillas permitidas
+                if (letras[numeroColumna[ultimoMovimiento.casillaInicio[0]] + 1] === casillaInicio.id[0]) movimientosDirectos.push([-1, avance]);
+                if (letras[numeroColumna[ultimoMovimiento.casillaInicio[0]] - 1] === casillaInicio.id[0]) movimientosDirectos.push([1, avance]);
+            }
+        } 
     }
     
     //Torres
@@ -444,7 +479,7 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
         }
 
     });
-    console.log("CasillasPermitidas: " + casillasPermitidas)
+    // console.log("CasillasPermitidas: " + casillasPermitidas)
     return casillasPermitidas;
 }
 
@@ -682,9 +717,9 @@ function simularMovimiento(casillas, piezaAgarrada, casillaInicio){
             tableroDigital[casillaPermitida] = piezaAnterior;
         }
     });
-    console.log("CasillasELiminar: " + casillaEliminar)
+    // console.log("CasillasELiminar: " + casillaEliminar)
     //Filtra las casillas permitidas para quitar las que coinciden con casillaEliminar
     casillasPermitidas = casillasPermitidas.filter(casillaPermitida => !(casillaEliminar.includes(casillaPermitida)));
-    console.log("CasillasPermitidas: " + casillasPermitidas)
+    // console.log("CasillasPermitidas: " + casillasPermitidas)
     return casillasPermitidas;
 }
