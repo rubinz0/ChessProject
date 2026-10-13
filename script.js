@@ -297,84 +297,42 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
     let casillasRestantes = 0;
     //Peones
     if(pieza[1] == "peon"){
-        //Unica pieza que comprueba esto
-        // if (pieza[0] === "blanco") {
-        //     //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
-        //     if (numeroCasillaInicio == 2 && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + 2)] === "null") {
-        //         casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio + 2));
-        //     }
-        //     if (tableroDigital[letraCasillaInicio + (numeroCasillaInicio + 1)] === "null") {
-        //         casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio + 1));
-        //     }
-        //     //Calcula
-
-        //     //Calcula la fila izquierda y derecha y calcula si hay una fila a la derecha o la izquierda para que no se salga del tablero y de error
-        //     if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + 1)] === "null") && !(letraCasillaInicio === "h")) {
-        //         if (tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + 1)][0] === "n") {
-        //             casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + 1));
-        //         }
-        //     }
-
-        //     if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + 1)] === "null") && !(letraCasillaInicio === "a")) {
-        //         if (tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + 1)][0] === "n") {
-        //             casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + 1));
-        //         }
-        //     }
-        // } else {
-        //     //Calculamos si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
-        //     if (numeroCasillaInicio == 7 && tableroDigital[letraCasillaInicio + (numeroCasillaInicio - 2)] === "null") {
-        //         casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio - 2));
-        //     }
-        //     if (tableroDigital[letraCasillaInicio + (numeroCasillaInicio - 1)] === "null") {
-        //         casillasPermitidas.push(letraCasillaInicio + (numeroCasillaInicio - 1));
-        //     }
-        //     //Calcula la fila izquierda y derecha
-        //     //Calcula
-        //     if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio - 1)] === "null") && !(letraCasillaInicio === "a")) {
-        //         if (tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio - 1)][0] === "b") {
-        //             casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio - 1));
-        //         }
-        //     }
-        //     if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio - 1)] === "null") && !(letraCasillaInicio === "h")) {
-        //         if (tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio - 1)][0] === "b") {
-        //             casillasPermitidas.push(letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio - 1));
-        //         }
-        //     }
-            
-        // }
         let avance = 1;
         if(pieza[0] === "negro"){
             avance = -1;
         }
+        let color = pieza[0];
         //Calcula si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
-        if ((numeroCasillaInicio === 2 | numeroCasillaInicio === 7) && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + avance)] === "null" && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + 2 * avance)] === "null") {
+        if ((numeroCasillaInicio === 2 || numeroCasillaInicio === 7) && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + avance)] === "null" && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + 2 * avance)] === "null") {
             movimientosDirectos.push([0, 2*avance]);
         }
+        //Avanza hacia delante
         if (tableroDigital[letraCasillaInicio + (numeroCasillaInicio + avance)] === "null") {
             movimientosDirectos.push([0, avance]);
         }
         //Calcula la fila izquierda y derecha y calcula si hay una fila a la derecha o la izquierda para que no se salga del tablero y de error
-        if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] + avance] + (numeroCasillaInicio + avance)] === "null") && !(letraCasillaInicio === "h")) {
-            if (tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + avance)][0] === "n") {
+        if (!(letraCasillaInicio === "h") && !(tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + avance)] === "null")) {
+            if (tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + avance)][0] !== pieza[0]) {
                 movimientosDirectos.push([1, avance]);
             }
         }
-
-        if (!(tableroDigital[letras[numeroColumna[letraCasillaInicio] - avance] + (numeroCasillaInicio + avance)] === "null") && !(letraCasillaInicio === "a")) {
-            if (tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + avance)][0] === "n") {
+        console.log(letraCasillaInicio)
+        if (!(letraCasillaInicio === "a") && !(tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + avance)] === "null")) {
+            if (tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + avance)][0] !== pieza[0]) {
                 movimientosDirectos.push([-1, avance]);
             }
         }
         let ultimoMovimiento = movimientos[movimientos.length - 1];
         //Calcula que en el ultimo movimiento se moviese un peon de diferente color
         if (movimientos.length > 0 && ultimoMovimiento.pieza.split("-")[1] === "peon" && ultimoMovimiento.pieza.split("-")[0] !== piezaAgarrada.id.split("-")[0]) {
-            console.log("asdads")
             //Comprueba que se mueva 2 casillas restando la posicion final e inicial del ultimo movimiento, tambien comprueba que el peon que quieres mover este a la misma altura que el peon que ha movido doble 
-            if (Math.abs(ultimoMovimiento.casillaInicio[1] - ultimoMovimiento.casillaDestino[1]) === 2*avance && casillaInicio.id[1] === ultimoMovimiento.casillaDestino[1]) {
-                console.log("si")
+            if (Math.abs(ultimoMovimiento.casillaInicio[1] - ultimoMovimiento.casillaDestino[1]) === 2 && casillaInicio.id[1] === ultimoMovimiento.casillaDestino[1]) {
+                //Guardo las columnas para simplificar
+                let colActual = numeroColumna[casillaInicio.id[0]];
+                let colRival = numeroColumna[ultimoMovimiento.casillaDestino[0]];
                 //Comprueba que este en una casilla de su lado y dependiendo del lado en el que este añade una diagonal o otra a las casillas permitidas
-                if (letras[numeroColumna[ultimoMovimiento.casillaInicio[0]] + 1] === casillaInicio.id[0]) movimientosDirectos.push([-1, avance]);
-                if (letras[numeroColumna[ultimoMovimiento.casillaInicio[0]] - 1] === casillaInicio.id[0]) movimientosDirectos.push([1, avance]);
+                if (colActual === colRival + 1) movimientosDirectos.push([-1, avance]);
+                if (colActual === colRival - 1) movimientosDirectos.push([1, avance]);
             }
         } 
     }
@@ -559,7 +517,7 @@ function validarMovimiento(piezaComida, piezaAgarrada){
     //Comprueba que el movimiento sea valido
     casillasPermitidas.forEach(casilla => {
         if (casillaDestino.id == casilla) {
-            //Comer pieza (Añadir funcion para comprobar jaques en el futuro)
+            //Comer pieza
             if (!(piezaComida == undefined)) piezaComida.remove();
             casillaDestino.appendChild(piezaAgarrada);
             //ENROQUES Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es en la columna g es el corto y el largo si es en c, 
@@ -584,6 +542,32 @@ function validarMovimiento(piezaComida, piezaAgarrada){
                     enroque = "largo";
                 }
                 console.log(tableroDigital)
+            }
+
+            if(movimientos.length > 0){
+                console.log(letras[numeroColumna[casillaInicio.id[0]] + 1])
+                console.log(letras[numeroColumna[casillaInicio.id[0]] - 1])
+                console.log(letras[numeroColumna[casillaDestino.id[0]]])
+                console.log(letras[numeroColumna[casillaDestino.id[0]]] === (letras[numeroColumna[casillaInicio.id[0]] + 1] || letras[numeroColumna[casillaInicio.id[0]] - 1]))
+
+                //Comprueba que la pieza movida sea un peon, si lo es comprueba si se mueve una casilla
+                if(piezaAgarrada.id.split("-")[1] === "peon" && Math.abs(casillaInicio.id[1] - casillaDestino.id[1]) === 1){
+                    //Calcula si se mueve a una columna adyacente, es decir en diagonal
+                    if(letras[numeroColumna[casillaDestino.id[0]]] === letras[numeroColumna[casillaInicio.id[0]] + 1] || letras[numeroColumna[casillaDestino.id[0]]] === letras[numeroColumna[casillaInicio.id[0]] - 1]){ 
+                        console.log("siasd")
+                        //Comprueba que la casilla en la que cae esta vacia porque si no podria ser una captura normal
+                        if(tableroDigital[casillaDestino.id] === "null"){
+                            console.log("en passant")
+                            //Guarda casilla donde esta el peon que se captura == columna de la casilla destino + fila casilla inicio
+                            let casillaComer = document.getElementById(casillaDestino.id[0] + casillaInicio.id[1]);
+                            //Selecciona el peon comido como pieza comida para guardarlo en la lista movimiento
+                            piezaComida = casillaComer.querySelector(".pieza").id;
+                            //Elimina la pieza(peon) que hay en esa casilla
+                            casillaComer.querySelector(".pieza").remove();
+
+                        }
+                    }
+                }
             }
             //Guardar el movimiento en memoria
             guardarMovimiento(piezaAgarrada, casillaInicio, casillaDestino, piezaComida, enroque);
