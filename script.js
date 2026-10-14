@@ -316,7 +316,6 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
                 movimientosDirectos.push([1, avance]);
             }
         }
-        console.log(letraCasillaInicio)
         if (!(letraCasillaInicio === "a") && !(tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + avance)] === "null")) {
             if (tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + avance)][0] !== pieza[0]) {
                 movimientosDirectos.push([-1, avance]);
@@ -543,21 +542,14 @@ function validarMovimiento(piezaComida, piezaAgarrada){
                 }
                 console.log(tableroDigital)
             }
-
+            //En passant
             if(movimientos.length > 0){
-                console.log(letras[numeroColumna[casillaInicio.id[0]] + 1])
-                console.log(letras[numeroColumna[casillaInicio.id[0]] - 1])
-                console.log(letras[numeroColumna[casillaDestino.id[0]]])
-                console.log(letras[numeroColumna[casillaDestino.id[0]]] === (letras[numeroColumna[casillaInicio.id[0]] + 1] || letras[numeroColumna[casillaInicio.id[0]] - 1]))
-
                 //Comprueba que la pieza movida sea un peon, si lo es comprueba si se mueve una casilla
                 if(piezaAgarrada.id.split("-")[1] === "peon" && Math.abs(casillaInicio.id[1] - casillaDestino.id[1]) === 1){
                     //Calcula si se mueve a una columna adyacente, es decir en diagonal
                     if(letras[numeroColumna[casillaDestino.id[0]]] === letras[numeroColumna[casillaInicio.id[0]] + 1] || letras[numeroColumna[casillaDestino.id[0]]] === letras[numeroColumna[casillaInicio.id[0]] - 1]){ 
-                        console.log("siasd")
                         //Comprueba que la casilla en la que cae esta vacia porque si no podria ser una captura normal
                         if(tableroDigital[casillaDestino.id] === "null"){
-                            console.log("en passant")
                             //Guarda casilla donde esta el peon que se captura == columna de la casilla destino + fila casilla inicio
                             let casillaComer = document.getElementById(casillaDestino.id[0] + casillaInicio.id[1]);
                             //Selecciona el peon comido como pieza comida para guardarlo en la lista movimiento
