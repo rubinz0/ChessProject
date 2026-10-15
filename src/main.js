@@ -1,4 +1,9 @@
 import { Caballo } from './modelos/piezas/Caballo.js';
+import { Torre } from './modelos/piezas/Torre.js';
+import { Peon } from './modelos/piezas/Peon.js';
+import { Alfil } from './modelos/piezas/Alfil.js';
+import { Dama } from './modelos/piezas/Dama.js';
+import { Rey } from './modelos/piezas/Rey.js';
 const tablero = document.getElementById("tablero");
 const PGN = [];
 const coordenadasArray = ["a8","b8","c8","d8","e8","f8","g8","h8","a7","b7","c7","d7","e7","f7","g7","h7","a6","b6","c6","d6","e6","f6","g6","h6","a5","b5","c5","d5","e5","f5","g5","h5","a4","b4","c4","d4","e4","f4","g4","h4","a3","b3","c3","d3","e3","f3","g3","h3","a2","b2","c2","d2","e2","f2","g2","h2","a1","b1","c1","d1","e1","f1","g1","h1"];
@@ -90,48 +95,69 @@ function colocarPiezas(){
     const casillas = document.querySelectorAll(".casilla");
     for(let i = 0; i < 64; i++){
         let nombrePieza = "none";
+        let color;
+        let pieza;
         //Casillas negras
+        if(i < 16){
+            color = "negro";
+        }else{
+            color = "blanco";
+        }
         if(i > 7 && i < 16){
             nombrePieza = "peonNegro";
+            pieza = new Peon(idPiezas[id], color, coordenadasArray[i]);
         }
         if(i == 0 | i == 7){
             nombrePieza = "torreNegra";
+            pieza = new Torre(idPiezas[id], color, coordenadasArray[i]);
         }
         if(i == 1 | i == 6){
             nombrePieza = "caballoNegro";
+            pieza = new Caballo(idPiezas[id], color, coordenadasArray[i]);
         }
         if(i == 2 | i == 5){
             nombrePieza = "alfilNegro";
+            pieza = new Alfil(idPiezas[id], color, coordenadasArray[i]);
         }
         if(i == 3){
             nombrePieza = "damaNegra";
+            pieza = new Dama(idPiezas[id], color, coordenadasArray[i]);
         }
         if(i == 4){
             nombrePieza = "reyNegro";
+            pieza = new Rey(idPiezas[id], color, coordenadasArray[i]);
         }
 
         //Casillas blancas
         if(i > 47 && i < 56){
             nombrePieza = "peonBlanco";
+            pieza = new Peon(idPiezas[id], color, coordenadasArray[i]);
         }
         if(i == 56 | i == 63){
             nombrePieza = "torreBlanca";
+            pieza = new Torre(idPiezas[id], color, coordenadasArray[i]);
         }
         if(i == 57 | i == 62){
             nombrePieza = "caballoBlanco";
+            pieza = new Caballo(idPiezas[id], color, coordenadasArray[i]);
         }
         if(i == 58 | i == 61){
             nombrePieza = "alfilBlanco";
+            pieza = new Alfil(idPiezas[id], color, coordenadasArray[i]);
         }
         if(i == 59){
             nombrePieza = "damaBlanca";
+            pieza = new Dama(idPiezas[id], color, coordenadasArray[i]);
         }
         if(i == 60){
             nombrePieza = "reyBlanco";
+            pieza = new Rey(idPiezas[id], color, coordenadasArray[i]);
         }
-
         //Colocar la imagen en la casilla seleccionada
         if(!(nombrePieza == "none")){
+            tableroDigital[coordenadasArray[i]] = pieza;
+            console.log(tableroDigital)
+            
             const pieza = document.createElement("img");
             const src = "/img/piezas/" + nombrePieza + ".webp"
             pieza.src = src;
@@ -140,8 +166,11 @@ function colocarPiezas(){
             pieza.id = idPiezas[id];
 
             //Colocar piezas en tablero digital (Diccionario)
-            tableroDigital[coordenadasArray[i]] = idPiezas[id];
+            
 
+            // tableroDigital[coordenadasArray[i]] = idPiezas[id];
+            //aSdasdasdasdasdasdasda
+            //asdasd
             id++;
 
             pieza.draggable = "false";

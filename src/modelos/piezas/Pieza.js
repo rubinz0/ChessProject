@@ -1,4 +1,8 @@
 export class Pieza {
+    id;
+    img;
+    color;
+    casilla;
     constructor(id, color, casilla) {
         this.id = id;
         this.color = color;     

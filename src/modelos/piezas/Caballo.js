@@ -1,9 +1,7 @@
-import { Pieza } from "./pieza";
+import { Pieza } from "./pieza.js";
 export class Caballo extends Pieza {
     constructor(id, color, casilla) {
-        this.id, id;
-        this.color = color;     
-        this.casilla = casilla; 
+        super(id, color, casilla);
     }
     obtenerMovimientos(tableroDigital) {
         
