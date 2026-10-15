@@ -7,7 +7,6 @@ import { Rey } from './modelos/piezas/Rey.js';
 const tablero = document.getElementById("tablero");
 const PGN = [];
 const coordenadasArray = ["a8","b8","c8","d8","e8","f8","g8","h8","a7","b7","c7","d7","e7","f7","g7","h7","a6","b6","c6","d6","e6","f6","g6","h6","a5","b5","c5","d5","e5","f5","g5","h5","a4","b4","c4","d4","e4","f4","g4","h4","a3","b3","c3","d3","e3","f3","g3","h3","a2","b2","c2","d2","e2","f2","g2","h2","a1","b1","c1","d1","e1","f1","g1","h1"];
-const letras = [null,"a","b", "c", "d", "e", "f", "g","h"];
 const numeroColumna = {
     a : 1,
     b : 2,
@@ -153,17 +152,17 @@ function colocarPiezas(){
             nombrePieza = "reyBlanco";
             pieza = new Rey(idPiezas[id], color, coordenadasArray[i]);
         }
+        if(pieza != undefined) pieza.img = "/img/piezas/" + nombrePieza + ".webp";
         //Colocar la imagen en la casilla seleccionada
         if(!(nombrePieza == "none")){
             tableroDigital[coordenadasArray[i]] = pieza;
-            console.log(tableroDigital)
             
-            const pieza = document.createElement("img");
-            const src = "/img/piezas/" + nombrePieza + ".webp"
-            pieza.src = src;
-            pieza.alt = nombrePieza;
-            pieza.className = "pieza";
-            pieza.id = idPiezas[id];
+            const piezaHTML = document.createElement("img");
+            const src = pieza.img;
+            piezaHTML.src = src;
+            piezaHTML.alt = nombrePieza;
+            piezaHTML.className = "pieza";
+            piezaHTML.id = pieza.id;
 
             //Colocar piezas en tablero digital (Diccionario)
             
@@ -173,15 +172,15 @@ function colocarPiezas(){
             //asdasd
             id++;
 
-            pieza.draggable = "false";
-            pieza.addEventListener("mousedown", clicarPieza);
-            casillas[i].appendChild(pieza);
+            piezaHTML.draggable = "false";
+            piezaHTML.addEventListener("mousedown", clicarPieza);
+            casillas[i].appendChild(piezaHTML);
 
 
 
         }else{
             // Colocar null en casillas tablero digital (Diccionario)
-            tableroDigital[coordenadasArray[i]] = "null";
+            tableroDigital[coordenadasArray[i]] = null;
         }
         
     }
@@ -220,6 +219,7 @@ function clicarPieza(evento){
     casillaInicio = evento.target.parentElement;
     //Vaciamos las casillas de la pieza anterior
     casillasPermitidas = [];
+
     casillasPermitidas = calcularMovimientos(piezaAgarrada, casillaInicio);
 
     casillasPermitidas = simularMovimiento(casillasPermitidas, piezaAgarrada, casillaInicio);
@@ -299,6 +299,8 @@ function soltarClick(evento){
 
 
 function calcularMovimientos(piezaAgarrada, casillaInicio){
+    let pieza2 = tableroDigital[casillaInicio.id];
+    console.log(pieza2)
     let valido = false;
     let pieza = piezaAgarrada.id;
     pieza = pieza.split("-");
@@ -368,12 +370,7 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
     
     //Torres
     if(pieza[1] == "torre"){
-        movimientosDeslizantes = [
-            [1,0],
-            [-1,0],
-            [0,1],
-            [0,-1]
-        ];
+        pieza2.calcularMovimientos(tableroDigital, casillaInicio);
     }
     //Caballos
     if(pieza[1] === "caballo"){
@@ -443,29 +440,7 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
             casillasPermitidas.push(columna+fila);
         }
     });
-    movimientosDeslizantes.forEach(movimiento => {
-        //Mide hasta que distancia calcula en esa direccion
-        let distancia = 1;
-        while(distancia < 8){
-            let columna = letras[letras.indexOf(letraCasillaInicio) - movimiento[0]*distancia];
-            let fila = numeroCasillaInicio + movimiento[1] * distancia;
-
-            if(tableroDigital[columna+fila] === "null"){
-                casillasPermitidas.push(columna+fila);
-            }
-
-            if(tableroDigital[columna+fila] != "null" && tableroDigital[columna+fila] != undefined && tableroDigital[columna+fila].split("-")[0] != piezaAgarrada.id.split("-")[0]){
-                casillasPermitidas.push(columna+fila);
-                break
-            }
-            //Si no esta vacia y no hay un enemigo esque hay un aliado
-            if(tableroDigital[columna+fila] != "null" && tableroDigital[columna+fila] != undefined && tableroDigital[columna+fila].split("-")[0] == piezaAgarrada.id.split("-")[0]){
-                break
-            }
-            distancia++;
-        }
-
-    });
+    
     // console.log("CasillasPermitidas: " + casillasPermitidas)
     return casillasPermitidas;
 }
