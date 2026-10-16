@@ -1,46 +1,59 @@
+import { letras, numeroCasilla, letraCasilla, numeroColumna, movimientos } from "../../utilidades.js";
 import { Pieza } from "./pieza.js";
 export class Peon extends Pieza {
-    movDoble;
+
+    seHaMovido;
+
     constructor(id, color, casilla) {
         super(id, color, casilla);
+        this.seHaMovido = false;
     }
-    calcularMovimientos(tableroDigital) {
+
+
+    calcularMovimientos(tableroDigital, casilla) {
+        let piezaAgarrada = tableroDigital[casilla.id].id;
         let avance = 1;
-        if(pieza[0] === "negro"){
+        if(piezaAgarrada.split("-")[0] === "negro"){
             avance = -1;
         }
-        let color = pieza[0];
+        let movimientosDirectos = [
+
+        ]
+
+        let color = piezaAgarrada[0];
         //Calcula si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
-        if ((numeroCasillaInicio === 2 || numeroCasillaInicio === 7) && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + avance)] === "null" && tableroDigital[letraCasillaInicio + (numeroCasillaInicio + 2 * avance)] === "null") {
+        if (this.seHaMovido === false && tableroDigital[letraCasilla(casilla) + (numeroCasilla(casilla) + avance)] === null && tableroDigital[letraCasilla(casilla) + (numeroCasilla(casilla) + 2 * avance)] === null) {
             movimientosDirectos.push([0, 2*avance]);
         }
         //Avanza hacia delante
-        if (tableroDigital[letraCasillaInicio + (numeroCasillaInicio + avance)] === "null") {
+        if (tableroDigital[letraCasilla(casilla) + (numeroCasilla(casilla) + avance)] === null) {
             movimientosDirectos.push([0, avance]);
         }
-        //Calcula la fila izquierda y derecha y calcula si hay una fila a la derecha o la izquierda para que no se salga del tablero y de error
-        if (!(letraCasillaInicio === "h") && !(tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + avance)] === "null")) {
-            if (tableroDigital[letras[numeroColumna[letraCasillaInicio] + 1] + (numeroCasillaInicio + avance)][0] !== pieza[0]) {
-                movimientosDirectos.push([1, avance]);
+
+        //Calcula la fila izquierda y derecha y comprueba que no se salga del tablero y de error (Al poner null tambien hace != undefinded, el !== no compara con undefined)
+        if (tableroDigital[letras[(numeroColumna[letraCasilla(casilla)] - 1 )] + (numeroCasilla(casilla) + avance)] != null) {
+            //Comprueba que la casilla diagonal este ocupada por una pieza de distinto color
+            if (tableroDigital[letras[numeroColumna[letraCasilla(casilla)] + avance] + (numeroCasilla(casilla) + avance)].id[0] !== piezaAgarrada[0]) {
+                movimientosDirectos.push([avance, avance]);
             }
         }
-        if (!(letraCasillaInicio === "a") && !(tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + avance)] === "null")) {
-            if (tableroDigital[letras[numeroColumna[letraCasillaInicio] - 1] + (numeroCasillaInicio + avance)][0] !== pieza[0]) {
-                movimientosDirectos.push([-1, avance]);
-            }
-        }
+        
+
         let ultimoMovimiento = movimientos[movimientos.length - 1];
         //Calcula que en el ultimo movimiento se moviese un peon de diferente color
-        if (movimientos.length > 0 && ultimoMovimiento.pieza.split("-")[1] === "peon" && ultimoMovimiento.pieza.split("-")[0] !== piezaAgarrada.id.split("-")[0]) {
+        if (movimientos.length > 0 && ultimoMovimiento.piezaAgarrada.split("-")[1] === "peon" && ultimoMovimiento.piezaAgarrada.split("-")[0] !== piezaAgarrada.id.split("-")[0]) {
             //Comprueba que se mueva 2 casillas restando la posicion final e inicial del ultimo movimiento, tambien comprueba que el peon que quieres mover este a la misma altura que el peon que ha movido doble 
-            if (Math.abs(ultimoMovimiento.casillaInicio[1] - ultimoMovimiento.casillaDestino[1]) === 2 && casillaInicio.id[1] === ultimoMovimiento.casillaDestino[1]) {
+            if (Math.abs(ultimoMovimiento.casilla[1] - ultimoMovimiento.casillaDestino[1]) === 2 && casilla.id[1] === ultimoMovimiento.casillaDestino[1]) {
                 //Guardo las columnas para simplificar
-                let colActual = numeroColumna[casillaInicio.id[0]];
+                let colActual = numeroColumna[casilla.id[0]];
                 let colRival = numeroColumna[ultimoMovimiento.casillaDestino[0]];
                 //Comprueba que este en una casilla de su lado y dependiendo del lado en el que este añade una diagonal o otra a las casillas permitidas
                 if (colActual === colRival + 1) movimientosDirectos.push([-1, avance]);
                 if (colActual === colRival - 1) movimientosDirectos.push([1, avance]);
             }
         } 
+        console.log(movimientosDirectos)
+        //Casillas permitidas
+        return this.movimientosDirectos(movimientosDirectos, casilla, tableroDigital);
     }
 }
