@@ -1,5 +1,5 @@
 import { letras, numeroCasilla, letraCasilla, numeroColumna, movimientos } from "../../utilidades.js";
-import { Pieza } from "./pieza.js";
+import { Pieza } from "./Pieza.js";
 export class Peon extends Pieza {
 
     seHaMovido;

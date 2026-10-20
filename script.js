@@ -443,7 +443,7 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
 const contenedorPGN = document.getElementById("contenedorPGN");
 //Funcion para generar el codigo PGN de la partida, cada vez que se mueve una pieza se añade el movimiento
 function generarPGN(piezaAgarrada, casillaDestino, piezaComida, casillaInicio, enroque){
-    captura = false;
+    let captura = false;
     //Con esto consigo cambiar las letras a ingles que es la notacion oficial sin tener que hacer bucles (tambien consigo vaciar la letra en caso de ser peon)
     const diccionario = {
         "P":"",

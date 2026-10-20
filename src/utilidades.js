@@ -20,3 +20,5 @@ export const numeroColumna = {
 }
 
 export let movimientos = [];
+
+export let casillasPermitidas = [];

@@ -5,7 +5,7 @@ import { Alfil } from './modelos/piezas/Alfil.js';
 import { Dama } from './modelos/piezas/Dama.js';
 import { Rey } from './modelos/piezas/Rey.js';
 
-import { letras, numeroColumna } from "./utilidades.js";
+import { letras, numeroColumna, casillasPermitidas } from "./utilidades.js";
 const tablero = document.getElementById("tablero");
 const PGN = [];
 const coordenadasArray = ["a8","b8","c8","d8","e8","f8","g8","h8","a7","b7","c7","d7","e7","f7","g7","h7","a6","b6","c6","d6","e6","f6","g6","h6","a5","b5","c5","d5","e5","f5","g5","h5","a4","b4","c4","d4","e4","f4","g4","h4","a3","b3","c3","d3","e3","f3","g3","h3","a2","b2","c2","d2","e2","f2","g2","h2","a1","b1","c1","d1","e1","f1","g1","h1"];
@@ -18,7 +18,6 @@ let comprobacionesEnroque = {
     "negro-torre-1":false,
     "negro-torre-2":false
 }
-let casillasPermitidas = [];
 //Diccionario donde guardo la posicion actual del tablero (FEN)
 let tableroDigital = {}
 function generarTablero(){
@@ -210,11 +209,13 @@ function clicarPieza(evento){
     click = "false";
     casillaInicio = evento.target.parentElement;
     //Vaciamos las casillas de la pieza anterior
-    casillasPermitidas = [];
+    casillasPermitidas.splice(0, casillasPermitidas.length);
 
-    
-    casillasPermitidas = calcularMovimientos(piezaAgarrada, casillaInicio);
-    casillasPermitidas = simularMovimiento(casillasPermitidas, piezaAgarrada, casillaInicio);
+    console.log(casillaInicio)
+    // casillasPermitidas = calcularMovimientos(piezaAgarrada, casillaInicio);
+    casillasPermitidas.push(...calcularMovimientos(piezaAgarrada, casillaInicio));
+    // casillasPermitidas = simularMovimiento(casillasPermitidas, piezaAgarrada, casillaInicio);
+    casillasPermitidas.push(...calcularMovimientos(casillasPermitidas, piezaAgarrada,casillaInicio));
 
 
     //Recoge todas las casillas del tablero
@@ -271,10 +272,10 @@ function soltarClick(evento){
             casillaDestino = casillaDestino.parentElement;
             piezaComida = casillaDestino.querySelector(".pieza");
         }
-
+        
         //Comprobamos que la casilla destino está en casillas permitidas y no deja al rey en jaque y si es un enroque mueve las dos piezas (llama funcion guardarMovimiento)
         validarMovimiento(piezaComida, piezaAgarrada);
-
+        
 
         piezaAgarrada.style.visibility = "visible";
         piezaAgarrada = "null";
@@ -291,14 +292,20 @@ function soltarClick(evento){
 
 
 function calcularMovimientos(piezaAgarrada, casillaInicio){
-    let pieza2 = tableroDigital[casillaInicio.id];
-    console.log(pieza2)
+    let pieza = tableroDigital[casillaInicio.id];
+    console.log(casillaInicio)
+    console.log(tableroDigital)
+    console.log(pieza)
+    let piezaId = pieza.id.split("-");
     let valido = false;
-    let pieza = piezaAgarrada.id;
-    pieza = pieza.split("-");
+    // let pieza = piezaAgarrada.id;
+    // let pieza = pieza2.id.split("-");
     //Esto resetea las casillas y permite calcular los movimientos posibles sobre la casilla destino. (Al guardar movimiento tengo que saber si doy jaque y para eso 
     // calculo si en el siguiente movimiento encuentra al rey por lo que vuelvo a calcular los movimientos)
-    let casillasPermitidas = []
+    
+    
+    //Para resetear las casillas sin reasignar el valor casillasPermitidas = []
+    casillasPermitidas.splice(0, casillasPermitidas.length); 
 
     let movX;
     let movY;
@@ -319,17 +326,19 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
 
     //Calcula cuantas casillas quedan hasta salirse del tablero
     let casillasRestantes = 0;
+    console.log(pieza)
     //Peones
-    if(pieza[1] == "peon"){
-        casillasPermitidas = pieza2.calcularMovimientos(tableroDigital, casillaInicio);
+    if(piezaId[1] == "peon"){
+        // casillasPermitidas = pieza2.calcularMovimientos(tableroDigital, casillaInicio);
+        casillasPermitidas.push(...pieza.calcularMovimientos(tableroDigital, casillaInicio));
     }
     
     //Torres
-    if(pieza[1] == "torre"){
-        casillasPermitidas = pieza2.calcularMovimientos(tableroDigital, casillaInicio);
+    if(piezaId[1] == "torre"){
+        casillasPermitidas.push(...pieza.calcularMovimientos(tableroDigital, casillaInicio));
     }
     //Caballos
-    if(pieza[1] === "caballo"){
+    if(piezaId[1] === "caballo"){
         movimientosDirectos = [
             [-1,2],
             [1,2],
@@ -342,7 +351,7 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
         ];
     }
     //Alfiles
-    if(pieza[1] === "alfil"){
+    if(piezaId[1] === "alfil"){
         movimientosDeslizantes = [
             [1,1],
             [1,-1],
@@ -352,7 +361,7 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
 
     }
     //Damas
-    if(pieza[1] === "dama"){
+    if(piezaId[1] === "dama"){
         movimientosDeslizantes = [
             [1,1],
             [1,-1],
@@ -365,7 +374,7 @@ function calcularMovimientos(piezaAgarrada, casillaInicio){
         ];
     }
     //Rey
-    if(pieza[1] === "rey"){
+    if(piezaId[1] === "rey"){
         movimientosDirectos = [
             [0,1],
             [1,1],
@@ -465,6 +474,7 @@ function guardarMovimiento(piezaAgarrada, casillaInicio, casillaDestino, piezaCo
 
 function validarMovimiento(piezaComida, piezaAgarrada){
     //Comprueba que el movimiento sea valido
+    console.log(casillasPermitidas)
     casillasPermitidas.forEach(casilla => {
         if (casillaDestino.id == casilla) {
             //Comer pieza
@@ -536,8 +546,6 @@ function calcularCasillasAmenazadas(piezaAgarrada){
     //Obtiene el color pieza agarrada
     const color = piezaAgarrada.id.split("-")[0];
 
-    console.log(tableroDigital)
-    console.log(tableroDigital["a4"])
     //Recorre tablero digital
     for (const [casilla,pieza] of Object.entries(tableroDigital)) {
         //Obtiene el elemento HTML de pieza y casilla
