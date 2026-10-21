@@ -1,12 +1,21 @@
 export const letras = [null,"a","b", "c", "d", "e", "f", "g","h"];
 
-export function numeroCasilla(casilla){
-    return parseInt(casilla.id[1]);
+export function numeroCasilla(pieza){
+    return parseInt(pieza.casilla[1]);
 }
 
 export function letraCasilla(casilla){
     return casilla.id[0];
 }
+
+// export function numeroCasilla(casilla){
+//     return parseInt(casilla.id[1]);
+// }
+
+// export function letraCasilla(casilla){
+//     return casilla.id[0];
+// }
+
 
 export const numeroColumna = {
     a : 1,

@@ -12,20 +12,28 @@ export class Pieza {
         this.casilla = casilla; 
     }
 
-    calcularMovimientos(tableroDigital, casillaInicio) {
+    set Casilla(casilla) {
+        this.casilla = casilla;
+    }
+
+    get Casilla() {
+        return casilla;
+    }
+
+    calcularMovimientos(tableroDigital) {
         console.log("Este método no se usa desde Pieza. Se tiene que implementar en la pieza correspondiente")
     }
 
-    movimientosDeslizantes(movimientos, casillaInicio, tableroDigital) {
+    movimientosDeslizantes(movimientos, tableroDigital) {
         let casillasPermitidas = [];
-        let piezaAgarrada = tableroDigital[casillaInicio.id];
+        let piezaAgarrada = tableroDigital[this.casilla];
         console.log(piezaAgarrada)
         movimientos.forEach(movimiento => {
             //Mide hasta que distancia calcula en esa direccion
             let distancia = 1;
             while (distancia < 8) {
-                let columna = letras[letras.indexOf(letraCasilla(casillaInicio)) - movimiento[0] * distancia];
-                let fila = numeroCasilla(casillaInicio) + movimiento[1] * distancia;
+                let columna = letras[letras.indexOf(this.casilla[0]) - movimiento[0] * distancia];
+                let fila = parseInt(this.casilla[1]) + movimiento[1] * distancia;
 
                 if (tableroDigital[columna + fila] === null) {
                     casillasPermitidas.push(columna + fila);
@@ -49,8 +57,8 @@ export class Pieza {
     movimientosDirectos(movimientosDirectos, casilla, tableroDigital){
         let casillasPermitidas = [];
         movimientosDirectos.forEach(movimiento => {
-            let columna = letras[letras.indexOf(letraCasilla(casilla)) + movimiento[0]];
-            let fila = numeroCasilla(casilla) + movimiento[1];
+            let columna = letras[letras.indexOf(casilla[0]) + movimiento[0]];
+            let fila = parseInt(casilla[1]) + movimiento[1];
             if(tableroDigital[columna+fila] === null){
                 casillasPermitidas.push(columna+fila);
             }

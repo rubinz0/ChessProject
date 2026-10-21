@@ -7,14 +7,14 @@ export class Torre extends Pieza {
         this.seHaMovido = false;
     }
 
-    calcularMovimientos(tableroDigital, casillaInicio) {
+    calcularMovimientos(tableroDigital) {
         let movimientosDeslizantes = [
             [1,0],
             [-1,0],
             [0,1],
             [0,-1]
         ];
-        console.log(this.movimientosDeslizantes(movimientosDeslizantes, casillaInicio, tableroDigital));
+        return this.movimientosDeslizantes(movimientosDeslizantes, tableroDigital);
     }
 
 
