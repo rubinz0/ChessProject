@@ -1,4 +1,4 @@
-import { letras, numeroCasilla, letraCasilla, numeroColumna, movimientos, casillasPermitidas } from "../../utilidades.js";
+import { letras, numeroCasilla, letraCasilla, numeroColumna, movimientos } from "../../utilidades.js";
 import { Pieza } from "./pieza.js";
 export class Peon extends Pieza {
 
@@ -41,8 +41,10 @@ export class Peon extends Pieza {
         
 
         let ultimoMovimiento = movimientos[movimientos.length - 1];
+        console.log(piezaAgarrada)
+
         //Calcula que en el ultimo movimiento se moviese un peon de diferente color
-        if (movimientos.length > 0 && ultimoMovimiento.piezaAgarrada.split("-")[1] === "peon" && ultimoMovimiento.piezaAgarrada.split("-")[0] !== piezaAgarrada.id.split("-")[0]) {
+        if (movimientos.length > 0 && ultimoMovimiento.pieza.split("-")[1] === "peon" && ultimoMovimiento.pieza.split("-")[0] !== piezaAgarrada.split("-")[0]) {
             //Comprueba que se mueva 2 casillas restando la posicion final e inicial del ultimo movimiento, tambien comprueba que el peon que quieres mover este a la misma altura que el peon que ha movido doble 
             if (Math.abs(ultimoMovimiento.casilla[1] - ultimoMovimiento.casillaDestino[1]) === 2 && casilla.id[1] === ultimoMovimiento.casillaDestino[1]) {
                 //Guardo las columnas para simplificar
