@@ -30,3 +30,12 @@ export const numeroColumna = {
 
 export let movimientos = [];
 
+export function juntarListas(lista1, lista2){
+    lista1.forEach(element => {
+        lista2.forEach(element2 => {
+            if(element === element2) lista1.push(element2);
+        });
+        
+    });
+    return lista1;
+}

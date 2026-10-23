@@ -209,16 +209,19 @@ console.log("Al clicar:", JSON.parse(JSON.stringify(tableroDigital)));
     casillasPermitidas.splice(0, casillasPermitidas.length);
 
     // casillasPermitidas = calcularMovimientos(piezaAgarrada, casillaInicio);
-    casillasPermitidas = calcularMovimientos(pieza);
+    casillasPermitidas.push(...calcularMovimientos(pieza));
+    console.log(casillasPermitidas)
+
     // casillasPermitidas = simularMovimiento(casillasPermitidas, piezaAgarrada, casillaInicio);
     casillasPermitidas.push(...simularMovimiento(pieza, casillasPermitidas));
+    console.log(casillasPermitidas)
+
     
 
     //Recoge todas las casillas del tablero
     let casillasHTML = document.querySelectorAll(".casilla");
     const casillasPintar = [];
 
-    console.log(casillasHTML)
     //Recorre las casillas del tablero y si esta en la lista de permitidas las añade la clasePermitida
     for(let i = 0; i < casillasHTML.length; i++){
         for(let j = 0; j < casillasPermitidas.length; j++){
@@ -326,12 +329,13 @@ function calcularMovimientos(pieza){
     //Peones
     if(piezaId[1] == "peon"){
         // casillasPermitidas = pieza2.calcularMovimientos(tableroDigital, casillaInicio);
-        casillasPermitidas = pieza.calcularMovimientos(tableroDigital, casillaInicio);
+        casillasPermitidas.push(...pieza.calcularMovimientos(tableroDigital, casillaInicio));
+        console.log(casillasPermitidas)
     }
     
     //Torres
     if(piezaId[1] == "torre"){
-        casillasPermitidas = pieza.calcularMovimientos(tableroDigital, casillaInicio);
+        casillasPermitidas.push(...pieza.calcularMovimientos(tableroDigital, casillaInicio));
     }
     //Caballos
     if(piezaId[1] === "caballo"){
@@ -392,7 +396,7 @@ function calcularMovimientos(pieza){
             
 
     
-
+    
     return casillasPermitidas;
 }
 
@@ -537,7 +541,7 @@ function validarMovimiento(piezaComida, piezaAgarrada, casillaDestino, casillasP
 //Calcula que casillas pueden comer las piezas del color distinto al tuyo
 function calcularCasillasAmenazadas(piezaAgarrada){
     console.log("Amenazadas:", JSON.parse(JSON.stringify(tableroDigital)));
-    
+    console.log(piezaAgarrada)
     const casillasHTML = document.querySelectorAll(".casilla");
 
     //Reseteamos estilo de las casillas amenazadas
@@ -549,6 +553,7 @@ function calcularCasillasAmenazadas(piezaAgarrada){
     let casillasAmenazadas = [];
     //Obtiene el color pieza agarrada
     const color = piezaAgarrada.id.split("-")[0];
+
     //Recorre tablero digital
     for (const [casilla, pieza] of Object.entries(tableroDigital)) {
         //Obtiene el elemento HTML de pieza y casilla
@@ -556,9 +561,10 @@ function calcularCasillasAmenazadas(piezaAgarrada){
         //Cambiado porque uso pieza directamente en vez de html
         // const piezaHTML = document.getElementById(piezaInstancia.id);
         // const casillaHTML = document.getElementById(casillaTablero);
-        console.log(pieza.id.split("-")[0])
         //Comprueba que haya pieza y que la pieza sea de color contrario
         if(pieza !== null && pieza.id.split("-")[0] !== color){
+        console.log(pieza.id.split("-")[0])
+
             let casillasPermitidas;
             //Si hay pieza rival calcula sus movimientos (Si es un peon coge la diagonal porque devuelve movimientos hacia delante que no son amenazas)
             if(pieza.id.split("-")[1][0] === "p"){
@@ -594,6 +600,7 @@ function calcularCasillasAmenazadas(piezaAgarrada){
     //         }
     //     }
     // }
+    console.log("Amenazadas:", JSON.parse(JSON.stringify(tableroDigital)));
     
     return casillasAmenazadas;
 }
@@ -612,7 +619,6 @@ function simularMovimiento(pieza, casillasPermitidas){
             //ENROQUES Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es en la columna g es el corto y el largo si es en c, 
             // Math.abs para valor absoluto ya que puede moverse -2
             if(Math.abs(numeroColumna[pieza.casilla[0]] - numeroColumna[casillaPermitida[0]]) === 2){
-                console.log(pieza)
                 console.log("1")
 
                 let casillasAmenazadas = calcularCasillasAmenazadas(pieza);
@@ -632,10 +638,10 @@ function simularMovimiento(pieza, casillasPermitidas){
             }else{
                 //REPITO EL CODIGO PARA EL REY (MEJORABLE???)
                 //Avanza la pieza a la casilla permitida para calcular si deja en jaque al rey
-                tableroDigital[pieza.id] = null;
+                tableroDigital[pieza] = null;
                 //Guarda la pieza que hay en la casilla que movemos
                 piezaAnterior = tableroDigital[casillaPermitida];
-                tableroDigital[casillaPermitida] = piezaAgarrada;
+                tableroDigital[casillaPermitida] = pieza;
                 console.log("2")
 
                 let casillasAmenazadas = calcularCasillasAmenazadas(pieza);
@@ -644,18 +650,18 @@ function simularMovimiento(pieza, casillasPermitidas){
                     if (tableroDigital[casillaAmenazada].split("-")[1] === "rey" && color === tableroDigital[casillaAmenazada].split("-")[0] && !(casillaEliminar.includes(casillaAmenazada))) casillaEliminar.push(casillaPermitida);
                 });
                 //Devuelve la pieza a su inicio
-                tableroDigital[pieza.id] = pieza;
+                tableroDigital[pieza] = pieza;
                 //Devuelve la pieza que habia en esa posicion
                 tableroDigital[casillaPermitida] = piezaAnterior;
                 }
         } else {
-    console.log("Simular:", JSON.parse(JSON.stringify(tableroDigital)));
+                console.log("Simular:", JSON.parse(JSON.stringify(tableroDigital)));
 
             //Avanza la pieza a la casilla permitida para calcular si deja en jaque al rey
-            tableroDigital[pieza.id] = null;
+            tableroDigital[pieza] = null;
             //Guarda la pieza que hay en la casilla que movemos
             piezaAnterior = tableroDigital[casillaPermitida];
-            tableroDigital[casillaPermitida] = piezaAgarrada;
+            tableroDigital[casillaPermitida] = pieza;
 
             let casillasAmenazadas = calcularCasillasAmenazadas(pieza);
             
@@ -675,7 +681,7 @@ function simularMovimiento(pieza, casillasPermitidas){
     console.log(casillaEliminar)
     //Vaciamos las casillas de la pieza anterior
     casillasPermitidas.splice(0, casillasPermitidas.length);
-    casillasPermitidas.push(casillasPermitidasFiltradas);
+    casillasPermitidas.push(...casillasPermitidasFiltradas);
     // console.log("CasillasPermitidas: " + casillasPermitidas)
     return casillasPermitidas;
 }
