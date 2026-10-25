@@ -206,15 +206,14 @@ console.log("Al clicar:", JSON.parse(JSON.stringify(tableroDigital)));
     let pieza = tableroDigital[casillaInicio.id];
     
     //Vaciamos las casillas de la pieza anterior
-    casillasPermitidas.splice(0, casillasPermitidas.length);
+    // casillasPermitidas.splice(0, casillasPermitidas.length);
 
     // casillasPermitidas = calcularMovimientos(piezaAgarrada, casillaInicio);
     casillasPermitidas.push(...calcularMovimientos(pieza));
-    console.log(casillasPermitidas)
 
     // casillasPermitidas = simularMovimiento(casillasPermitidas, piezaAgarrada, casillaInicio);
     casillasPermitidas.push(...simularMovimiento(pieza, casillasPermitidas));
-    console.log(casillasPermitidas)
+        console.log("Soltar:", JSON.parse(JSON.stringify(tableroDigital)));
 
     
 
@@ -278,9 +277,27 @@ function soltarClick(evento){
         
         let casillaInicio = piezaAgarrada.closest(".casilla");
         let casillasPermitidas = calcularMovimientos(pieza);
+        console.log(casillasPermitidas)
         //Comprobamos que la casilla destino está en casillas permitidas y no deja al rey en jaque y si es un enroque mueve las dos piezas (llama funcion guardarMovimiento)
-        validarMovimiento(piezaComida, piezaAgarrada, casillaDestino, casillasPermitidas, casillaInicio);
+        // validarMovimiento(piezaComida, piezaAgarrada, casillaDestino, casillasPermitidas, casillaInicio);
+        casillasPermitidas.push(...simularMovimiento(pieza, casillasPermitidas));
+        console.log(casillasPermitidas)
         
+        casillasPermitidas.forEach(casillasPermitida => {
+            if(casillaDestino.id === casillasPermitida){
+                let enroque = false;
+                //Comprueba que sea un enroque
+                if(piezaAgarrada.id.split("-")[1] === "rey" && Math.abs(letras[casillaInicio.id[0]] - letras[casillaDestino.id[0]]) === 2) console.log(enroque)
+                //Actualiza tablero en memoria con la jugada actual
+                tableroDigital[casillaInicio.id] = null;
+                tableroDigital[casillaDestino.id] = pieza;
+                pieza.casilla = casillaDestino.id;
+                //Guardar el movimiento en memoria
+                guardarMovimiento(pieza, casillaInicio.id, piezaComida, enroque);
+
+                casillaDestino.appendChild(piezaAgarrada);
+            }
+        });
 
         piezaAgarrada.style.visibility = "visible";
         piezaAgarrada = null;
@@ -292,10 +309,12 @@ function soltarClick(evento){
             casilla.classList.remove("casillaPermitida");
         });
     }
+
 }
 
 
 function calcularMovimientos(pieza){
+    console.log("Calcular movimientos");
     let casillasPermitidas = [];
     let casillaInicio = pieza.casilla;
     let piezaId = pieza.id.split("-");
@@ -329,8 +348,9 @@ function calcularMovimientos(pieza){
     //Peones
     if(piezaId[1] == "peon"){
         // casillasPermitidas = pieza2.calcularMovimientos(tableroDigital, casillaInicio);
+        console.log("Peon:", JSON.parse(JSON.stringify(tableroDigital)));
+
         casillasPermitidas.push(...pieza.calcularMovimientos(tableroDigital, casillaInicio));
-        console.log(casillasPermitidas)
     }
     
     //Torres
@@ -439,9 +459,9 @@ function generarPGN(piezaAgarrada, casillaDestino, piezaComida, casillaInicio, e
     
 }
 
-function guardarMovimiento(pieza, casillaDestino, piezaComida, enroque){
+function guardarMovimiento(pieza, casillaInicio, piezaComida, enroque){
     //Volvemos a calcular movimientos posibles pero desde la casilla que aterriza simulando que en el siguiente turno podriamos comer el rey
-    const posiblesJaques = calcularMovimientos(pieza, casillaDestino);
+    const posiblesJaques = calcularMovimientos(pieza, pieza.casilla);
     let jaque = false;
     //Comprobamos que en esa casilla halla una pieza y que sea el rey
     posiblesJaques.forEach(casilla => {
@@ -458,8 +478,8 @@ function guardarMovimiento(pieza, casillaDestino, piezaComida, enroque){
 
     let movimiento = {
         "pieza": pieza.id,
-        "casillaInicio": pieza.casilla,
-        "casillaDestino":casillaDestino.id,
+        "casillaInicio": casillaInicio,
+        "casillaDestino":pieza.casilla,
         "piezaComida":piezaComida,
         "jaque":jaque,
         "enroque":enroque,
@@ -467,17 +487,17 @@ function guardarMovimiento(pieza, casillaDestino, piezaComida, enroque){
     }
     movimientos.push(movimiento);
     console.log(movimiento)
-    generarPGN(piezaAgarrada, casillaDestino, piezaComida, pieza.casilla, enroque);
+    generarPGN(piezaAgarrada, pieza.casilla, piezaComida, casillaInicio, enroque);
     
 }
 
 
 function validarMovimiento(piezaComida, piezaAgarrada, casillaDestino, casillasPermitidas, casillaInicio){
+    console.log("validarMovimiento")
     let pieza = tableroDigital[casillaInicio.id]
     //Comprueba que el movimiento sea valido
     casillasPermitidas.forEach(casilla => {
-        console.log(casilla)
-        console.log(casillaDestino)
+
         if (casillaDestino.id == casilla) {
             
             //Comer pieza
@@ -504,7 +524,6 @@ function validarMovimiento(piezaComida, piezaAgarrada, casillaDestino, casillasP
                     tableroDigital["a" + fila] = null;
                     enroque = "largo";
                 }
-                console.log(tableroDigital)
             }
             //En passant
             if(movimientos.length > 0){
@@ -526,7 +545,6 @@ function validarMovimiento(piezaComida, piezaAgarrada, casillaDestino, casillasP
                 }
             }
             //Guardar el movimiento en memoria
-            console.log(casillasPermitidas)
             guardarMovimiento(pieza, casillaDestino, piezaComida, enroque);
 
             //Actualiza tablero en memoria con la jugada actual
@@ -540,8 +558,7 @@ function validarMovimiento(piezaComida, piezaAgarrada, casillaDestino, casillasP
 
 //Calcula que casillas pueden comer las piezas del color distinto al tuyo
 function calcularCasillasAmenazadas(piezaAgarrada){
-    console.log("Amenazadas:", JSON.parse(JSON.stringify(tableroDigital)));
-    console.log(piezaAgarrada)
+    console.log("Calcular casillas amenazadas")
     const casillasHTML = document.querySelectorAll(".casilla");
 
     //Reseteamos estilo de las casillas amenazadas
@@ -563,7 +580,6 @@ function calcularCasillasAmenazadas(piezaAgarrada){
         // const casillaHTML = document.getElementById(casillaTablero);
         //Comprueba que haya pieza y que la pieza sea de color contrario
         if(pieza !== null && pieza.id.split("-")[0] !== color){
-        console.log(pieza.id.split("-")[0])
 
             let casillasPermitidas;
             //Si hay pieza rival calcula sus movimientos (Si es un peon coge la diagonal porque devuelve movimientos hacia delante que no son amenazas)
@@ -607,6 +623,7 @@ function calcularCasillasAmenazadas(piezaAgarrada){
 
 //Simula el movimiento de la pieza para comprobar si deja al rey en jaque
 function simularMovimiento(pieza, casillasPermitidas){
+    console.log("Simular movimiento")
     let casillaEliminar = [];
     let color = piezaAgarrada.id.split("-")[0];
     //Aqui se guarda el id de la pieza que ocupaba la casilla a la que simulamos el movimiento
@@ -619,7 +636,6 @@ function simularMovimiento(pieza, casillasPermitidas){
             //ENROQUES Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es en la columna g es el corto y el largo si es en c, 
             // Math.abs para valor absoluto ya que puede moverse -2
             if(Math.abs(numeroColumna[pieza.casilla[0]] - numeroColumna[casillaPermitida[0]]) === 2){
-                console.log("1")
 
                 let casillasAmenazadas = calcularCasillasAmenazadas(pieza);
                 //Si esta en jaque eliminamos directamente porque no pude enrocar
@@ -642,7 +658,6 @@ function simularMovimiento(pieza, casillasPermitidas){
                 //Guarda la pieza que hay en la casilla que movemos
                 piezaAnterior = tableroDigital[casillaPermitida];
                 tableroDigital[casillaPermitida] = pieza;
-                console.log("2")
 
                 let casillasAmenazadas = calcularCasillasAmenazadas(pieza);
                 //Calcula si al haber movido el rey está amenazado. Si lo esta lo añade a casillasEliminar
@@ -655,33 +670,59 @@ function simularMovimiento(pieza, casillasPermitidas){
                 tableroDigital[casillaPermitida] = piezaAnterior;
                 }
         } else {
-                console.log("Simular:", JSON.parse(JSON.stringify(tableroDigital)));
+            avanzarPieza(pieza, casillaPermitida);
+        console.log("Soltar:", JSON.parse(JSON.stringify(tableroDigital)));
 
-            //Avanza la pieza a la casilla permitida para calcular si deja en jaque al rey
-            tableroDigital[pieza] = null;
-            //Guarda la pieza que hay en la casilla que movemos
-            piezaAnterior = tableroDigital[casillaPermitida];
-            tableroDigital[casillaPermitida] = pieza;
+            // //Avanza la pieza a la casilla permitida para calcular si deja en jaque al rey
+            // tableroDigital[pieza.casilla] = null;
+            // console.log(JSON.parse(JSON.stringify(tableroDigital[casillaPermitida])))
 
-            let casillasAmenazadas = calcularCasillasAmenazadas(pieza);
+            // //Guarda la pieza que hay en la casilla que movemos
+            // piezaAnterior = tableroDigital[casillaPermitida];
+            // tableroDigital[casillaPermitida] = pieza;
+            // tableroDigital[pieza.casilla] = null;
+
+            // let casillasAmenazadas = calcularCasillasAmenazadas(pieza);
             
-            //Calcula si al haber movido el rey está amenazado. Si lo esta lo añade a casillasEliminar
-            casillasAmenazadas.forEach(casillaAmenazada => {
-                if (tableroDigital[casillaAmenazada].split("-")[1] === "rey" && color === tableroDigital[casillaAmenazada].split("-")[0] && !(casillaEliminar.includes(casillaAmenazada))) casillaEliminar.push(casillaPermitida);
-            });
-            //Devuelve la pieza a su inicio
-            tableroDigital[pieza.id] = pieza;
-            //Devuelve la pieza que habia en esa posicion
-            tableroDigital[casillaPermitida] = piezaAnterior;
+            // //Calcula si al haber movido el rey está amenazado. Si lo esta lo añade a casillasEliminar
+            // casillasAmenazadas.forEach(casillaAmenazada => {
+            //     if (tableroDigital[casillaAmenazada].split("-")[1] === "rey" && color === tableroDigital[casillaAmenazada].split("-")[0] && !(casillaEliminar.includes(casillaAmenazada))) casillaEliminar.push(casillaPermitida);
+            // });
+            // //Devuelve la pieza a su inicio
+            // tableroDigital[pieza.casilla] = pieza;
+            // //Devuelve la pieza que habia en esa posicion
+            // tableroDigital[casillaPermitida] = piezaAnterior;
+
         }
     });
     // console.log("CasillasELiminar: " + casillaEliminar)
     //Filtra las casillas permitidas para quitar las que coinciden con casillaEliminar
     let casillasPermitidasFiltradas = casillasPermitidas.filter(casillaPermitida => !(casillaEliminar.includes(casillaPermitida)));
-    console.log(casillaEliminar)
     //Vaciamos las casillas de la pieza anterior
     casillasPermitidas.splice(0, casillasPermitidas.length);
     casillasPermitidas.push(...casillasPermitidasFiltradas);
     // console.log("CasillasPermitidas: " + casillasPermitidas)
     return casillasPermitidas;
+}
+
+function avanzarPieza(pieza, casillaPermitida){
+            //Guarda la pieza que hay en la casilla a la que nos movemos
+            let piezaAnterior = tableroDigital[casillaPermitida];
+
+            //Vacia la casilla donde estaba la pieza
+            tableroDigital[pieza.casilla] = null;
+
+            //Avanza la pieza a la casilla permitida
+            tableroDigital[casillaPermitida] = pieza;
+
+            //Calcula las casillas amenazadas al mover
+            let casillasAmenazadas = calcularCasillasAmenazadas(pieza);
+            //Calcula si al haber movido el rey está amenazado. Si lo esta lo añade a casillasEliminar
+            casillasAmenazadas.forEach(casillaAmenazada => {
+                if (tableroDigital[casillaAmenazada] != null && tableroDigital[casillaAmenazada].id.split("-")[1] === "rey" && color === tableroDigital[casillaAmenazada].id.split("-")[0] && !(casillaEliminar.includes(casillaAmenazada))) casillaEliminar.push(casillaPermitida);
+            });
+            //Devuelve la pieza a su inicio
+            tableroDigital[pieza.casilla] = pieza;
+            //Devuelve la pieza que habia en esa posicion
+            tableroDigital[casillaPermitida] = piezaAnterior;
 }

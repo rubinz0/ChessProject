@@ -1,5 +1,5 @@
 import { letras, numeroCasilla, letraCasilla, numeroColumna, movimientos } from "../../utilidades.js";
-import { Pieza } from "./pieza.js";
+import { Pieza } from "./Pieza.js";
 export class Peon extends Pieza {
 
     seHaMovido;
@@ -12,6 +12,7 @@ export class Peon extends Pieza {
 
     calcularMovimientos(tableroDigital) {
         let casilla = this.casilla;
+        console.log(casilla)
         let piezaAgarrada = tableroDigital[casilla].id;
         let avance = 1;
         if(piezaAgarrada.split("-")[0] === "negro"){
@@ -34,19 +35,18 @@ export class Peon extends Pieza {
         //Calcula la fila izquierda y derecha y comprueba que no se salga del tablero y de error (Al poner null tambien hace != undefinded, el !== no compara con undefined)
         if (tableroDigital[letras[(numeroColumna[casilla[0]] - 1 )] + (parseInt(casilla[1]) + avance)] != null) {
             //Comprueba que la casilla diagonal este ocupada por una pieza de distinto color
-            if (tableroDigital[letras[numeroColumna[casilla[0]] + avance] + (parseInt(casilla[1]) + avance)].id[0] !== piezaAgarrada[0]) {
+            if (tableroDigital[letras[numeroColumna[casilla[0]] + avance] + (parseInt(casilla[1]) + avance)] !== piezaAgarrada[0]) {
                 movimientosDirectos.push([avance, avance]);
             }
         }
         
 
         let ultimoMovimiento = movimientos[movimientos.length - 1];
-        console.log(piezaAgarrada)
-
+        console.log(ultimoMovimiento)
         //Calcula que en el ultimo movimiento se moviese un peon de diferente color
         if (movimientos.length > 0 && ultimoMovimiento.pieza.split("-")[1] === "peon" && ultimoMovimiento.pieza.split("-")[0] !== piezaAgarrada.split("-")[0]) {
             //Comprueba que se mueva 2 casillas restando la posicion final e inicial del ultimo movimiento, tambien comprueba que el peon que quieres mover este a la misma altura que el peon que ha movido doble 
-            if (Math.abs(ultimoMovimiento.casilla[1] - ultimoMovimiento.casillaDestino[1]) === 2 && casilla.id[1] === ultimoMovimiento.casillaDestino[1]) {
+            if (Math.abs(ultimoMovimiento.casillaInicio[1] - ultimoMovimiento.casillaDestino[1]) === 2 && casilla[1] === ultimoMovimiento.casillaInicio[1]) {
                 //Guardo las columnas para simplificar
                 let colActual = numeroColumna[casilla.id[0]];
                 let colRival = numeroColumna[ultimoMovimiento.casillaDestino[0]];

@@ -1,4 +1,4 @@
-import { Pieza } from "./pieza.js";
+import { Pieza } from "./Pieza.js";
 export class Torre extends Pieza {
     img = this.id
     seHaMovido;
