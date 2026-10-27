@@ -193,7 +193,6 @@ console.log("Al clicar:", JSON.parse(JSON.stringify(tableroDigital)));
     let casillasPermitidas = [];
     //Esto desactiva el comportamiento por defecto que deja arrastrar imagenes
     evento.preventDefault();
-    console.log("Pieza agarrada: " , evento.target);
     piezaAgarrada = evento.target;
     piezaAgarrada.style.position = "absolute";
     piezaAgarrada.style.zIndex = "100";
@@ -212,8 +211,7 @@ console.log("Al clicar:", JSON.parse(JSON.stringify(tableroDigital)));
     casillasPermitidas.push(...calcularMovimientos(pieza));
 
     // casillasPermitidas = simularMovimiento(casillasPermitidas, piezaAgarrada, casillaInicio);
-    casillasPermitidas.push(...simularMovimiento(pieza, casillasPermitidas));
-        console.log("Soltar:", JSON.parse(JSON.stringify(tableroDigital)));
+    casillasPermitidas.splice(0, casillasPermitidas.length, ...simularMovimiento(pieza, casillasPermitidas));
 
     
 
@@ -277,21 +275,20 @@ function soltarClick(evento){
         
         let casillaInicio = piezaAgarrada.closest(".casilla");
         let casillasPermitidas = calcularMovimientos(pieza);
-        console.log(casillasPermitidas)
         //Comprobamos que la casilla destino está en casillas permitidas y no deja al rey en jaque y si es un enroque mueve las dos piezas (llama funcion guardarMovimiento)
         // validarMovimiento(piezaComida, piezaAgarrada, casillaDestino, casillasPermitidas, casillaInicio);
-        casillasPermitidas.push(...simularMovimiento(pieza, casillasPermitidas));
-        console.log(casillasPermitidas)
+        casillasPermitidas.splice(0, casillasPermitidas.length, ...simularMovimiento(pieza, casillasPermitidas));
         
         casillasPermitidas.forEach(casillasPermitida => {
             if(casillaDestino.id === casillasPermitida){
                 let enroque = false;
                 //Comprueba que sea un enroque
-                if(piezaAgarrada.id.split("-")[1] === "rey" && Math.abs(letras[casillaInicio.id[0]] - letras[casillaDestino.id[0]]) === 2) console.log(enroque)
+                if(piezaAgarrada.id.split("-")[1] === "rey" && Math.abs(letras[casillaInicio.id[0]] - letras[casillaDestino.id[0]]) === 2) console.log("Enroque: " + enroque)
                 //Actualiza tablero en memoria con la jugada actual
                 tableroDigital[casillaInicio.id] = null;
                 tableroDigital[casillaDestino.id] = pieza;
                 pieza.casilla = casillaDestino.id;
+                if(!pieza.seHaMovido) pieza.seHaMovido = true;
                 //Guardar el movimiento en memoria
                 guardarMovimiento(pieza, casillaInicio.id, piezaComida, enroque);
 
@@ -437,14 +434,14 @@ function generarPGN(piezaAgarrada, casillaDestino, piezaComida, casillaInicio, e
     let pieza;
     //Calculo si es un enroque corto o largo para cancelar la logica del PGN y poner 0-0 o 0-0-0
 
-    if(enroque === undefined){
+    if(enroque === false){
         if(!(piezaComida == undefined)) captura = true;
         pieza = diccionario[(piezaAgarrada.id.split("-")[1][0]).toUpperCase()];
-        casilla = casillaDestino.id; 
+        casilla = casillaDestino; 
         if(captura && !(pieza === "")) pieza += "x";
         //Si captura un peon añadimos su columna
         if(captura && pieza === "") {
-            pieza += casillaInicio.id[0]+"x";
+            pieza += casillaInicio[0]+"x";
         }
     }else{
         if(enroque === "corto"){
@@ -453,7 +450,7 @@ function generarPGN(piezaAgarrada, casillaDestino, piezaComida, casillaInicio, e
             pieza = "0-0-0";
         }
     }
-    
+    console.log("ASd")
     //Añade el movimiento al html
     contenedorPGN.innerHTML += pieza+casilla + " + ";
     
@@ -487,74 +484,75 @@ function guardarMovimiento(pieza, casillaInicio, piezaComida, enroque){
     }
     movimientos.push(movimiento);
     console.log(movimiento)
+    console.log(pieza.casilla)
     generarPGN(piezaAgarrada, pieza.casilla, piezaComida, casillaInicio, enroque);
     
 }
 
 
-function validarMovimiento(piezaComida, piezaAgarrada, casillaDestino, casillasPermitidas, casillaInicio){
-    console.log("validarMovimiento")
-    let pieza = tableroDigital[casillaInicio.id]
-    //Comprueba que el movimiento sea valido
-    casillasPermitidas.forEach(casilla => {
+// function validarMovimiento(piezaComida, piezaAgarrada, casillaDestino, casillasPermitidas, casillaInicio){
+//     console.log("validarMovimiento")
+//     let pieza = tableroDigital[casillaInicio.id]
+//     //Comprueba que el movimiento sea valido
+//     casillasPermitidas.forEach(casilla => {
 
-        if (casillaDestino.id == casilla) {
+//         if (casillaDestino.id == casilla) {
             
-            //Comer pieza
-            if (!(piezaComida == undefined)) piezaComida.remove();
-            casillaDestino.appendChild(piezaAgarrada);
-            //ENROQUES Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es en la columna g es el corto y el largo si es en c, 
-            // Math.abs para valor absoluto ya que puede moverse -2
-            let enroque;
-            if (pieza.id.split("-")[1] === "rey" && Math.abs(numeroColumna[casillaInicio.id[0]] - numeroColumna[casillaDestino.id[0]]) == 2) {
-                let fila = casillaDestino.id[1];
-                if (casillaDestino.id[0] === "g") {
-                    //Busca la casilla f1 o f8 dependiendo y inserta la torre correspondiente
-                    document.getElementById("f" + fila).appendChild(document.getElementById(tableroDigital["h" + fila]));
-                    //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
-                    tableroDigital["f" + fila] = tableroDigital["h" + fila];
-                    tableroDigital["h" + fila] = null;
-                    enroque = "corto";
-                }
-                if (casillaDestino.id[0] === "c") {
-                    //Busca la casilla f1 o f8 dependiendo y inserta la torre correspondiente
-                    document.getElementById("d" + fila).appendChild(document.getElementById(tableroDigital["a" + fila]));
-                    //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
-                    tableroDigital["d" + fila] = tableroDigital["a" + fila];
-                    tableroDigital["a" + fila] = null;
-                    enroque = "largo";
-                }
-            }
-            //En passant
-            if(movimientos.length > 0){
-                //Comprueba que la pieza movida sea un peon, si lo es comprueba si se mueve una casilla
-                if(pieza.id.split("-")[1] === "peon" && Math.abs(casillaInicio.id[1] - casillaDestino.id[1]) === 1){
-                    //Calcula si se mueve a una columna adyacente, es decir en diagonal
-                    if(letras[numeroColumna[casillaDestino.id[0]]] === letras[numeroColumna[casillaInicio.id[0]] + 1] || letras[numeroColumna[casillaDestino.id[0]]] === letras[numeroColumna[casillaInicio.id[0]] - 1]){ 
-                        //Comprueba que la casilla en la que cae esta vacia porque si no podria ser una captura normal
-                        if(tableroDigital[casillaDestino.id] === null){
-                            //Guarda casilla donde esta el peon que se captura == columna de la casilla destino + fila casilla inicio
-                            let casillaComer = document.getElementById(casillaDestino.id[0] + casillaInicio.id[1]);
-                            //Selecciona el peon comido como pieza comida para guardarlo en la lista movimiento
-                            piezaComida = casillaComer.querySelector(".pieza").id;
-                            //Elimina la pieza(peon) que hay en esa casilla
-                            casillaComer.querySelector(".pieza").remove();
+//             //Comer pieza
+//             if (!(piezaComida == undefined)) piezaComida.remove();
+//             casillaDestino.appendChild(piezaAgarrada);
+//             //ENROQUES Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es en la columna g es el corto y el largo si es en c, 
+//             // Math.abs para valor absoluto ya que puede moverse -2
+//             let enroque;
+//             if (pieza.id.split("-")[1] === "rey" && Math.abs(numeroColumna[casillaInicio.id[0]] - numeroColumna[casillaDestino.id[0]]) == 2) {
+//                 let fila = casillaDestino.id[1];
+//                 if (casillaDestino.id[0] === "g") {
+//                     //Busca la casilla f1 o f8 dependiendo y inserta la torre correspondiente
+//                     document.getElementById("f" + fila).appendChild(document.getElementById(tableroDigital["h" + fila]));
+//                     //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
+//                     tableroDigital["f" + fila] = tableroDigital["h" + fila];
+//                     tableroDigital["h" + fila] = null;
+//                     enroque = "corto";
+//                 }
+//                 if (casillaDestino.id[0] === "c") {
+//                     //Busca la casilla f1 o f8 dependiendo y inserta la torre correspondiente
+//                     document.getElementById("d" + fila).appendChild(document.getElementById(tableroDigital["a" + fila]));
+//                     //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
+//                     tableroDigital["d" + fila] = tableroDigital["a" + fila];
+//                     tableroDigital["a" + fila] = null;
+//                     enroque = "largo";
+//                 }
+//             }
+//             //En passant
+//             if(movimientos.length > 0){
+//                 //Comprueba que la pieza movida sea un peon, si lo es comprueba si se mueve una casilla
+//                 if(pieza.id.split("-")[1] === "peon" && Math.abs(casillaInicio.id[1] - casillaDestino.id[1]) === 1){
+//                     //Calcula si se mueve a una columna adyacente, es decir en diagonal
+//                     if(letras[numeroColumna[casillaDestino.id[0]]] === letras[numeroColumna[casillaInicio.id[0]] + 1] || letras[numeroColumna[casillaDestino.id[0]]] === letras[numeroColumna[casillaInicio.id[0]] - 1]){ 
+//                         //Comprueba que la casilla en la que cae esta vacia porque si no podria ser una captura normal
+//                         if(tableroDigital[casillaDestino.id] === null){
+//                             //Guarda casilla donde esta el peon que se captura == columna de la casilla destino + fila casilla inicio
+//                             let casillaComer = document.getElementById(casillaDestino.id[0] + casillaInicio.id[1]);
+//                             //Selecciona el peon comido como pieza comida para guardarlo en la lista movimiento
+//                             piezaComida = casillaComer.querySelector(".pieza").id;
+//                             //Elimina la pieza(peon) que hay en esa casilla
+//                             casillaComer.querySelector(".pieza").remove();
 
-                        }
-                    }
-                }
-            }
-            //Guardar el movimiento en memoria
-            guardarMovimiento(pieza, casillaDestino, piezaComida, enroque);
+//                         }
+//                     }
+//                 }
+//             }
+//             //Guardar el movimiento en memoria
+//             guardarMovimiento(pieza, casillaDestino, piezaComida, enroque);
 
-            //Actualiza tablero en memoria con la jugada actual
-            tableroDigital[casillaInicio.id] = null;
-            tableroDigital[casillaDestino.id] = piezaAgarrada.id;
-        }
-    });
-        console.log("Termina")
-    console.log(casillasPermitidas)
-}
+//             //Actualiza tablero en memoria con la jugada actual
+//             tableroDigital[casillaInicio.id] = null;
+//             tableroDigital[casillaDestino.id] = piezaAgarrada.id;
+//         }
+//     });
+//         console.log("Termina")
+//     console.log(casillasPermitidas)
+// }
 
 //Calcula que casillas pueden comer las piezas del color distinto al tuyo
 function calcularCasillasAmenazadas(piezaAgarrada){
@@ -671,7 +669,6 @@ function simularMovimiento(pieza, casillasPermitidas){
                 }
         } else {
             avanzarPieza(pieza, casillaPermitida);
-        console.log("Soltar:", JSON.parse(JSON.stringify(tableroDigital)));
 
             // //Avanza la pieza a la casilla permitida para calcular si deja en jaque al rey
             // tableroDigital[pieza.casilla] = null;

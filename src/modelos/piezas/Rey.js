@@ -1,4 +1,4 @@
-import { Pieza } from "./pieza.js";
+import { Pieza } from "./Pieza.js";
 export class Rey extends Pieza {
     seHaMovido;
     constructor(id, color, casilla) {

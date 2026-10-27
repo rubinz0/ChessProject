@@ -6,6 +6,7 @@ export class Pieza {
     img;
     color;
     casilla;
+    seHaMovido = false;
     constructor(id, color, casilla) {
         this.id = id;
         this.color = color;     
