@@ -190,7 +190,7 @@ let piezaAgarrada = null;
 
 function clicarPieza(evento){
 console.log("Al clicar:", JSON.parse(JSON.stringify(tableroDigital)));
-    let casillasPermitidas = [];
+    let movimientosPermitidos = [];
     //Esto desactiva el comportamiento por defecto que deja arrastrar imagenes
     evento.preventDefault();
     piezaAgarrada = evento.target;
@@ -208,10 +208,10 @@ console.log("Al clicar:", JSON.parse(JSON.stringify(tableroDigital)));
     // casillasPermitidas.splice(0, casillasPermitidas.length);
 
     // casillasPermitidas = calcularMovimientos(piezaAgarrada, casillaInicio);
-    casillasPermitidas.push(...calcularMovimientos(pieza));
-
+    movimientosPermitidos.push(...calcularMovimientos(pieza));
     // casillasPermitidas = simularMovimiento(casillasPermitidas, piezaAgarrada, casillaInicio);
-    casillasPermitidas.splice(0, casillasPermitidas.length, ...simularMovimiento(pieza, casillasPermitidas));
+    movimientosPermitidos.splice(0, movimientosPermitidos.length, ...simularMovimiento(pieza, movimientosPermitidos));
+    console.log(movimientosPermitidos)
 
     
 
@@ -221,10 +221,10 @@ console.log("Al clicar:", JSON.parse(JSON.stringify(tableroDigital)));
 
     //Recorre las casillas del tablero y si esta en la lista de permitidas las añade la clasePermitida
     for(let i = 0; i < casillasHTML.length; i++){
-        for(let j = 0; j < casillasPermitidas.length; j++){
-            if(casillasHTML[i].id === casillasPermitidas[j]){
+        for(let j = 0; j < movimientosPermitidos.length; j++){
+            if(casillasHTML[i].id === movimientosPermitidos[j].casilla){
                 casillasPintar.push(casillasHTML[i]);
-                j = casillasPermitidas.length;
+                j = movimientosPermitidos.length;
             }
         }
     }
@@ -274,23 +274,26 @@ function soltarClick(evento){
         }
         
         let casillaInicio = piezaAgarrada.closest(".casilla");
-        let casillasPermitidas = calcularMovimientos(pieza);
+        let movimientosPermitidos = calcularMovimientos(pieza);
+        console.warn(movimientosPermitidos)
         //Comprobamos que la casilla destino está en casillas permitidas y no deja al rey en jaque y si es un enroque mueve las dos piezas (llama funcion guardarMovimiento)
         // validarMovimiento(piezaComida, piezaAgarrada, casillaDestino, casillasPermitidas, casillaInicio);
-        casillasPermitidas.splice(0, casillasPermitidas.length, ...simularMovimiento(pieza, casillasPermitidas));
+        movimientosPermitidos.splice(0, movimientosPermitidos.length, ...simularMovimiento(pieza, movimientosPermitidos));
         
-        casillasPermitidas.forEach(casillasPermitida => {
-            if(casillaDestino.id === casillasPermitida){
+        movimientosPermitidos.forEach(movimientoPermitido => {
+            if(casillaDestino.id === movimientoPermitido.casilla){
                 let enroque = false;
+                let tipo = movimientoPermitido.tipo;
                 //Comprueba que sea un enroque
                 if(piezaAgarrada.id.split("-")[1] === "rey" && Math.abs(letras[casillaInicio.id[0]] - letras[casillaDestino.id[0]]) === 2) console.log("Enroque: " + enroque)
+                console.warn(movimientoPermitido)
                 //Actualiza tablero en memoria con la jugada actual
                 tableroDigital[casillaInicio.id] = null;
                 tableroDigital[casillaDestino.id] = pieza;
                 pieza.casilla = casillaDestino.id;
                 if(!pieza.seHaMovido) pieza.seHaMovido = true;
                 //Guardar el movimiento en memoria
-                guardarMovimiento(pieza, casillaInicio.id, piezaComida, enroque);
+                guardarMovimiento(pieza, casillaInicio.id, piezaComida, enroque, tipo);
 
                 casillaDestino.appendChild(piezaAgarrada);
             }
@@ -312,7 +315,7 @@ function soltarClick(evento){
 
 function calcularMovimientos(pieza){
     console.log("Calcular movimientos");
-    let casillasPermitidas = [];
+    let movimientosPermitidos = [];
     let casillaInicio = pieza.casilla;
     let piezaId = pieza.id.split("-");
     let valido = false;
@@ -323,7 +326,7 @@ function calcularMovimientos(pieza){
     
     
     //Para resetear las casillas sin reasignar el valor casillasPermitidas = []
-    casillasPermitidas.splice(0, casillasPermitidas.length); 
+    movimientosPermitidos.splice(0, movimientosPermitidos.length); 
 
 
     //Caballos y rey
@@ -346,13 +349,13 @@ function calcularMovimientos(pieza){
     if(piezaId[1] == "peon"){
         // casillasPermitidas = pieza2.calcularMovimientos(tableroDigital, casillaInicio);
         console.log("Peon:", JSON.parse(JSON.stringify(tableroDigital)));
-
-        casillasPermitidas.push(...pieza.calcularMovimientos(tableroDigital, casillaInicio));
+        movimientosPermitidos.push(...pieza.calcularMovimientos(tableroDigital, casillaInicio));
+        console.log("Movimientos permitidos: ", JSON.parse(JSON.stringify(movimientosPermitidos)))
     }
     
     //Torres
     if(piezaId[1] == "torre"){
-        casillasPermitidas.push(...pieza.calcularMovimientos(tableroDigital, casillaInicio));
+        movimientosPermitidos.push(...pieza.calcularMovimientos(tableroDigital, casillaInicio));
     }
     //Caballos
     if(piezaId[1] === "caballo"){
@@ -414,7 +417,7 @@ function calcularMovimientos(pieza){
 
     
     
-    return casillasPermitidas;
+    return movimientosPermitidos;
 }
 
 const contenedorPGN = document.getElementById("contenedorPGN");
@@ -450,19 +453,18 @@ function generarPGN(piezaAgarrada, casillaDestino, piezaComida, casillaInicio, e
             pieza = "0-0-0";
         }
     }
-    console.log("ASd")
     //Añade el movimiento al html
     contenedorPGN.innerHTML += pieza+casilla + " + ";
     
 }
 
-function guardarMovimiento(pieza, casillaInicio, piezaComida, enroque){
+function guardarMovimiento(pieza, casillaInicio, piezaComida, enroque, tipo){
     //Volvemos a calcular movimientos posibles pero desde la casilla que aterriza simulando que en el siguiente turno podriamos comer el rey
     const posiblesJaques = calcularMovimientos(pieza, pieza.casilla);
     let jaque = false;
     //Comprobamos que en esa casilla halla una pieza y que sea el rey
-    posiblesJaques.forEach(casilla => {
-        if(document.getElementById(casilla).querySelector("img") && document.getElementById(casilla).querySelector("img").id.split("-")[1] === "rey") jaque = true;
+    posiblesJaques.forEach(movimiento => {
+        if(document.getElementById(movimiento.casilla).querySelector("img") && document.getElementById(movimiento.casilla).querySelector("img").id.split("-")[1] === "rey") jaque = true;
     });
     //Si movemos algun rey o torre lo guardamos para saber si podemos enrocar
     if(pieza.id === "blanco-rey") comprobacionesEnroque["blanco-rey"] = true;
@@ -474,9 +476,10 @@ function guardarMovimiento(pieza, casillaInicio, piezaComida, enroque){
 
 
     let movimiento = {
-        "pieza": pieza.id,
+        "pieza": pieza,
         "casillaInicio": casillaInicio,
         "casillaDestino":pieza.casilla,
+        "tipo": tipo,
         "piezaComida":piezaComida,
         "jaque":jaque,
         "enroque":enroque,
@@ -484,9 +487,8 @@ function guardarMovimiento(pieza, casillaInicio, piezaComida, enroque){
     }
     movimientos.push(movimiento);
     console.log(movimiento)
-    console.log(pieza.casilla)
     generarPGN(piezaAgarrada, pieza.casilla, piezaComida, casillaInicio, enroque);
-    
+    console.log(movimientos)
 }
 
 

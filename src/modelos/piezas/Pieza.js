@@ -13,14 +13,6 @@ export class Pieza {
         this.casilla = casilla; 
     }
 
-    set Casilla(casilla) {
-        this.casilla = casilla;
-    }
-
-    get Casilla() {
-        return casilla;
-    }
-
     calcularMovimientos(tableroDigital) {
         console.log("Este método no se usa desde Pieza. Se tiene que implementar en la pieza correspondiente")
     }
@@ -55,20 +47,34 @@ export class Pieza {
     }
 
     movimientosDirectos(movimientosDirectos, casilla, tableroDigital){
+        let movimientosPermitidos = [];
         let pieza = tableroDigital[casilla];
         let casillasPermitidas = [];
         movimientosDirectos.forEach(movimiento => {
+            let movimientoPermitido = {}
             let columna = letras[letras.indexOf(casilla[0]) + movimiento[0]];
             let fila = parseInt(casilla[1]) + movimiento[1];
             if(tableroDigital[columna+fila] === null){
-                casillasPermitidas.push(columna+fila);
+                movimientoPermitido.casilla = columna+fila;
+                movimientoPermitido.tipo = "normal";
+                movimientoPermitido.captura = false;
+                //Si se mueve a una casilla nula y avanza hacia un lado es captura al paso
+                if(Math.abs(movimiento[0]) === 1) {
+                    movimientoPermitido.tipo = "captura-paso";
+                }
+                movimientosPermitidos.push(movimientoPermitido);
+                // casillasPermitidas.push(columna+fila);
             }
             //Calcula si es una casilla ocupada, dentro del tablero y de una pieza rival
             if(tableroDigital[columna+fila] != null && tableroDigital[columna+fila] != undefined && tableroDigital[columna+fila].id.split("-")[0] != pieza.id.split("-")[0]){
-                casillasPermitidas.push(columna+fila);
+                movimientoPermitido.casilla = columna+fila;
+                movimientoPermitido.tipo = "normal";
+                movimientoPermitido.captura = true;
+                movimientosPermitidos.push(movimientoPermitido);
+                // casillasPermitidas.push(columna+fila);
             }
         });
-        return casillasPermitidas;
+        return movimientosPermitidos;
     }
 
 }
