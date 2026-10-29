@@ -284,6 +284,7 @@ function soltarClick(evento){
             if(casillaDestino.id === movimientoPermitido.casilla){
                 let enroque = false;
                 let tipo = movimientoPermitido.tipo;
+                if(movimientoPermitido.captura) casillaDestino.querySelector(".pieza").remove();
                 //Comprueba que sea un enroque
                 if(piezaAgarrada.id.split("-")[1] === "rey" && Math.abs(letras[casillaInicio.id[0]] - letras[casillaDestino.id[0]]) === 2) console.log("Enroque: " + enroque)
                 console.warn(movimientoPermitido)
@@ -488,7 +489,6 @@ function guardarMovimiento(pieza, casillaInicio, piezaComida, enroque, tipo){
     movimientos.push(movimiento);
     console.log(movimiento)
     generarPGN(piezaAgarrada, pieza.casilla, piezaComida, casillaInicio, enroque);
-    console.log(movimientos)
 }
 
 

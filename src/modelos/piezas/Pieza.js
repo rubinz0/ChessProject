@@ -58,8 +58,8 @@ export class Pieza {
                 movimientoPermitido.casilla = columna+fila;
                 movimientoPermitido.tipo = "normal";
                 movimientoPermitido.captura = false;
-                //Si se mueve a una casilla nula y avanza hacia un lado es captura al paso
-                if(Math.abs(movimiento[0]) === 1) {
+                //Si un peon se mueve a una casilla nula y avanza hacia un lado es captura al paso
+                if(pieza.id.split("-")[1] === "peon" && Math.abs(movimiento[0]) === 1) {
                     movimientoPermitido.tipo = "captura-paso";
                 }
                 movimientosPermitidos.push(movimientoPermitido);
@@ -70,6 +70,8 @@ export class Pieza {
                 movimientoPermitido.casilla = columna+fila;
                 movimientoPermitido.tipo = "normal";
                 movimientoPermitido.captura = true;
+                movimientoPermitido.casillaCaptura = columna + fila;
+                movimientoPermitido.piezaCapturada = tableroDigital[columna+fila];
                 movimientosPermitidos.push(movimientoPermitido);
                 // casillasPermitidas.push(columna+fila);
             }

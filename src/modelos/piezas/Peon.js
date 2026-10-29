@@ -47,7 +47,7 @@ export class Peon extends Pieza {
 
         let ultimoMovimiento = movimientos[movimientos.length - 1];
         //Calcula que en el ultimo movimiento se moviese un peon de diferente color
-        if (movimientos.length > 0 && ultimoMovimiento.pieza.id.split("-")[1] === "peon" && ultimoMovimiento.pieza.id.split("-")[0] !== piezaAgarrada.id.split("-")[0]) {
+        if (movimientos.length > 0 && ultimoMovimiento.pieza.id.split("-")[1] === "peon" && ultimoMovimiento.pieza.id.split("-")[0] !== piezaAgarrada.split("-")[0]) {
             //Comprueba que se mueva 2 casillas restando la posicion final e inicial del ultimo movimiento, tambien comprueba que el peon que quieres mover este a la misma altura que el peon que ha movido doble 
             if (Math.abs(ultimoMovimiento.casillaInicio[1] - ultimoMovimiento.casillaDestino[1]) === 2 && casilla[1] === ultimoMovimiento.casillaDestino[1]) {
                 //Guardo las columnas para simplificar
