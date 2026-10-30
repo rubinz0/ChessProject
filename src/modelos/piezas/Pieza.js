@@ -54,20 +54,25 @@ export class Pieza {
             let movimientoPermitido = {}
             let columna = letras[letras.indexOf(casilla[0]) + movimiento[0]];
             let fila = parseInt(casilla[1]) + movimiento[1];
+            movimientoPermitido.casillaInicio = casilla;
+            movimientoPermitido.casillaDestino = columna+fila;
+            movimientoPermitido.pieza = pieza;
             if(tableroDigital[columna+fila] === null){
-                movimientoPermitido.casilla = columna+fila;
-                movimientoPermitido.tipo = "normal";
-                movimientoPermitido.captura = false;
                 //Si un peon se mueve a una casilla nula y avanza hacia un lado es captura al paso
                 if(pieza.id.split("-")[1] === "peon" && Math.abs(movimiento[0]) === 1) {
                     movimientoPermitido.tipo = "captura-paso";
+                    movimientoPermitido.captura = true;
+                    movimientoPermitido.casillaCaptura = columna + casilla[1];
+                    movimientoPermitido.piezaCapturada = tableroDigital[columna+casilla[1]];
+                }else{
+                    movimientoPermitido.tipo = "normal";
+                    movimientoPermitido.captura = false;
                 }
                 movimientosPermitidos.push(movimientoPermitido);
                 // casillasPermitidas.push(columna+fila);
             }
             //Calcula si es una casilla ocupada, dentro del tablero y de una pieza rival
             if(tableroDigital[columna+fila] != null && tableroDigital[columna+fila] != undefined && tableroDigital[columna+fila].id.split("-")[0] != pieza.id.split("-")[0]){
-                movimientoPermitido.casilla = columna+fila;
                 movimientoPermitido.tipo = "normal";
                 movimientoPermitido.captura = true;
                 movimientoPermitido.casillaCaptura = columna + fila;

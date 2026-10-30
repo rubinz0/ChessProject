@@ -222,7 +222,7 @@ console.log("Al clicar:", JSON.parse(JSON.stringify(tableroDigital)));
     //Recorre las casillas del tablero y si esta en la lista de permitidas las añade la clasePermitida
     for(let i = 0; i < casillasHTML.length; i++){
         for(let j = 0; j < movimientosPermitidos.length; j++){
-            if(casillasHTML[i].id === movimientosPermitidos[j].casilla){
+            if(casillasHTML[i].id === movimientosPermitidos[j].casillaDestino){
                 casillasPintar.push(casillasHTML[i]);
                 j = movimientosPermitidos.length;
             }
@@ -281,20 +281,23 @@ function soltarClick(evento){
         movimientosPermitidos.splice(0, movimientosPermitidos.length, ...simularMovimiento(pieza, movimientosPermitidos));
         
         movimientosPermitidos.forEach(movimientoPermitido => {
-            if(casillaDestino.id === movimientoPermitido.casilla){
+            if(casillaDestino.id === movimientoPermitido.casillaDestino){
                 let enroque = false;
                 let tipo = movimientoPermitido.tipo;
-                if(movimientoPermitido.captura) casillaDestino.querySelector(".pieza").remove();
+                //AL CAMBIAR CASILLA POR INSTANCIA NO HACE FALTA CASILLA COMER DIRECTAMENTE SE PONE LA CASILLA SIN #
+                //
+                //-------------------------------
+                let casillaComer = "#"+movimientoPermitido.casillaCaptura;
+                if(movimientoPermitido.captura) document.querySelector(casillaComer).querySelector(".pieza").remove();
                 //Comprueba que sea un enroque
                 if(piezaAgarrada.id.split("-")[1] === "rey" && Math.abs(letras[casillaInicio.id[0]] - letras[casillaDestino.id[0]]) === 2) console.log("Enroque: " + enroque)
-                console.warn(movimientoPermitido)
                 //Actualiza tablero en memoria con la jugada actual
                 tableroDigital[casillaInicio.id] = null;
                 tableroDigital[casillaDestino.id] = pieza;
                 pieza.casilla = casillaDestino.id;
                 if(!pieza.seHaMovido) pieza.seHaMovido = true;
                 //Guardar el movimiento en memoria
-                guardarMovimiento(pieza, casillaInicio.id, piezaComida, enroque, tipo);
+                guardarMovimiento(movimientoPermitido);
 
                 casillaDestino.appendChild(piezaAgarrada);
             }
@@ -351,12 +354,13 @@ function calcularMovimientos(pieza){
         // casillasPermitidas = pieza2.calcularMovimientos(tableroDigital, casillaInicio);
         console.log("Peon:", JSON.parse(JSON.stringify(tableroDigital)));
         movimientosPermitidos.push(...pieza.calcularMovimientos(tableroDigital, casillaInicio));
-        console.log("Movimientos permitidos: ", JSON.parse(JSON.stringify(movimientosPermitidos)))
     }
     
     //Torres
     if(piezaId[1] == "torre"){
         movimientosPermitidos.push(...pieza.calcularMovimientos(tableroDigital, casillaInicio));
+        console.log("Movimientos permitidos: ", JSON.parse(JSON.stringify(movimientosPermitidos)))
+
     }
     //Caballos
     if(piezaId[1] === "caballo"){
@@ -423,7 +427,7 @@ function calcularMovimientos(pieza){
 
 const contenedorPGN = document.getElementById("contenedorPGN");
 //Funcion para generar el codigo PGN de la partida, cada vez que se mueve una pieza se añade el movimiento
-function generarPGN(piezaAgarrada, casillaDestino, piezaComida, casillaInicio, enroque){
+function generarPGN(movimiento){
     let captura = false;
     //Con esto consigo cambiar las letras a ingles que es la notacion oficial sin tener que hacer bucles (tambien consigo vaciar la letra en caso de ser peon)
     const diccionario = {
@@ -438,17 +442,16 @@ function generarPGN(piezaAgarrada, casillaDestino, piezaComida, casillaInicio, e
     let pieza;
     //Calculo si es un enroque corto o largo para cancelar la logica del PGN y poner 0-0 o 0-0-0
 
-    if(enroque === false){
-        if(!(piezaComida == undefined)) captura = true;
-        pieza = diccionario[(piezaAgarrada.id.split("-")[1][0]).toUpperCase()];
-        casilla = casillaDestino; 
-        if(captura && !(pieza === "")) pieza += "x";
+    if(!(movimiento.tipo.startsWith("enroque"))){
+        pieza = diccionario[(movimiento.pieza.id.split("-")[1][0]).toUpperCase()];
+        casilla = movimiento.casillaDestino; 
+        if(movimiento.captura && !(pieza === "")) pieza += "x";
         //Si captura un peon añadimos su columna
-        if(captura && pieza === "") {
-            pieza += casillaInicio[0]+"x";
+        if(movimiento.captura && pieza === "") {
+            pieza += movimiento.casillaInicio[0]+"x";
         }
     }else{
-        if(enroque === "corto"){
+        if(movimiento.tipo === "enroque-corto"){
             pieza = "0-0";
         }else{
             pieza = "0-0-0";
@@ -459,36 +462,38 @@ function generarPGN(piezaAgarrada, casillaDestino, piezaComida, casillaInicio, e
     
 }
 
-function guardarMovimiento(pieza, casillaInicio, piezaComida, enroque, tipo){
+function guardarMovimiento(movimientoPermitido){
     //Volvemos a calcular movimientos posibles pero desde la casilla que aterriza simulando que en el siguiente turno podriamos comer el rey
-    const posiblesJaques = calcularMovimientos(pieza, pieza.casilla);
+    const posiblesJaques = calcularMovimientos(movimientoPermitido.pieza, movimientoPermitido.pieza.casilla);
     let jaque = false;
     //Comprobamos que en esa casilla halla una pieza y que sea el rey
     posiblesJaques.forEach(movimiento => {
-        if(document.getElementById(movimiento.casilla).querySelector("img") && document.getElementById(movimiento.casilla).querySelector("img").id.split("-")[1] === "rey") jaque = true;
+        if(document.getElementById(movimiento.casillaDestino).querySelector("img") && document.getElementById(movimiento.casillaDestino).querySelector("img").id.split("-")[1] === "rey") jaque = true;
     });
     //Si movemos algun rey o torre lo guardamos para saber si podemos enrocar
-    if(pieza.id === "blanco-rey") comprobacionesEnroque["blanco-rey"] = true;
-    if(pieza.id === "blanco-torre-1") comprobacionesEnroque["blanco-torre-1"] = true;
-    if(pieza.id === "blanco-torre-2") comprobacionesEnroque["blanco-torre-2"] = true;
-    if(pieza.id === "negro-rey") comprobacionesEnroque ["negro-rey"]= true;
-    if(pieza.id === "negro-torre-1") comprobacionesEnroque["negro-torre-1"] = true;
-    if(pieza.id === "negro-torre-2") comprobacionesEnroque["negro-torre-2"] = true;
+    if(movimientoPermitido.pieza.id === "blanco-rey") comprobacionesEnroque["blanco-rey"] = true;
+    if(movimientoPermitido.pieza.id === "blanco-torre-1") comprobacionesEnroque["blanco-torre-1"] = true;
+    if(movimientoPermitido.pieza.id === "blanco-torre-2") comprobacionesEnroque["blanco-torre-2"] = true;
+    if(movimientoPermitido.pieza.id === "negro-rey") comprobacionesEnroque ["negro-rey"]= true;
+    if(movimientoPermitido.pieza.id === "negro-torre-1") comprobacionesEnroque["negro-torre-1"] = true;
+    if(movimientoPermitido.pieza.id === "negro-torre-2") comprobacionesEnroque["negro-torre-2"] = true;
+    console.warn(JSON.parse(JSON.stringify(movimientoPermitido)))
+    let movimiento = movimientoPermitido;
+    movimiento.jaque = jaque;
+    movimiento.fotografiaEnroque = {...comprobacionesEnroque}
+    console.warn(JSON.parse(JSON.stringify(movimientoPermitido)))
 
-
-    let movimiento = {
-        "pieza": pieza,
-        "casillaInicio": casillaInicio,
-        "casillaDestino":pieza.casilla,
-        "tipo": tipo,
-        "piezaComida":piezaComida,
-        "jaque":jaque,
-        "enroque":enroque,
-        "fotografiaEnroque": {...comprobacionesEnroque}
-    }
+    // let movimiento = {
+    //     "pieza": movimientoPermitido.pieza,
+    //     "casillaInicio": movimientoPermitido.casilla,
+    //     "casillaDestino":movimientoPermitido.pieza.casilla,
+    //     "tipo": movimientoPermitido.tipo,
+    //     "piezaComida":movimientoPermitido.piezaComida,
+    //     "jaque":jaque,
+    //     "fotografiaEnroque": {...comprobacionesEnroque}
+    // }
     movimientos.push(movimiento);
-    console.log(movimiento)
-    generarPGN(piezaAgarrada, pieza.casilla, piezaComida, casillaInicio, enroque);
+    generarPGN(movimiento);
 }
 
 
