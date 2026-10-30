@@ -17,33 +17,44 @@ export class Pieza {
         console.log("Este método no se usa desde Pieza. Se tiene que implementar en la pieza correspondiente")
     }
 
-    movimientosDeslizantes(movimientos, tableroDigital) {
-        let casillasPermitidas = [];
-        let piezaAgarrada = tableroDigital[this.casilla];
+    movimientosDeslizantes(movimientos, tableroDigital, casilla) {
+        let movimientosPermitidos = [];
+        let pieza = tableroDigital[casilla];
         movimientos.forEach(movimiento => {
             //Mide hasta que distancia calcula en esa direccion
             let distancia = 1;
             while (distancia < 8) {
-                let columna = letras[letras.indexOf(this.casilla[0]) - movimiento[0] * distancia];
-                let fila = parseInt(this.casilla[1]) + movimiento[1] * distancia;
+                let movimientoPermitido = {}
+                let columna = letras[letras.indexOf(casilla[0]) - movimiento[0] * distancia];
+                let fila = parseInt(casilla[1]) + movimiento[1] * distancia;
 
+                movimientoPermitido.casillaInicio = casilla;
+                movimientoPermitido.casillaDestino = columna+fila;
+                movimientoPermitido.pieza = pieza;
+                movimientoPermitido.tipo = "normal";
                 if (tableroDigital[columna + fila] === null) {
-                    casillasPermitidas.push(columna + fila);
+                    movimientoPermitido.captura = false;
+                    movimientosPermitidos.push(movimientoPermitido);
+                    // casillasPermitidas.push(columna + fila);
                 }
                 
-                if (tableroDigital[columna + fila] != null && tableroDigital[columna + fila] != undefined && piezaAgarrada.id[0] != piezaAgarrada.id[0]) {
-                    casillasPermitidas.push(columna + fila);
+                if (tableroDigital[columna + fila] != null && tableroDigital[columna + fila] != undefined && pieza.color != pieza.color) {
+                    movimientoPermitido.captura = true;
+                    movimientoPermitido.casillaCaptura = columna + fila;
+                    movimientoPermitido.piezaCapturada = tableroDigital[columna+fila];
+                    // casillasPermitidas.push(columna + fila);
+                    movimientosPermitidos.push(movimientoPermitido);
                     break
                 }
                 //Si no esta vacia y no hay un enemigo esque hay un aliado
-                if (tableroDigital[columna + fila] != null && tableroDigital[columna + fila] != undefined && tableroDigital[columna + fila].id[0] == piezaAgarrada.id[0]) {
+                if (tableroDigital[columna + fila] != null && tableroDigital[columna + fila] != undefined && tableroDigital[columna + fila].id[0] == pieza.id[0]) {
                     break
                 }
                 distancia++;
             }
 
         });
-        return casillasPermitidas;
+        return movimientosPermitidos;
     }
 
     movimientosDirectos(movimientosDirectos, casilla, tableroDigital){
