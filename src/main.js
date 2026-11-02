@@ -187,6 +187,7 @@ function clicarPieza(evento){
     //Esto desactiva el comportamiento por defecto que deja arrastrar imagenes
     evento.preventDefault();
     piezaAgarrada = evento.target;
+    //Pongo la pieza en la capa mas alta 
     piezaAgarrada.style.position = "absolute";
     piezaAgarrada.style.zIndex = "100";
     //Restamos la posicion del raton menos la esquina de la img para no solo anclarla al raton sino anclarla 
@@ -425,7 +426,6 @@ function calcularCasillasAmenazadas(color){
     casillasPermitidasHTML.forEach(casilla => {
         casilla.classList.remove("casillaAmenazada");
     });
-    let casillasHTML = document.querySelectorAll(".casilla");
 
     let casillasAmenazadas = [];
     let casillasEliminar = [];
@@ -488,39 +488,6 @@ function simularMovimiento(pieza, casillasPermitidas){
     //Recorre casillas permitidas
     casillasPermitidas.forEach(casillaPermitida => {
         //Excepcion del rey ya que hay que comprobar que si se enroca no pase por una casilla amenazada
-        if (pieza.id.split("-")[1] === "rey") {
-            //ENROQUES Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es en la columna g es el corto y el largo si es en c, 
-            // Math.abs para valor absoluto ya que puede moverse -2
-            // if(Math.abs(numeroColumna[pieza.casilla[0]] - numeroColumna[casillaPermitida.casillaDestino[0]]) === 2){
-            //     console.warn("enroque")
-            //     let jaque = avanzarPieza(pieza, casillaPermitida);
-            //     if(!jaque){
-            //         //Si la casilla destino es mayor que la inicio el enroque es a la derecha (enroque corto)
-            //         if (numeroColumna[casillaPermitida.casillaDestino[0]] > numeroColumna[pieza.casilla[0]]) {
-            //             //Si es enroque corto comprobamos la casilla destino y la de la izquierda
-            //             if (casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] + 1] + pieza.casilla[1]) || casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] + 2] + pieza.casilla[1])) casillasEliminar.push(casillaPermitida);
-            //         } else {
-            //             //Si es enroque largo comprobamos la casilla destino y la de la derecha
-            //             if (casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] - 1] + pieza.casilla[1]) || casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] - 2] + pieza.casilla[1])) casillasEliminar.push(casillaPermitida);
-            //         }
-            //     }
-
-            //     // let casillasAmenazadas = calcularCasillasAmenazadas(pieza);
-            //     //Si esta en jaque eliminamos directamente porque no pude enrocar
-            //     // if(casillasAmenazadas.includes(pieza.casilla)){
-            //     //      casillasEliminar.push(casillaPermitida);
-            //     // }else{
-            //     //     //Si la casilla destino es mayor que la inicio el enroque es a la derecha (enroque corto)
-            //     //     if (numeroColumna[casillaPermitida[0]] > numeroColumna[pieza.casilla[0]]) {
-            //     //         //Si es enroque corto comprobamos la casilla destino y la de la izquierda
-            //     //         if (casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] + 1] + pieza.casilla[1]) || casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] + 2] + pieza.casilla[1])) casillasEliminar.push(casillaPermitida);
-            //     //     } else {
-            //     //         //Si es enroque largo comprobamos la casilla destino y la de la derecha
-            //     //         if (casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] - 1] + pieza.casilla[1]) || casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] - 2] + pieza.casilla[1])) casillasEliminar.push(casillaPermitida);
-            //     //     }
-            //     // }
-            // }
-        } 
         let jaque = avanzarPieza(pieza, casillaPermitida.casillaDestino);
         if(jaque && !(casillasEliminar.includes(casillaPermitida))) casillasEliminar.push(casillaPermitida);
         
