@@ -5,19 +5,13 @@ import { Alfil } from './modelos/piezas/Alfil.js';
 import { Dama } from './modelos/piezas/Dama.js';
 import { Rey } from './modelos/piezas/Rey.js';
 
-import { letras, numeroColumna, movimientos } from "./utilidades.js";
+import { letras, numeroColumna, movimientos, comprobacionesEnroque } from "./utilidades.js";
+import { Pieza } from './modelos/piezas/Pieza.js';
 const tablero = document.getElementById("tablero");
 const PGN = [];
 const coordenadasArray = ["a8","b8","c8","d8","e8","f8","g8","h8","a7","b7","c7","d7","e7","f7","g7","h7","a6","b6","c6","d6","e6","f6","g6","h6","a5","b5","c5","d5","e5","f5","g5","h5","a4","b4","c4","d4","e4","f4","g4","h4","a3","b3","c3","d3","e3","f3","g3","h3","a2","b2","c2","d2","e2","f2","g2","h2","a1","b1","c1","d1","e1","f1","g1","h1"];
 
-let comprobacionesEnroque = {
-    "blanco-rey":false,
-    "blanco-torre-1":false,
-    "blanco-torre-2":false,
-    "negro-rey":false,
-    "negro-torre-1":false,
-    "negro-torre-2":false
-}
+
 //Diccionario donde guardo la posicion actual del tablero (FEN)
 let tableroDigital = {}
 function generarTablero(){
@@ -189,7 +183,6 @@ let piezaAgarrada = null;
 
 
 function clicarPieza(evento){
-console.log("Al clicar:", JSON.parse(JSON.stringify(tableroDigital)));
     let movimientosPermitidos = [];
     //Esto desactiva el comportamiento por defecto que deja arrastrar imagenes
     evento.preventDefault();
@@ -203,7 +196,6 @@ console.log("Al clicar:", JSON.parse(JSON.stringify(tableroDigital)));
     agarreY = evento.clientY - piezaAgarrada.getBoundingClientRect().top - window.scrollY;
     let casillaInicio = evento.target.parentElement;
     let pieza = tableroDigital[casillaInicio.id];
-    
     //Vaciamos las casillas de la pieza anterior
     // casillasPermitidas.splice(0, casillasPermitidas.length);
 
@@ -211,7 +203,6 @@ console.log("Al clicar:", JSON.parse(JSON.stringify(tableroDigital)));
     movimientosPermitidos.push(...calcularMovimientos(pieza));
     // casillasPermitidas = simularMovimiento(casillasPermitidas, piezaAgarrada, casillaInicio);
     movimientosPermitidos.splice(0, movimientosPermitidos.length, ...simularMovimiento(pieza, movimientosPermitidos));
-    console.log(movimientosPermitidos)
 
     
 
@@ -275,7 +266,6 @@ function soltarClick(evento){
         
         let casillaInicio = piezaAgarrada.closest(".casilla");
         let movimientosPermitidos = calcularMovimientos(pieza);
-        console.warn(movimientosPermitidos)
         //Comprobamos que la casilla destino está en casillas permitidas y no deja al rey en jaque y si es un enroque mueve las dos piezas (llama funcion guardarMovimiento)
         // validarMovimiento(piezaComida, piezaAgarrada, casillaDestino, casillasPermitidas, casillaInicio);
         movimientosPermitidos.splice(0, movimientosPermitidos.length, ...simularMovimiento(pieza, movimientosPermitidos));
@@ -290,11 +280,38 @@ function soltarClick(evento){
                 let casillaComer = "#"+movimientoPermitido.casillaCaptura;
                 if(movimientoPermitido.captura) document.querySelector(casillaComer).querySelector(".pieza").remove();
                 //Comprueba que sea un enroque
-                if(piezaAgarrada.id.split("-")[1] === "rey" && Math.abs(letras[casillaInicio.id[0]] - letras[casillaDestino.id[0]]) === 2) console.log("Enroque: " + enroque)
+                console.warn(Math.abs(letras.indexOf(movimientoPermitido.casillaInicio[0]) - letras.indexOf(movimientoPermitido.casillaDestino[0])))
+                console.warn(letras["f"])
+                if(movimientoPermitido.pieza instanceof Rey && Math.abs(letras.indexOf(movimientoPermitido.casillaInicio[0]) - letras.indexOf(movimientoPermitido.casillaDestino[0])) === 2){
+                    let fila = movimientoPermitido.casillaDestino[1];
+                    if (movimientoPermitido.casillaDestino[0] === "g") {
+                        //Busca la casilla f1 o f8 dependiendo y inserta la torre correspondiente
+                        tablero.querySelector("#f" + fila).appendChild(tablero.querySelector("#"+tableroDigital["h" + fila].id));
+                        console.warn(JSON.parse(JSON.stringify(tableroDigital)))
+                        //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
+                        tableroDigital["f" + fila] = tableroDigital["h" + fila];
+                        tableroDigital["h" + fila] = null;
+                        tableroDigital["f" + fila].casilla = "f" + fila;
+                        enroque = "corto";
+                        console.warn(JSON.parse(JSON.stringify(tableroDigital)))
+
+                    }
+                    if (movimientoPermitido.casillaDestino[0] === "c") {
+                        //Busca la casilla f1 o f8 dependiendo y inserta la torre correspondiente
+                        tablero.querySelector("#d" + fila).appendChild(tablero.querySelector("#" + tableroDigital["a" + fila].id));
+                        //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
+                        tableroDigital["d" + fila] = tableroDigital["a" + fila];
+                        tableroDigital["a" + fila] = null;
+                        tableroDigital["d" + fila].casilla = "d" + fila;
+                        enroque = "largo";
+                    }
+                } 
                 //Actualiza tablero en memoria con la jugada actual
                 tableroDigital[casillaInicio.id] = null;
                 tableroDigital[casillaDestino.id] = pieza;
                 pieza.casilla = casillaDestino.id;
+                        console.warn(JSON.parse(JSON.stringify(tableroDigital)))
+
                 if(!pieza.seHaMovido) pieza.seHaMovido = true;
                 //Guardar el movimiento en memoria
                 guardarMovimiento(movimientoPermitido);
@@ -321,107 +338,9 @@ function calcularMovimientos(pieza){
     console.log("Calcular movimientos");
     let movimientosPermitidos = [];
     let casillaInicio = pieza.casilla;
-    let piezaId = pieza.id.split("-");
-    let valido = false;
-    // let pieza = piezaAgarrada.id;
-    // let pieza = pieza2.id.split("-");
-    //Esto resetea las casillas y permite calcular los movimientos posibles sobre la casilla destino. (Al guardar movimiento tengo que saber si doy jaque y para eso 
-    // calculo si en el siguiente movimiento encuentra al rey por lo que vuelvo a calcular los movimientos)
-    
-    
-    //Para resetear las casillas sin reasignar el valor casillasPermitidas = []
-    movimientosPermitidos.splice(0, movimientosPermitidos.length); 
-
-
-    //Caballos y rey
-    let movimientosDirectos = [];
-    //Torres alfiles y damas ya que cogen un patron y lo repiten en bucle
-    let movimientosDeslizantes = [];
-
-
-    //El orden es el de las agujas del reloj por lo que al recorrer la brujula cada bucle sabra si sumar o restar las coordenadas
-    const brujula = [1,1,-1,-1];
-    const letraCasillaInicio = pieza.casilla[0];
-    const numeroCasillaInicio = parseInt(pieza.casilla[1]);
-    //Aqui restamos o sumamos el numero de la casilla en la que esta el bucle ej: h2, h3, h4
-    let numeroActualCasilla = numeroCasillaInicio;
-    let letraActualCasilla = letraCasillaInicio;
-
-    //Calcula cuantas casillas quedan hasta salirse del tablero
-    let casillasRestantes = 0;
-    //Peones
-    if(piezaId[1] == "peon"){
-        // casillasPermitidas = pieza2.calcularMovimientos(tableroDigital, casillaInicio);
-        console.log("Peon:", JSON.parse(JSON.stringify(tableroDigital)));
+        // console.log(pieza instanceof Caballo, JSON.parse(JSON.stringify(tableroDigital)));
         movimientosPermitidos.push(...pieza.calcularMovimientos(tableroDigital, casillaInicio));
-    }
-    
-    //Torres
-    if(piezaId[1] == "torre"){
-        movimientosPermitidos.push(...pieza.calcularMovimientos(tableroDigital, casillaInicio));
-        console.log("Movimientos permitidos: ", JSON.parse(JSON.stringify(movimientosPermitidos)))
 
-    }
-    //Caballos
-    if(piezaId[1] === "caballo"){
-        movimientosDirectos = [
-            [-1,2],
-            [1,2],
-            [2,1],
-            [2,-1],
-            [1,-2],
-            [-1,-2],
-            [-2,-1],
-            [-2,1]
-        ];
-    }
-    //Alfiles
-    if(piezaId[1] === "alfil"){
-        movimientosDeslizantes = [
-            [1,1],
-            [1,-1],
-            [-1,1],
-            [-1,-1]
-        ];
-
-    }
-    //Damas
-    if(piezaId[1] === "dama"){
-        movimientosDeslizantes = [
-            [1,1],
-            [1,-1],
-            [-1,1],
-            [-1,-1],
-            [1,0],
-            [-1,0],
-            [0,1],
-            [0,-1]
-        ];
-    }
-    //Rey
-    if(piezaId[1] === "rey"){
-        movimientosDirectos = [
-            [0,1],
-            [1,1],
-            [1,0],
-            [1,-1],
-            [0,-1],
-            [-1,-1],
-            [-1,0],
-            [-1,1],
-        ];
-        //Comprueba si el rey se ha movido y si ha movido su torre si no, añade el enroque de ese lado como movimiento, 
-        // ademas de comprobar que las casillas intermedias esten vacias
-        if(pieza[0] === "blanco" && !comprobacionesEnroque["blanco-rey"] && !comprobacionesEnroque["blanco-torre-2"] && tableroDigital["g1"] === null && tableroDigital["f1"] === null) movimientosDirectos.push([2,0]);
-        if(pieza[0] === "blanco" && !comprobacionesEnroque["blanco-rey"] && !comprobacionesEnroque["blanco-torre-1"] && tableroDigital["d1"] === null && tableroDigital["c1"] === null && tableroDigital["b1"] === null) movimientosDirectos.push([-2,0]);
-        if(pieza[0] === "negro" && !comprobacionesEnroque["negro-rey"] && !comprobacionesEnroque["negro-torre-1"] && tableroDigital["d8"] === null && tableroDigital["c8"] === null && tableroDigital["b8"] === null) movimientosDirectos.push([-2,0]);
-        if(pieza[0] === "negro" && !comprobacionesEnroque["negro-rey"] && !comprobacionesEnroque["negro-torre-2"] && tableroDigital["g8"] === null && tableroDigital["f8"] === null ) movimientosDirectos.push([2,0]);
-    }
-
-            
-
-    
-    
     return movimientosPermitidos;
 }
 
@@ -477,11 +396,10 @@ function guardarMovimiento(movimientoPermitido){
     if(movimientoPermitido.pieza.id === "negro-rey") comprobacionesEnroque ["negro-rey"]= true;
     if(movimientoPermitido.pieza.id === "negro-torre-1") comprobacionesEnroque["negro-torre-1"] = true;
     if(movimientoPermitido.pieza.id === "negro-torre-2") comprobacionesEnroque["negro-torre-2"] = true;
-    console.warn(JSON.parse(JSON.stringify(movimientoPermitido)))
+
     let movimiento = movimientoPermitido;
     movimiento.jaque = jaque;
     movimiento.fotografiaEnroque = {...comprobacionesEnroque}
-    console.warn(JSON.parse(JSON.stringify(movimientoPermitido)))
 
     // let movimiento = {
     //     "pieza": movimientoPermitido.pieza,
@@ -497,96 +415,31 @@ function guardarMovimiento(movimientoPermitido){
 }
 
 
-// function validarMovimiento(piezaComida, piezaAgarrada, casillaDestino, casillasPermitidas, casillaInicio){
-//     console.log("validarMovimiento")
-//     let pieza = tableroDigital[casillaInicio.id]
-//     //Comprueba que el movimiento sea valido
-//     casillasPermitidas.forEach(casilla => {
-
-//         if (casillaDestino.id == casilla) {
-            
-//             //Comer pieza
-//             if (!(piezaComida == undefined)) piezaComida.remove();
-//             casillaDestino.appendChild(piezaAgarrada);
-//             //ENROQUES Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es en la columna g es el corto y el largo si es en c, 
-//             // Math.abs para valor absoluto ya que puede moverse -2
-//             let enroque;
-//             if (pieza.id.split("-")[1] === "rey" && Math.abs(numeroColumna[casillaInicio.id[0]] - numeroColumna[casillaDestino.id[0]]) == 2) {
-//                 let fila = casillaDestino.id[1];
-//                 if (casillaDestino.id[0] === "g") {
-//                     //Busca la casilla f1 o f8 dependiendo y inserta la torre correspondiente
-//                     document.getElementById("f" + fila).appendChild(document.getElementById(tableroDigital["h" + fila]));
-//                     //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
-//                     tableroDigital["f" + fila] = tableroDigital["h" + fila];
-//                     tableroDigital["h" + fila] = null;
-//                     enroque = "corto";
-//                 }
-//                 if (casillaDestino.id[0] === "c") {
-//                     //Busca la casilla f1 o f8 dependiendo y inserta la torre correspondiente
-//                     document.getElementById("d" + fila).appendChild(document.getElementById(tableroDigital["a" + fila]));
-//                     //Actualiza tablero en memoria con la jugada actual. Aqui cambiamos el orden para conseguir el nombre de la torre
-//                     tableroDigital["d" + fila] = tableroDigital["a" + fila];
-//                     tableroDigital["a" + fila] = null;
-//                     enroque = "largo";
-//                 }
-//             }
-//             //En passant
-//             if(movimientos.length > 0){
-//                 //Comprueba que la pieza movida sea un peon, si lo es comprueba si se mueve una casilla
-//                 if(pieza.id.split("-")[1] === "peon" && Math.abs(casillaInicio.id[1] - casillaDestino.id[1]) === 1){
-//                     //Calcula si se mueve a una columna adyacente, es decir en diagonal
-//                     if(letras[numeroColumna[casillaDestino.id[0]]] === letras[numeroColumna[casillaInicio.id[0]] + 1] || letras[numeroColumna[casillaDestino.id[0]]] === letras[numeroColumna[casillaInicio.id[0]] - 1]){ 
-//                         //Comprueba que la casilla en la que cae esta vacia porque si no podria ser una captura normal
-//                         if(tableroDigital[casillaDestino.id] === null){
-//                             //Guarda casilla donde esta el peon que se captura == columna de la casilla destino + fila casilla inicio
-//                             let casillaComer = document.getElementById(casillaDestino.id[0] + casillaInicio.id[1]);
-//                             //Selecciona el peon comido como pieza comida para guardarlo en la lista movimiento
-//                             piezaComida = casillaComer.querySelector(".pieza").id;
-//                             //Elimina la pieza(peon) que hay en esa casilla
-//                             casillaComer.querySelector(".pieza").remove();
-
-//                         }
-//                     }
-//                 }
-//             }
-//             //Guardar el movimiento en memoria
-//             guardarMovimiento(pieza, casillaDestino, piezaComida, enroque);
-
-//             //Actualiza tablero en memoria con la jugada actual
-//             tableroDigital[casillaInicio.id] = null;
-//             tableroDigital[casillaDestino.id] = piezaAgarrada.id;
-//         }
-//     });
-//         console.log("Termina")
-//     console.log(casillasPermitidas)
-// }
 
 //Calcula que casillas pueden comer las piezas del color distinto al tuyo
-function calcularCasillasAmenazadas(piezaAgarrada){
+function calcularCasillasAmenazadas(color){
     console.log("Calcular casillas amenazadas")
-    const casillasHTML = document.querySelectorAll(".casilla");
 
     //Reseteamos estilo de las casillas amenazadas
     let casillasPermitidasHTML = document.querySelectorAll(".casillaAmenazada");
     casillasPermitidasHTML.forEach(casilla => {
         casilla.classList.remove("casillaAmenazada");
     });
+    let casillasHTML = document.querySelectorAll(".casilla");
 
     let casillasAmenazadas = [];
+    let casillasEliminar = [];
     //Obtiene el color pieza agarrada
-    const color = piezaAgarrada.id.split("-")[0];
-
+    
     //Recorre tablero digital
     for (const [casilla, pieza] of Object.entries(tableroDigital)) {
         //Obtiene el elemento HTML de pieza y casilla
 
         //Cambiado porque uso pieza directamente en vez de html
-        // const piezaHTML = document.getElementById(piezaInstancia.id);
-        // const casillaHTML = document.getElementById(casillaTablero);
+        // const piezaHTML = document.getElementById(piezaAgarrada.id);
+        // const casillaHTML = document.getElementById(casilla);
         //Comprueba que haya pieza y que la pieza sea de color contrario
         if(pieza !== null && pieza.id.split("-")[0] !== color){
-
-            let casillasPermitidas;
             //Si hay pieza rival calcula sus movimientos (Si es un peon coge la diagonal porque devuelve movimientos hacia delante que no son amenazas)
             if(pieza.id.split("-")[1][0] === "p"){
                 let fila = parseInt(casilla[1]);
@@ -594,25 +447,27 @@ function calcularCasillasAmenazadas(piezaAgarrada){
                 let direccion = -1;
                 if(color === "negro") direccion = 1;
                 //Calcula que la diagonal exista y no se salga del tablero
-                if(tableroDigital[letras[numeroColumna[casilla[0]] - 1]+(fila+direccion)] != undefined) casillasAmenazadas.push(letras[numeroColumna[casilla[0]] - 1]+(fila+direccion));
-                if(tableroDigital[letras[numeroColumna[casilla[0]] + 1]+(fila+direccion)] != undefined) casillasAmenazadas.push(letras[numeroColumna[casilla[0]] + 1]+(fila+direccion));
-
+                if(tableroDigital[letras[numeroColumna[casilla[0]] - 1]+(fila+direccion)] !== undefined) casillasAmenazadas.push(letras[numeroColumna[casilla[0]] - 1]+(fila+direccion));
+                if(tableroDigital[letras[numeroColumna[casilla[0]] + 1]+(fila+direccion)] !== undefined) casillasAmenazadas.push(letras[numeroColumna[casilla[0]] + 1]+(fila+direccion));
             }else{
-                casillasPermitidas = calcularMovimientos(pieza, casilla);
+                let movimientosPermitidos = calcularMovimientos(pieza, casilla)
+                movimientosPermitidos.forEach(movimientoPermitido => {
+                    if(tableroDigital[movimientoPermitido.casillaDestino] !== undefined) casillasAmenazadas.push(movimientoPermitido.casillaDestino);
+                });
             }
             //Evita que si ningun peon amenaza haga un for each de casillas permitidas = undefined
-            if(casillasPermitidas != undefined){
+            if(casillasAmenazadas.length > 0){
                 //Recorre las casillas donde puede mover el rival
-                casillasPermitidas.forEach(casillaPermitida => {
+                casillasAmenazadas.forEach(casillaAmenazada => {
                     //Evita meter una casilla varias veces si la atacan diferentes piezas
-                    if(casillasAmenazadas.includes(casillaPermitida) === false) casillasAmenazadas.push(casillaPermitida);
+                    if(!(casillasEliminar.includes(casillaAmenazada))) casillasEliminar.push(casillaAmenazada);
                 });
+
             }
 
 
         }
     }
-
     //Añade la clase amenazada para marcar las casillas amenazadas por el rival
     // for(let i = 0; i < casillasHTML.length; i++){
     //     for(let j = 0; j < casillasAmenazadas.length; j++){
@@ -620,19 +475,15 @@ function calcularCasillasAmenazadas(piezaAgarrada){
     //             casillasHTML[i].classList.add("casillaAmenazada");
     //         }
     //     }
-    // }
-    console.log("Amenazadas:", JSON.parse(JSON.stringify(tableroDigital)));
-    
-    return casillasAmenazadas;
+    // }    
+    return casillasEliminar;
 }
 
 //Simula el movimiento de la pieza para comprobar si deja al rey en jaque
 function simularMovimiento(pieza, casillasPermitidas){
     console.log("Simular movimiento")
-    let casillaEliminar = [];
-    let color = piezaAgarrada.id.split("-")[0];
-    //Aqui se guarda el id de la pieza que ocupaba la casilla a la que simulamos el movimiento
-    let piezaAnterior;
+    let casillasEliminar = [];
+
 
     //Recorre casillas permitidas
     casillasPermitidas.forEach(casillaPermitida => {
@@ -640,68 +491,43 @@ function simularMovimiento(pieza, casillasPermitidas){
         if (pieza.id.split("-")[1] === "rey") {
             //ENROQUES Calculo si un rey se mueve mas de 1 casilla si es asi es enroque, si es en la columna g es el corto y el largo si es en c, 
             // Math.abs para valor absoluto ya que puede moverse -2
-            if(Math.abs(numeroColumna[pieza.casilla[0]] - numeroColumna[casillaPermitida[0]]) === 2){
+            // if(Math.abs(numeroColumna[pieza.casilla[0]] - numeroColumna[casillaPermitida.casillaDestino[0]]) === 2){
+            //     console.warn("enroque")
+            //     let jaque = avanzarPieza(pieza, casillaPermitida);
+            //     if(!jaque){
+            //         //Si la casilla destino es mayor que la inicio el enroque es a la derecha (enroque corto)
+            //         if (numeroColumna[casillaPermitida.casillaDestino[0]] > numeroColumna[pieza.casilla[0]]) {
+            //             //Si es enroque corto comprobamos la casilla destino y la de la izquierda
+            //             if (casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] + 1] + pieza.casilla[1]) || casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] + 2] + pieza.casilla[1])) casillasEliminar.push(casillaPermitida);
+            //         } else {
+            //             //Si es enroque largo comprobamos la casilla destino y la de la derecha
+            //             if (casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] - 1] + pieza.casilla[1]) || casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] - 2] + pieza.casilla[1])) casillasEliminar.push(casillaPermitida);
+            //         }
+            //     }
 
-                let casillasAmenazadas = calcularCasillasAmenazadas(pieza);
-                //Si esta en jaque eliminamos directamente porque no pude enrocar
-                if(casillasAmenazadas.includes(pieza.id)){
-                     casillaEliminar.push(casillaPermitida);
-                }else{
-                    //Si la casilla destino es mayor que la inicio el enroque es a la derecha (enroque corto)
-                    if (numeroColumna[casillaPermitida[0]] > numeroColumna[pieza.id[0]]) {
-                        //Si es enroque corto comprobamos la casilla destino y la de la izquierda
-                        if (casillasAmenazadas.includes(letras[numeroColumna[pieza.id[0]] + 1] + pieza.id[1]) | casillasAmenazadas.includes(letras[numeroColumna[pieza.id[0]] + 2] + pieza.id[1])) casillaEliminar.push(casillaPermitida);
-                    } else {
-                        //Si es enroque largo comprobamos la casilla destino y la de la derecha
-                        if (casillasAmenazadas.includes(letras[numeroColumna[pieza.id[0]] - 1] + pieza.id[1]) | casillasAmenazadas.includes(letras[numeroColumna[pieza.id[0]] - 2] + pieza.id[1])) casillaEliminar.push(casillaPermitida);
-                    }
-                }
-            }else{
-                //REPITO EL CODIGO PARA EL REY (MEJORABLE???)
-                //Avanza la pieza a la casilla permitida para calcular si deja en jaque al rey
-                tableroDigital[pieza] = null;
-                //Guarda la pieza que hay en la casilla que movemos
-                piezaAnterior = tableroDigital[casillaPermitida];
-                tableroDigital[casillaPermitida] = pieza;
-
-                let casillasAmenazadas = calcularCasillasAmenazadas(pieza);
-                //Calcula si al haber movido el rey está amenazado. Si lo esta lo añade a casillasEliminar
-                casillasAmenazadas.forEach(casillaAmenazada => {
-                    if (tableroDigital[casillaAmenazada].split("-")[1] === "rey" && color === tableroDigital[casillaAmenazada].split("-")[0] && !(casillaEliminar.includes(casillaAmenazada))) casillaEliminar.push(casillaPermitida);
-                });
-                //Devuelve la pieza a su inicio
-                tableroDigital[pieza] = pieza;
-                //Devuelve la pieza que habia en esa posicion
-                tableroDigital[casillaPermitida] = piezaAnterior;
-                }
-        } else {
-            avanzarPieza(pieza, casillaPermitida);
-
-            // //Avanza la pieza a la casilla permitida para calcular si deja en jaque al rey
-            // tableroDigital[pieza.casilla] = null;
-            // console.log(JSON.parse(JSON.stringify(tableroDigital[casillaPermitida])))
-
-            // //Guarda la pieza que hay en la casilla que movemos
-            // piezaAnterior = tableroDigital[casillaPermitida];
-            // tableroDigital[casillaPermitida] = pieza;
-            // tableroDigital[pieza.casilla] = null;
-
-            // let casillasAmenazadas = calcularCasillasAmenazadas(pieza);
-            
-            // //Calcula si al haber movido el rey está amenazado. Si lo esta lo añade a casillasEliminar
-            // casillasAmenazadas.forEach(casillaAmenazada => {
-            //     if (tableroDigital[casillaAmenazada].split("-")[1] === "rey" && color === tableroDigital[casillaAmenazada].split("-")[0] && !(casillaEliminar.includes(casillaAmenazada))) casillaEliminar.push(casillaPermitida);
-            // });
-            // //Devuelve la pieza a su inicio
-            // tableroDigital[pieza.casilla] = pieza;
-            // //Devuelve la pieza que habia en esa posicion
-            // tableroDigital[casillaPermitida] = piezaAnterior;
-
-        }
+            //     // let casillasAmenazadas = calcularCasillasAmenazadas(pieza);
+            //     //Si esta en jaque eliminamos directamente porque no pude enrocar
+            //     // if(casillasAmenazadas.includes(pieza.casilla)){
+            //     //      casillasEliminar.push(casillaPermitida);
+            //     // }else{
+            //     //     //Si la casilla destino es mayor que la inicio el enroque es a la derecha (enroque corto)
+            //     //     if (numeroColumna[casillaPermitida[0]] > numeroColumna[pieza.casilla[0]]) {
+            //     //         //Si es enroque corto comprobamos la casilla destino y la de la izquierda
+            //     //         if (casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] + 1] + pieza.casilla[1]) || casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] + 2] + pieza.casilla[1])) casillasEliminar.push(casillaPermitida);
+            //     //     } else {
+            //     //         //Si es enroque largo comprobamos la casilla destino y la de la derecha
+            //     //         if (casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] - 1] + pieza.casilla[1]) || casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] - 2] + pieza.casilla[1])) casillasEliminar.push(casillaPermitida);
+            //     //     }
+            //     // }
+            // }
+        } 
+        let jaque = avanzarPieza(pieza, casillaPermitida.casillaDestino);
+        if(jaque && !(casillasEliminar.includes(casillaPermitida))) casillasEliminar.push(casillaPermitida);
+        
     });
     // console.log("CasillasELiminar: " + casillaEliminar)
     //Filtra las casillas permitidas para quitar las que coinciden con casillaEliminar
-    let casillasPermitidasFiltradas = casillasPermitidas.filter(casillaPermitida => !(casillaEliminar.includes(casillaPermitida)));
+    let casillasPermitidasFiltradas = casillasPermitidas.filter(casillaPermitida => !(casillasEliminar.includes(casillaPermitida)));
     //Vaciamos las casillas de la pieza anterior
     casillasPermitidas.splice(0, casillasPermitidas.length);
     casillasPermitidas.push(...casillasPermitidasFiltradas);
@@ -710,6 +536,7 @@ function simularMovimiento(pieza, casillasPermitidas){
 }
 
 function avanzarPieza(pieza, casillaPermitida){
+    let jaque = false;
             //Guarda la pieza que hay en la casilla a la que nos movemos
             let piezaAnterior = tableroDigital[casillaPermitida];
 
@@ -720,13 +547,28 @@ function avanzarPieza(pieza, casillaPermitida){
             tableroDigital[casillaPermitida] = pieza;
 
             //Calcula las casillas amenazadas al mover
-            let casillasAmenazadas = calcularCasillasAmenazadas(pieza);
+            let casillasAmenazadas = calcularCasillasAmenazadas(pieza.color);
             //Calcula si al haber movido el rey está amenazado. Si lo esta lo añade a casillasEliminar
             casillasAmenazadas.forEach(casillaAmenazada => {
-                if (tableroDigital[casillaAmenazada] != null && tableroDigital[casillaAmenazada].id.split("-")[1] === "rey" && color === tableroDigital[casillaAmenazada].id.split("-")[0] && !(casillaEliminar.includes(casillaAmenazada))) casillaEliminar.push(casillaPermitida);
+                if (tableroDigital[casillaAmenazada] instanceof Rey && tableroDigital[casillaAmenazada].color === pieza.color) jaque = true;
             });
+
+            if(pieza instanceof Rey && !jaque ){
+                if(Math.abs(numeroColumna[pieza.casilla[0]] - numeroColumna[casillaPermitida[0]]) === 2){
+                    //Si la casilla destino es mayor que la inicio el enroque es a la derecha (enroque corto)
+                    if (numeroColumna[casillaPermitida[0]] > numeroColumna[pieza.casilla[0]]) {
+                        //Si es enroque corto comprobamos la casilla destino y la de la izquierda
+                        if (casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] + 1] + pieza.casilla[1]) || casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] + 2] + pieza.casilla[1])) jaque = true;
+                    } else {
+                        //Si es enroque largo comprobamos la casilla destino y la de la derecha
+                        if (casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] - 1] + pieza.casilla[1]) || casillasAmenazadas.includes(letras[numeroColumna[pieza.casilla[0]] - 2] + pieza.casilla[1])) jaque = true;
+                    }
+                }
+            }
+
             //Devuelve la pieza a su inicio
             tableroDigital[pieza.casilla] = pieza;
             //Devuelve la pieza que habia en esa posicion
             tableroDigital[casillaPermitida] = piezaAnterior;
+            return jaque;
 }

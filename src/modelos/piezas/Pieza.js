@@ -17,12 +17,13 @@ export class Pieza {
         console.log("Este método no se usa desde Pieza. Se tiene que implementar en la pieza correspondiente")
     }
 
-    movimientosDeslizantes(movimientos, tableroDigital, casilla) {
+    movimientosDeslizantes(movimientosDeslizantes, tableroDigital, casilla) {
         let movimientosPermitidos = [];
         let pieza = tableroDigital[casilla];
-        movimientos.forEach(movimiento => {
+        movimientosDeslizantes.forEach(movimiento => {
             //Mide hasta que distancia calcula en esa direccion
             let distancia = 1;
+            
             while (distancia < 8) {
                 let movimientoPermitido = {}
                 let columna = letras[letras.indexOf(casilla[0]) - movimiento[0] * distancia];
@@ -38,7 +39,8 @@ export class Pieza {
                     // casillasPermitidas.push(columna + fila);
                 }
                 
-                if (tableroDigital[columna + fila] != null && tableroDigital[columna + fila] != undefined && pieza.color != pieza.color) {
+                if(tableroDigital[columna + fila] != null) console.warn()
+                if (tableroDigital[columna + fila] != null && tableroDigital[columna + fila].color !== pieza.color) {
                     movimientoPermitido.captura = true;
                     movimientoPermitido.casillaCaptura = columna + fila;
                     movimientoPermitido.piezaCapturada = tableroDigital[columna+fila];
@@ -47,7 +49,7 @@ export class Pieza {
                     break
                 }
                 //Si no esta vacia y no hay un enemigo esque hay un aliado
-                if (tableroDigital[columna + fila] != null && tableroDigital[columna + fila] != undefined && tableroDigital[columna + fila].id[0] == pieza.id[0]) {
+                if (tableroDigital[columna + fila] != null && tableroDigital[columna + fila].color === pieza.color) {
                     break
                 }
                 distancia++;
@@ -57,7 +59,7 @@ export class Pieza {
         return movimientosPermitidos;
     }
 
-    movimientosDirectos(movimientosDirectos, casilla, tableroDigital){
+    movimientosDirectos(movimientosDirectos, tableroDigital, casilla){
         let movimientosPermitidos = [];
         let pieza = tableroDigital[casilla];
         let casillasPermitidas = [];
@@ -68,22 +70,30 @@ export class Pieza {
             movimientoPermitido.casillaInicio = casilla;
             movimientoPermitido.casillaDestino = columna+fila;
             movimientoPermitido.pieza = pieza;
+
             if(tableroDigital[columna+fila] === null){
-                //Si un peon se mueve a una casilla nula y avanza hacia un lado es captura al paso
-                if(pieza.id.split("-")[1] === "peon" && Math.abs(movimiento[0]) === 1) {
-                    movimientoPermitido.tipo = "captura-paso";
-                    movimientoPermitido.captura = true;
-                    movimientoPermitido.casillaCaptura = columna + casilla[1];
-                    movimientoPermitido.piezaCapturada = tableroDigital[columna+casilla[1]];
+                if(pieza.id.split("-")[1] === "peon"){
+                    //Si un peon se mueve a una casilla nula y avanza hacia un lado es captura al paso
+                    if(Math.abs(movimiento[0]) === 1) {
+                        movimientoPermitido.tipo = "captura-paso";
+                        movimientoPermitido.captura = true;
+                        movimientoPermitido.casillaCaptura = columna + casilla[1];
+                        movimientoPermitido.piezaCapturada = tableroDigital[columna+casilla[1]];
+                    }else{
+                        movimientoPermitido.tipo = "normal";
+                        movimientoPermitido.captura = false;
+                    }
                 }else{
                     movimientoPermitido.tipo = "normal";
                     movimientoPermitido.captura = false;
                 }
                 movimientosPermitidos.push(movimientoPermitido);
+
                 // casillasPermitidas.push(columna+fila);
             }
             //Calcula si es una casilla ocupada, dentro del tablero y de una pieza rival
-            if(tableroDigital[columna+fila] != null && tableroDigital[columna+fila] != undefined && tableroDigital[columna+fila].id.split("-")[0] != pieza.id.split("-")[0]){
+            //QUITADO  && tableroDigital[columna+fila] != undefined &&  SI FUNCIONA SIN ESO BORRAR
+            if(tableroDigital[columna+fila] != null && tableroDigital[columna+fila].color !== pieza.color){
                 movimientoPermitido.tipo = "normal";
                 movimientoPermitido.captura = true;
                 movimientoPermitido.casillaCaptura = columna + fila;
@@ -92,6 +102,7 @@ export class Pieza {
                 // casillasPermitidas.push(columna+fila);
             }
         });
+
         return movimientosPermitidos;
     }
 

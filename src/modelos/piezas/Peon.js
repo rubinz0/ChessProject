@@ -2,7 +2,6 @@ import { letras, numeroCasilla, letraCasilla, numeroColumna, movimientos } from 
 import { Pieza } from "./Pieza.js";
 export class Peon extends Pieza {
 
-
     constructor(id, color, casilla) {
         super(id, color, casilla);
     }
@@ -59,6 +58,6 @@ export class Peon extends Pieza {
             }
         } 
         //Casillas permitidas
-        return this.movimientosDirectos(movimientosDirectos, casilla, tableroDigital);
+        return this.movimientosDirectos(movimientosDirectos, tableroDigital, casilla);
     }
 }
