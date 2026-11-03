@@ -78,3 +78,5 @@ function calcularMovimientos(pieza){
 
 
 Cambiar en simular movimiento las casillas permitidas por movmientos permitidos para no liarme con "e4" o movimiento {casillaInicio: "e4"}
+
+Cuando enroco cambiar si la torre se ha movido true
