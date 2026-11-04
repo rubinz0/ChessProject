@@ -18,6 +18,7 @@ export class Pieza {
     }
 
     movimientosDeslizantes(movimientosDeslizantes, tableroDigital, casilla) {
+        //Guarda los objetos movimiento
         let movimientosPermitidos = [];
         let pieza = tableroDigital[casilla];
         movimientosDeslizantes.forEach(movimiento => {
@@ -29,22 +30,23 @@ export class Pieza {
                 let columna = letras[letras.indexOf(casilla[0]) - movimiento[0] * distancia];
                 let fila = parseInt(casilla[1]) + movimiento[1] * distancia;
 
+                //Asigna los valores de los atributos de movimientos permitido 
                 movimientoPermitido.casillaInicio = casilla;
                 movimientoPermitido.casillaDestino = columna+fila;
                 movimientoPermitido.pieza = pieza;
                 movimientoPermitido.tipo = "normal";
+
+                //Si no hay pieza en la casillaDestino asigna false a captura
                 if (tableroDigital[columna + fila] === null) {
                     movimientoPermitido.captura = false;
                     movimientosPermitidos.push(movimientoPermitido);
-                    // casillasPermitidas.push(columna + fila);
                 }
-                
-                if(tableroDigital[columna + fila] != null) console.warn()
+                //Si hay una pieza y no es del mismo color que la pieza, asigna la captura, su casilla, su pieza y añade el movimiento
                 if (tableroDigital[columna + fila] != null && tableroDigital[columna + fila].color !== pieza.color) {
                     movimientoPermitido.captura = true;
                     movimientoPermitido.casillaCaptura = columna + fila;
                     movimientoPermitido.piezaCapturada = tableroDigital[columna+fila];
-                    // casillasPermitidas.push(columna + fila);
+
                     movimientosPermitidos.push(movimientoPermitido);
                     break
                 }
@@ -60,18 +62,22 @@ export class Pieza {
     }
 
     movimientosDirectos(movimientosDirectos, tableroDigital, casilla){
+        //Guarda los objetos movimiento
         let movimientosPermitidos = [];
         let pieza = tableroDigital[casilla];
-        let casillasPermitidas = [];
         movimientosDirectos.forEach(movimiento => {
             let movimientoPermitido = {}
             let columna = letras[letras.indexOf(casilla[0]) + movimiento[0]];
             let fila = parseInt(casilla[1]) + movimiento[1];
+
+            //Asigna los valores de los atributos de movimientos permitido 
             movimientoPermitido.casillaInicio = casilla;
             movimientoPermitido.casillaDestino = columna+fila;
             movimientoPermitido.pieza = pieza;
 
+            //Si no hay pieza en la casillaDestino asigna false a captura
             if(tableroDigital[columna+fila] === null){
+                //Si es peon se separa porque tiene captura al paso
                 if(pieza.id.split("-")[1] === "peon"){
                     //Si un peon se mueve a una casilla nula y avanza hacia un lado es captura al paso
                     if(Math.abs(movimiento[0]) === 1) {
@@ -88,18 +94,15 @@ export class Pieza {
                     movimientoPermitido.captura = false;
                 }
                 movimientosPermitidos.push(movimientoPermitido);
-
-                // casillasPermitidas.push(columna+fila);
             }
-            //Calcula si es una casilla ocupada, dentro del tablero y de una pieza rival
-            //QUITADO  && tableroDigital[columna+fila] != undefined &&  SI FUNCIONA SIN ESO BORRAR
+            //Si hay una pieza y no es del mismo color que la pieza, asigna la captura, su casilla, su pieza y añade el movimiento
             if(tableroDigital[columna+fila] != null && tableroDigital[columna+fila].color !== pieza.color){
                 movimientoPermitido.tipo = "normal";
                 movimientoPermitido.captura = true;
                 movimientoPermitido.casillaCaptura = columna + fila;
                 movimientoPermitido.piezaCapturada = tableroDigital[columna+fila];
+                
                 movimientosPermitidos.push(movimientoPermitido);
-                // casillasPermitidas.push(columna+fila);
             }
         });
 

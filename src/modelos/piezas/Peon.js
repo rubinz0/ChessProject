@@ -11,7 +11,8 @@ export class Peon extends Pieza {
         let casilla = this.casilla;
         let piezaAgarrada = tableroDigital[casilla].id;
         let avance = 1;
-        if(piezaAgarrada.split("-")[0] === "negro"){
+        //Dependiendo del color asigna avance positivo o negativo
+        if(piezaAgarrada.color === "negro"){
             avance = -1;
         }
         let movimientosDirectos = [
@@ -19,12 +20,11 @@ export class Peon extends Pieza {
         ]
 
 
-        let color = piezaAgarrada[0];
         //Calcula si puede mover doble y la casilla donde puede haber una pieza ej: f4  f + 4-1  f3(Si hay una pieza no dejamos mover)
         if (!this.seHaMovido && tableroDigital[casilla[0] + (parseInt(casilla[1]) + avance)] === null && tableroDigital[casilla[0] + (parseInt(casilla[1]) + 2 * avance)] === null) {
             movimientosDirectos.push([0, 2*avance]);
         }
-        //Avanza hacia delante
+        //Avanza hacia delante si no hay una pieza
         if (tableroDigital[casilla[0] + (parseInt(casilla[1]) + avance)] === null) {
             movimientosDirectos.push([0, avance]);
         }
