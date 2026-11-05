@@ -7,10 +7,11 @@ export class Pieza {
     color;
     casilla;
     seHaMovido = false;
-    constructor(id, color, casilla) {
+    constructor(id, color, casilla, img) {
         this.id = id;
         this.color = color;     
         this.casilla = casilla; 
+        this.img = img;
     }
 
     calcularMovimientos(tableroDigital) {

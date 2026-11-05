@@ -68,6 +68,116 @@ function generarTablero(){
 }
 
 generarTablero();
+//rnbqkbnr/p3pppp/8/1p1p4/4P3/1N1K4/PPPP1PPP/R1B3NR w kq - 0 1
+let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+lectorFEN(fen);
+function lectorFEN(FEN){
+    let id = 0;
+    let contadorPiezas = {
+        blanco: { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 },
+        negro:  { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 }
+    }
+    
+    let fen = FEN.split(" ")[0];
+    console.log(fen)
+
+    let letras = ["a","b","c","d","e","f","g","h"];
+    let numeros = [8,7,6,5,4,3,2,1];
+
+
+    for(let i = 0; i < 64; i++){
+        tableroDigital[coordenadasArray[i]] =null;
+    }
+
+    let indiceLetras = 0;
+    let indiceNumeros = 0;
+    while(fen.length > 0){
+                        let pieza;
+
+
+        console.warn("indiceLetras: ", indiceLetras, " indiceNumeros: ", indiceNumeros)
+        if(fen[0] === "/") {
+            console.warn("/")
+
+                indiceLetras = 0;
+                indiceNumeros++;
+                
+            
+
+        }else{
+            if(!isNaN(parseInt(fen[0]))){
+                console.log(parseInt(fen[0]))
+                indiceLetras = indiceLetras + parseInt(fen[0]);
+                console.log(indiceNumeros)
+                console.warn("indiceLetras: ", indiceLetras, " indiceNumeros: ", indiceNumeros)
+
+            }else{
+                let fila = letras[indiceLetras];
+                let columna = numeros[indiceNumeros];
+                let casilla = fila + columna;
+                let letraMayuscula = fen[0].toUpperCase();
+                let color = "negro";
+                if(letraMayuscula === fen[0]) color = "blanco";
+
+
+                console.log("Casilla: ", fila+columna)
+                let imgURL = "/img/piezas/";
+
+                const piezasMapa = {
+                    R: { clase: Torre,   nombre: "torre"   },
+                    P: { clase: Peon,    nombre: "peon"    },
+                    N: { clase: Caballo, nombre: "caballo" },
+                    B: { clase: Alfil,   nombre: "alfil"   },
+                    Q: { clase: Dama,    nombre: "dama"    },
+                    K: { clase: Rey,     nombre: "rey"     }
+                };   
+                const piezaInfo = piezasMapa[letraMayuscula];
+                contadorPiezas[color][piezaInfo.nombre]++;
+                pieza = new piezaInfo.clase(color + "-" + piezaInfo.nombre + "-" + contadorPiezas[color][piezaInfo.nombre], color, casilla, imgURL + color + "-" + piezaInfo.nombre + ".webp");
+                console.log(pieza)
+                console.log(pieza instanceof Torre)
+                tableroDigital[casilla] = pieza;
+                indiceLetras++;
+
+            }
+            
+
+
+        }
+
+            fen = fen.slice(1);
+            console.log(fen)
+
+    }
+        
+console.log(tableroDigital)
+
+    
+    
+    
+}
+
+colocarPiezasHTML(tableroDigital)
+function colocarPiezasHTML(tableroDigital){
+    for(let i = 0; i < 64; i++){
+        let pieza = tableroDigital[coordenadasArray[i]];
+        if(pieza != null){
+            let casillaHTML = tablero.querySelector("#"+pieza.casilla);
+            
+            const piezaHTML = document.createElement("img");
+            piezaHTML.src = pieza.img;
+            piezaHTML.alt = pieza.id;
+            piezaHTML.className = "pieza";
+            piezaHTML.id = pieza.id;
+
+            //Desactiva la img de arrastrar
+            piezaHTML.draggable = "false";
+            piezaHTML.addEventListener("mousedown", clicarPieza);
+            casillaHTML.appendChild(piezaHTML);
+            console.warn("a")
+        }
+    }
+}
 
 function colocarPiezas(){
     let id = 0;
@@ -165,8 +275,8 @@ function colocarPiezas(){
 
 }
 
-colocarPiezas();
-
+// colocarPiezas();
+console.log(tableroDigital)
 
 //Variables de pieza, para pasarlas entre mouseDown y mouseMove es decir que cuando mueva la pieza la funcion de clicar pieza 
 // no desaparezca los datos si no que los pase a una variable local

@@ -2,8 +2,8 @@ import { Pieza } from "./Pieza.js";
 import { comprobacionesEnroque } from "../../utilidades.js";
 
 export class Rey extends Pieza {
-    constructor(id, color, casilla) {
-        super(id, color, casilla);
+    constructor(id, color, casilla, img) {
+        super(id, color, casilla, img);
     }
 
     calcularMovimientos(tableroDigital) {

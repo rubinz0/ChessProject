@@ -2,8 +2,8 @@ import { letras, numeroCasilla, letraCasilla, numeroColumna, movimientos } from 
 import { Pieza } from "./Pieza.js";
 export class Peon extends Pieza {
 
-    constructor(id, color, casilla) {
-        super(id, color, casilla);
+    constructor(id, color, casilla, img) {
+        super(id, color, casilla, img);
     }
 
 

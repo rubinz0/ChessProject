@@ -80,3 +80,10 @@ function calcularMovimientos(pieza){
 Cambiar en simular movimiento las casillas permitidas por movmientos permitidos para no liarme con "e4" o movimiento {casillaInicio: "e4"}
 
 Cuando enroco cambiar si la torre se ha movido true
+
+
+const contadorPiezas = {
+    blanco: { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 },
+    negro:  { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 }
+};
+contadorPiezas["blanco"]["torre"]++
