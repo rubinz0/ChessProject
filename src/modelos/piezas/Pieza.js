@@ -106,7 +106,6 @@ export class Pieza {
                 movimientosPermitidos.push(movimientoPermitido);
             }
         });
-
         return movimientosPermitidos;
     }
 

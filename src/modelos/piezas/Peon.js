@@ -12,9 +12,10 @@ export class Peon extends Pieza {
         let piezaAgarrada = tableroDigital[casilla].id;
         let avance = 1;
         //Dependiendo del color asigna avance positivo o negativo
-        if(piezaAgarrada.color === "negro"){
+        if(tableroDigital[casilla].color === "negro"){
             avance = -1;
         }
+
         let movimientosDirectos = [
 
         ]

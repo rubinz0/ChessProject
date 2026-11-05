@@ -72,19 +72,20 @@ generarTablero();
 let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 lectorFEN(fen);
 function lectorFEN(FEN){
-    let id = 0;
+    //Aqui se cuentan cuantas piezas hay de cada tipo para su id
     let contadorPiezas = {
         blanco: { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 },
         negro:  { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 }
     }
     
+    //Separa la colocacion de las piezas del resto de datos 
     let fen = FEN.split(" ")[0];
-    console.log(fen)
 
+    //Listas para montar la casilla
     let letras = ["a","b","c","d","e","f","g","h"];
     let numeros = [8,7,6,5,4,3,2,1];
 
-
+    //Rellena de null todas las casillas como base
     for(let i = 0; i < 64; i++){
         tableroDigital[coordenadasArray[i]] =null;
     }
@@ -92,37 +93,32 @@ function lectorFEN(FEN){
     let indiceLetras = 0;
     let indiceNumeros = 0;
     while(fen.length > 0){
-                        let pieza;
+        let pieza;
 
-
-        console.warn("indiceLetras: ", indiceLetras, " indiceNumeros: ", indiceNumeros)
-        if(fen[0] === "/") {
-            console.warn("/")
-
-                indiceLetras = 0;
-                indiceNumeros++;
-                
-            
-
+        //Si hay una barra salta una fila y pone la columna a cero
+        if (fen[0] === "/") {
+            indiceLetras = 0;
+            indiceNumeros++;
         }else{
+            //Si es un numero añade salta tantas casillas como el valor del numero sea
             if(!isNaN(parseInt(fen[0]))){
-                console.log(parseInt(fen[0]))
                 indiceLetras = indiceLetras + parseInt(fen[0]);
-                console.log(indiceNumeros)
-                console.warn("indiceLetras: ", indiceLetras, " indiceNumeros: ", indiceNumeros)
-
             }else{
+                //Si no es un numero es la letra de la pieza a colocar
                 let fila = letras[indiceLetras];
                 let columna = numeros[indiceNumeros];
                 let casilla = fila + columna;
+                //Pasa a mayuscula 
                 let letraMayuscula = fen[0].toUpperCase();
+                
+                //Si coincide a su letra sin modificar estaba en mayuscula por lo que es una pieza blanca
                 let color = "negro";
                 if(letraMayuscula === fen[0]) color = "blanco";
 
 
-                console.log("Casilla: ", fila+columna)
                 let imgURL = "/img/piezas/";
 
+                //Este diccionario sirve para acceder a la informacion dependiendo de la letra que sea (Ahorra un if por cada clase)
                 const piezasMapa = {
                     R: { clase: Torre,   nombre: "torre"   },
                     P: { clase: Peon,    nombre: "peon"    },
@@ -131,37 +127,34 @@ function lectorFEN(FEN){
                     Q: { clase: Dama,    nombre: "dama"    },
                     K: { clase: Rey,     nombre: "rey"     }
                 };   
+
+                //Con esta sola linea obtenemos la clase y el nombre
                 const piezaInfo = piezasMapa[letraMayuscula];
+                
+                //Suma uno al contador de piezas de su clase
                 contadorPiezas[color][piezaInfo.nombre]++;
+
+                //Instancia la pieza
                 pieza = new piezaInfo.clase(color + "-" + piezaInfo.nombre + "-" + contadorPiezas[color][piezaInfo.nombre], color, casilla, imgURL + color + "-" + piezaInfo.nombre + ".webp");
-                console.log(pieza)
-                console.log(pieza instanceof Torre)
+                //Coloca la pieza en el tableroDigital
                 tableroDigital[casilla] = pieza;
+
                 indiceLetras++;
-
             }
-            
-
-
         }
-
-            fen = fen.slice(1);
-            console.log(fen)
-
+        //Quit la letra que se acaba de analizar
+        fen = fen.slice(1);
     }
-        
-console.log(tableroDigital)
-
-    
-    
-    
 }
 
 colocarPiezasHTML(tableroDigital)
 function colocarPiezasHTML(tableroDigital){
+    //Recorre todas las casillas
     for(let i = 0; i < 64; i++){
         let pieza = tableroDigital[coordenadasArray[i]];
+        //Si hay una pieza la genera
         if(pieza != null){
+            //Obtiene el html asociado a la casilla ej "e4"
             let casillaHTML = tablero.querySelector("#"+pieza.casilla);
             
             const piezaHTML = document.createElement("img");
@@ -500,10 +493,10 @@ function guardarMovimiento(movimientoPermitido){
         if(tablero.querySelector("#"+movimiento.casillaDestino).querySelector(".pieza") != null && tablero.querySelector("#"+movimiento.casillaDestino).querySelector(".pieza").id.split("-")[1] === "rey") jaque = true;
     });
     //Si movemos algun rey o torre lo guardamos para saber si podemos enrocar
-    if(movimientoPermitido.pieza.id === "blanco-rey") comprobacionesEnroque["blanco-rey"] = true;
+    if(movimientoPermitido.pieza.id === "blanco-rey-1") comprobacionesEnroque["blanco-rey-1"] = true;
     if(movimientoPermitido.pieza.id === "blanco-torre-1") comprobacionesEnroque["blanco-torre-1"] = true;
     if(movimientoPermitido.pieza.id === "blanco-torre-2") comprobacionesEnroque["blanco-torre-2"] = true;
-    if(movimientoPermitido.pieza.id === "negro-rey") comprobacionesEnroque ["negro-rey"]= true;
+    if(movimientoPermitido.pieza.id === "negro-rey-1") comprobacionesEnroque ["negro-rey-1"]= true;
     if(movimientoPermitido.pieza.id === "negro-torre-1") comprobacionesEnroque["negro-torre-1"] = true;
     if(movimientoPermitido.pieza.id === "negro-torre-2") comprobacionesEnroque["negro-torre-2"] = true;
 
@@ -600,6 +593,7 @@ function simularMovimiento(pieza, casillasPermitidas){
 
 //Sirve para comprobar que no halla un jaque al terminar una jugada ya que seria dejar al rey en jaque y mover o mover un rey a una casilla en jaque
 function avanzarPieza(pieza, casillaPermitida){
+    console.log("Avanzar pieza")
     let jaque = false;
     //Guarda la pieza que hay en la casilla a la que nos movemos
     let piezaAnterior = tableroDigital[casillaPermitida];
