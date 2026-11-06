@@ -68,10 +68,20 @@ function generarTablero(){
 }
 
 generarTablero();
+
+const inputFEN = document.getElementById("FEN");
+const cargarFEN = document.getElementById("cargarFEN");
+inputFEN.value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+cargarFEN.addEventListener("click", function(){
+    lectorFEN(inputFEN.value);
+    colocarPiezasHTML(tableroDigital);
+});
+
 //rnbqkbnr/p3pppp/8/1p1p4/4P3/1N1K4/PPPP1PPP/R1B3NR w kq - 0 1
 let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 lectorFEN(fen);
 function lectorFEN(FEN){
+    console.log(inputFEN.value)
     //Aqui se cuentan cuantas piezas hay de cada tipo para su id
     let contadorPiezas = {
         blanco: { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 },
@@ -149,6 +159,15 @@ function lectorFEN(FEN){
 
 colocarPiezasHTML(tableroDigital)
 function colocarPiezasHTML(tableroDigital){
+    //Recoge todas las piezas del tablero si hay (Por si cambias de FEN habiendo uno ya cargado)
+    const piezas = tablero.querySelectorAll(".pieza");
+    if(piezas.length > 0) {
+        //Las elimina para limpiar el tablero
+        piezas.forEach(piezaHTML => {
+           piezaHTML.remove();
+        });
+    }
+
     //Recorre todas las casillas
     for(let i = 0; i < 64; i++){
         let pieza = tableroDigital[coordenadasArray[i]];
@@ -167,108 +186,11 @@ function colocarPiezasHTML(tableroDigital){
             piezaHTML.draggable = "false";
             piezaHTML.addEventListener("mousedown", clicarPieza);
             casillaHTML.appendChild(piezaHTML);
-            console.warn("a")
         }
     }
 }
 
-function colocarPiezas(){
-    let id = 0;
-    const idPiezas = ["negro-torre-1","negro-caballo-1","negro-alfil-1","negro-dama","negro-rey","negro-alfil-2","negro-caballo-2","negro-torre-2",
-        "negro-peon-1","negro-peon-2","negro-peon-3","negro-peon-4","negro-peon-5","negro-peon-6","negro-peon-7","negro-peon-8","blanco-peon-1",
-        "blanco-peon-2","blanco-peon-3","blanco-peon-4","blanco-peon-5","blanco-peon-6","blanco-peon-7","blanco-peon-8","blanco-torre-1",
-        "blanco-caballo-1","blanco-alfil-1","blanco-dama","blanco-rey","blanco-alfil-2","blanco-caballo-2","blanco-torre-2",
-        ];
-    const casillas = document.querySelectorAll(".casilla");
-    for(let i = 0; i < 64; i++){
-        let nombrePieza = "none";
-        let color;
-        let pieza;
-        //Casillas negras
-        if(i < 16){
-            color = "negro";
-        }else{
-            color = "blanco";
-        }
-        if(i > 7 && i < 16){
-            nombrePieza = "peonNegro";
-            pieza = new Peon(idPiezas[id], color, coordenadasArray[i]);
-        }
-        if(i == 0 | i == 7){
-            nombrePieza = "torreNegra";
-            pieza = new Torre(idPiezas[id], color, coordenadasArray[i]);
-        }
-        if(i == 1 | i == 6){
-            nombrePieza = "caballoNegro";
-            pieza = new Caballo(idPiezas[id], color, coordenadasArray[i]);
-        }
-        if(i == 2 | i == 5){
-            nombrePieza = "alfilNegro";
-            pieza = new Alfil(idPiezas[id], color, coordenadasArray[i]);
-        }
-        if(i == 3){
-            nombrePieza = "damaNegra";
-            pieza = new Dama(idPiezas[id], color, coordenadasArray[i]);
-        }
-        if(i == 4){
-            nombrePieza = "reyNegro";
-            pieza = new Rey(idPiezas[id], color, coordenadasArray[i]);
-        }
 
-        //Casillas blancas
-        if(i > 47 && i < 56){
-            nombrePieza = "peonBlanco";
-            pieza = new Peon(idPiezas[id], color, coordenadasArray[i]);
-        }
-        if(i == 56 | i == 63){
-            nombrePieza = "torreBlanca";
-            pieza = new Torre(idPiezas[id], color, coordenadasArray[i]);
-        }
-        if(i == 57 | i == 62){
-            nombrePieza = "caballoBlanco";
-            pieza = new Caballo(idPiezas[id], color, coordenadasArray[i]);
-        }
-        if(i == 58 | i == 61){
-            nombrePieza = "alfilBlanco";
-            pieza = new Alfil(idPiezas[id], color, coordenadasArray[i]);
-        }
-        if(i == 59){
-            nombrePieza = "damaBlanca";
-            pieza = new Dama(idPiezas[id], color, coordenadasArray[i]);
-        }
-        if(i == 60){
-            nombrePieza = "reyBlanco";
-            pieza = new Rey(idPiezas[id], color, coordenadasArray[i]);
-        }
-        if(pieza != undefined) pieza.img = "/img/piezas/" + nombrePieza + ".webp";
-        //Colocar la imagen en la casilla seleccionada
-        if(!(nombrePieza == "none")){
-            tableroDigital[coordenadasArray[i]] = pieza;
-            const piezaHTML = document.createElement("img");
-            const src = pieza.img;
-            piezaHTML.src = src;
-            piezaHTML.alt = nombrePieza;
-            piezaHTML.className = "pieza";
-            piezaHTML.id = pieza.id;
-            id++;
-
-            //Desactiva la img de arrastrar
-            piezaHTML.draggable = "false";
-            piezaHTML.addEventListener("mousedown", clicarPieza);
-            casillas[i].appendChild(piezaHTML);
-
-
-
-        }else{
-            // Colocar null en casillas tablero digital (Diccionario)
-            tableroDigital[coordenadasArray[i]] = null;
-        }
-        
-    }
-
-}
-
-// colocarPiezas();
 console.log(tableroDigital)
 
 //Variables de pieza, para pasarlas entre mouseDown y mouseMove es decir que cuando mueva la pieza la funcion de clicar pieza 
@@ -364,7 +286,7 @@ function soltarClick(evento){
         movimientosPermitidos.splice(0, movimientosPermitidos.length, ...simularMovimiento(pieza, movimientosPermitidos));
         
         //Recorre los movimientos permitidos y validados
-        movimientosPermitidos.forEach(movimientoPermitido => {
+        movimientosPermitidos.forEach(async movimientoPermitido => {
             //Si la casilla donde sueltas la pieza esta como casilla destino de algun movimiento ejecuta el movimiento
             if(casillaDestino.id === movimientoPermitido.casillaDestino){
                 let enroque = false;
@@ -409,6 +331,24 @@ function soltarClick(evento){
                         movimientoPermitido.tipo = "enroque-largo";
                     }
                 } 
+
+                if(movimientoPermitido.tipo === "coronacion"){
+                    const piezaElegida = await abrirModalCoronacion("blanco");
+                    console.log("El usuario eligió:", piezaElegida);
+                    casillaDestino.classList.add("anim-arcano");
+                    casillaDestino.style.position = "relative";
+
+                    const efecto = document.createElement("div");
+                    efecto.classList.add("efecto-animacion");
+                    casillaDestino.appendChild(efecto);
+                    setTimeout(() => {
+                    efecto.remove();
+                    }, 350);
+                    // Se retira la clase al terminar la animación para dejar el DOM limpio:
+                    setTimeout(() => {
+                    casillaDestino.classList.remove("anim-arcano");
+                    }, 400);
+                }else{
                 //Actualiza tablero en memoria con la jugada actual
                 //Vacia la casilla de inicio
                 tableroDigital[casillaInicio.id] = null;
@@ -424,6 +364,8 @@ function soltarClick(evento){
 
                 //Añade la piezaHTML a su casillaHTML
                 casillaDestino.appendChild(piezaAgarrada);
+                }
+                
             }
         });
 
@@ -631,4 +573,45 @@ function avanzarPieza(pieza, casillaPermitida){
     //Devuelve la pieza que habia en esa posicion
     tableroDigital[casillaPermitida] = piezaAnterior;
     return jaque;
+}
+
+const modalCoronacion = document.getElementById("modalCoronacion");
+const opcionesPiezas = document.querySelectorAll(".opcion-pieza");
+
+// Función para abrir el modal y esperar la selección del jugador
+function abrirModalCoronacion(color) {
+  // 1. Asignamos la ruta de las imágenes según el color del peón que corona
+  document.getElementById("img-dama").src = `/img/piezas/${color}-dama.webp`;
+  document.getElementById("img-torre").src = `/img/piezas/${color}-torre.webp`;
+  document.getElementById("img-alfil").src = `/img/piezas/${color}-alfil.webp`;
+  document.getElementById("img-caballo").src = `/img/piezas/${color}-caballo.webp`;
+
+  // 2. Mostramos el modal retirando la clase que lo oculta
+  modalCoronacion.classList.remove("oculto");
+
+  // 3. Devolvemos una promesa que esperará a que el usuario pinche una opción
+  return new Promise((resolve) => {
+    function manejarSeleccion(e) {
+      const tipoElegido = e.currentTarget.dataset.pieza; // "dama", "torre", "alfil" o "caballo"
+
+      // Limpiamos los listeners para que no se acumulen clics en futuras coronaciones
+      opcionesPiezas.forEach((opcion) => {
+        opcion.removeEventListener("click", manejarSeleccion);
+      });
+
+      // Cerramos el modal
+      cerrarModalCoronacion();
+
+      // Resolvemos entregando el tipo elegido a quien llamó a la función
+      resolve(tipoElegido);
+    }
+
+    opcionesPiezas.forEach((opcion) => {
+      opcion.addEventListener("click", manejarSeleccion);
+    });
+  });
+}
+
+function cerrarModalCoronacion() {
+  modalCoronacion.classList.add("oculto");
 }

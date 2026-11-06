@@ -9,9 +9,32 @@
     <nav class="navbar">
         <div id="home">Home</div>
     </nav>
+    <input type="text" id="FEN">
+    <button id="cargarFEN">Cargar</button>
     <div id="tablero">
     </div>
     <div id="contenedorPGN">PGN: </div>
+
+    <div id="modalCoronacion" class="modal-overlay oculto">
+  <div class="modal-contenedor">
+    <p>⚔️ Elige tu pieza 🛡️</p>
+    
+    <div class="opciones-grid">
+      <div class="opcion-pieza" data-pieza="dama">
+        <img id="img-dama" src="" alt="Dama" />
+      </div>
+      <div class="opcion-pieza" data-pieza="torre">
+        <img id="img-torre" src="" alt="Torre" />
+      </div>
+      <div class="opcion-pieza" data-pieza="alfil">
+        <img id="img-alfil" src="" alt="Alfil" />
+      </div>
+      <div class="opcion-pieza" data-pieza="caballo">
+        <img id="img-caballo" src="" alt="Caballo" />
+      </div>
+    </div>
+  </div>
+</div>
     <script src="src/main.js" type="module"></script>
 </body>
 </html>

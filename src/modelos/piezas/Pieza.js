@@ -78,7 +78,7 @@ export class Pieza {
 
             //Si no hay pieza en la casillaDestino asigna false a captura
             if(tableroDigital[columna+fila] === null){
-                //Si es peon se separa porque tiene captura al paso
+                //Si es peon se separa porque tiene captura al paso y coronacion
                 if(pieza.id.split("-")[1] === "peon"){
                     //Si un peon se mueve a una casilla nula y avanza hacia un lado es captura al paso
                     if(Math.abs(movimiento[0]) === 1) {
@@ -87,8 +87,13 @@ export class Pieza {
                         movimientoPermitido.casillaCaptura = columna + casilla[1];
                         movimientoPermitido.piezaCapturada = tableroDigital[columna+casilla[1]];
                     }else{
-                        movimientoPermitido.tipo = "normal";
-                        movimientoPermitido.captura = false;
+                        //Si un peon esta en la fila 1 o 8 esta coronando (REPETIDO EN CAPTURA)
+                        if(fila === 1 || fila === 8) {
+                            movimientoPermitido.tipo = "coronacion"
+                        }else{
+                            movimientoPermitido.tipo = "normal";
+                            movimientoPermitido.captura = false;
+                        }
                     }
                 }else{
                     movimientoPermitido.tipo = "normal";
@@ -102,7 +107,10 @@ export class Pieza {
                 movimientoPermitido.captura = true;
                 movimientoPermitido.casillaCaptura = columna + fila;
                 movimientoPermitido.piezaCapturada = tableroDigital[columna+fila];
-                
+                //Si un peon esta en la fila 1 o 8 esta coronando (REPETIDO SIN CAPTURA)
+                if (fila === 1 || fila === 8) {
+                    movimientoPermitido.tipo = "coronacion"
+                }
                 movimientosPermitidos.push(movimientoPermitido);
             }
         });
