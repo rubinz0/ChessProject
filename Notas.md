@@ -181,6 +181,9 @@ Cambiar en simular movimiento las casillas permitidas por movmientos permitidos 
 Cuando enroco cambiar si la torre se ha movido true
 
 
+
+
+
 const contadorPiezas = {
     blanco: { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 },
     negro:  { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 }
@@ -368,3 +371,8 @@ CSS
     opacity: 1;
   }
 }
+
+
+
+
+cambiar el movimiento.tipo = enroque en pieza en vez de main igual que captura al paso

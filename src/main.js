@@ -5,7 +5,7 @@ import { Alfil } from './modelos/piezas/Alfil.js';
 import { Dama } from './modelos/piezas/Dama.js';
 import { Rey } from './modelos/piezas/Rey.js';
 
-import { letras, numeroColumna, movimientos, comprobacionesEnroque } from "./utilidades.js";
+import { letras, numeroColumna, movimientos, comprobacionesEnroque, contadorPiezas } from "./utilidades.js";
 import { Pieza } from './modelos/piezas/Pieza.js';
 const tablero = document.getElementById("tablero");
 const PGN = [];
@@ -78,15 +78,14 @@ cargarFEN.addEventListener("click", function(){
 });
 
 //rnbqkbnr/p3pppp/8/1p1p4/4P3/1N1K4/PPPP1PPP/R1B3NR w kq - 0 1
-let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+//r1bqkbn1/pppp1ppP/2n5/4p3/4P3/5N2/PPPP1PP1/RNBQKB1R w KQq - 0 1
+//rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+let fen = "r1bqkbn1/pppp1ppP/2n5/4p3/4P3/5N2/PPPP1PP1/RNBQKB1R w KQq - 0 1";
 lectorFEN(fen);
 function lectorFEN(FEN){
     console.log(inputFEN.value)
     //Aqui se cuentan cuantas piezas hay de cada tipo para su id
-    let contadorPiezas = {
-        blanco: { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 },
-        negro:  { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 }
-    }
+
     
     //Separa la colocacion de las piezas del resto de datos 
     let fen = FEN.split(" ")[0];
@@ -254,14 +253,15 @@ function moverPieza(evento){
 
 }
 
-
+let procesandoJugada = false;
 document.addEventListener("mouseup", soltarClick);
-function soltarClick(evento){
+async function soltarClick(evento){
+    console.warn("Soltar", procesandoJugada)
     let casillaInicio = evento.target.parentElement;
     let pieza = tableroDigital[casillaInicio.id];
 
     let casillaDestino;
-    if(piezaAgarrada === null){
+    if(piezaAgarrada === null || procesandoJugada){
         return;
     }if(!(piezaAgarrada === null)){
         //Con esto hacemos que se suelte la pieza y reseteamos sus valores para que no pase por encima de otras y este en la misma capa que la casilla        piezaAgarrada.style.position = "";
@@ -286,10 +286,9 @@ function soltarClick(evento){
         movimientosPermitidos.splice(0, movimientosPermitidos.length, ...simularMovimiento(pieza, movimientosPermitidos));
         
         //Recorre los movimientos permitidos y validados
-        movimientosPermitidos.forEach(async movimientoPermitido => {
+        for(const movimientoPermitido of movimientosPermitidos) {
             //Si la casilla donde sueltas la pieza esta como casilla destino de algun movimiento ejecuta el movimiento
             if(casillaDestino.id === movimientoPermitido.casillaDestino){
-                let enroque = false;
                 //AL CAMBIAR CASILLA POR INSTANCIA NO HACE FALTA CASILLA COMER DIRECTAMENTE SE PONE LA CASILLA SIN #
                 //
                 //-------------------------------
@@ -331,24 +330,62 @@ function soltarClick(evento){
                         movimientoPermitido.tipo = "enroque-largo";
                     }
                 } 
+                //Resetea los estilos
+                piezaAgarrada.style.position = "";
+                piezaAgarrada.zIndex = "";
+                //Añade la piezaHTML a su casillaHTML
+                casillaDestino.appendChild(piezaAgarrada);
+                piezaAgarrada.style.visibility = "visible";
+                //Reseteamos estilo de las casillas a las que podemos mover
+                let casillasPermitidasHTML = document.querySelectorAll(".casillaPermitida");
+                casillasPermitidasHTML.forEach(casilla => {
+                    casilla.classList.remove("casillaPermitida");
+                });
 
-                if(movimientoPermitido.tipo === "coronacion"){
-                    const piezaElegida = await abrirModalCoronacion("blanco");
-                    console.log("El usuario eligió:", piezaElegida);
+        if(movimientoPermitido.tipo === "coronacion"){
+            procesandoJugada = true;
+
+                    let color = movimientoPermitido.pieza.color;
+                    pieza = await abrirModalCoronacion(color);
+                    const clases = {
+                        "dama": Dama,
+                        "torre": Torre,
+                        "alfil": Alfil,
+                        "caballo": Caballo
+                    }
+
+                    
+                        // 2. Generar el nuevo ID y la ruta de imagen
+                    contadorPiezas[color][pieza]++
+                    const nuevoId = `${color}-${pieza}-${contadorPiezas[color][pieza]}`;
+                    const nuevaImg = `/img/piezas/${color}-${pieza}.webp`;
+
+                            console.warn(nuevoId, nuevaImg)
+                            // 3. Instanciar y actualizar
+                    pieza = new clases[pieza](nuevoId, color, movimientoPermitido.casillaDestino, nuevaImg);
+                    console.warn(pieza)
+                    movimientoPermitido.piezaAntesCoronar = movimientoPermitido.pieza;
+                    movimientoPermitido.pieza = pieza;
+
+                    // tableroDigital[casillaDestino] = pieza;
+                    piezaAgarrada.src = pieza.img;
+
                     casillaDestino.classList.add("anim-arcano");
                     casillaDestino.style.position = "relative";
 
                     const efecto = document.createElement("div");
-                    efecto.classList.add("efecto-animacion");
+                    efecto.classList.add("efecto-animacion", "fusion");
                     casillaDestino.appendChild(efecto);
+
+                    // Si quieres animar la entrada de la imagen:
+                    piezaAgarrada.classList.add("pieza-spawn");
+                    let imgPieza = piezaAgarrada;
                     setTimeout(() => {
                     efecto.remove();
+                        imgPieza.classList.remove("pieza-spawn");
                     }, 350);
-                    // Se retira la clase al terminar la animación para dejar el DOM limpio:
-                    setTimeout(() => {
-                    casillaDestino.classList.remove("anim-arcano");
-                    }, 400);
-                }else{
+                    console.warn(movimientoPermitido)
+                }
                 //Actualiza tablero en memoria con la jugada actual
                 //Vacia la casilla de inicio
                 tableroDigital[casillaInicio.id] = null;
@@ -358,34 +395,29 @@ function soltarClick(evento){
                 pieza.casilla = casillaDestino.id;
                 //Si la pieza no se habia movido la marca como pieza movida
                 if(!pieza.seHaMovido) pieza.seHaMovido = true;
-                
+                console.log(movimientoPermitido)
+                console.warn(JSON.parse(JSON.stringify(tableroDigital)))
                 //Guardar el movimiento en memoria
                 guardarMovimiento(movimientoPermitido);
 
-                //Añade la piezaHTML a su casillaHTML
-                casillaDestino.appendChild(piezaAgarrada);
-                }
+                
+
                 
             }
-        });
+        };
+                        procesandoJugada = false;
+                piezaAgarrada = null;
 
-        piezaAgarrada.style.visibility = "visible";
-        piezaAgarrada = null;
 
-
-        //Reseteamos estilo de las casillas a las que podemos mover
-        let casillasPermitidasHTML = document.querySelectorAll(".casillaPermitida");
-        casillasPermitidasHTML.forEach(casilla => {
-            casilla.classList.remove("casillaPermitida");
-        });
     }
-
 }
 
 
 function calcularMovimientos(pieza){
     console.log("Calcular movimientos");
     let movimientosPermitidos = [];
+    console.log(pieza)
+    console.log(JSON.parse(JSON.stringify(tableroDigital)))
     movimientosPermitidos.push(...pieza.calcularMovimientos(tableroDigital));
 
     return movimientosPermitidos;
@@ -423,7 +455,6 @@ function generarPGN(movimiento){
     }
     //Añade el movimiento al html
     contenedorPGN.textContent = contenedorPGN.textContent + pieza+casilla + " + ";
-    
 }
 
 function guardarMovimiento(movimientoPermitido){
@@ -446,7 +477,6 @@ function guardarMovimiento(movimientoPermitido){
     let movimiento = movimientoPermitido;
     movimiento.jaque = jaque;
     movimiento.fotografiaEnroque = {...comprobacionesEnroque}
-
     movimientos.push(movimiento);
     generarPGN(movimiento);
 }
@@ -592,7 +622,9 @@ function abrirModalCoronacion(color) {
   // 3. Devolvemos una promesa que esperará a que el usuario pinche una opción
   return new Promise((resolve) => {
     function manejarSeleccion(e) {
-      const tipoElegido = e.currentTarget.dataset.pieza; // "dama", "torre", "alfil" o "caballo"
+
+
+
 
       // Limpiamos los listeners para que no se acumulen clics en futuras coronaciones
       opcionesPiezas.forEach((opcion) => {
@@ -603,7 +635,7 @@ function abrirModalCoronacion(color) {
       cerrarModalCoronacion();
 
       // Resolvemos entregando el tipo elegido a quien llamó a la función
-      resolve(tipoElegido);
+      resolve(e.currentTarget.dataset.pieza);
     }
 
     opcionesPiezas.forEach((opcion) => {

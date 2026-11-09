@@ -48,3 +48,8 @@ export let comprobacionesEnroque = {
     "negro-torre-1":false,
     "negro-torre-2":false
 }
+
+export let contadorPiezas = {
+        blanco: { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 },
+        negro:  { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 }
+}
