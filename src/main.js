@@ -205,6 +205,7 @@ function clicarPieza(evento){
     //Esto desactiva el comportamiento por defecto que deja arrastrar imagenes
     evento.preventDefault();
     piezaAgarrada = evento.target;
+    
     //Pongo la pieza en la capa mas alta 
     piezaAgarrada.style.position = "absolute";
     piezaAgarrada.style.zIndex = "100";
@@ -332,6 +333,8 @@ async function soltarClick(evento){
                 } 
                 //Resetea los estilos
                 piezaAgarrada.style.position = "";
+                piezaAgarrada.style.left = "";
+                piezaAgarrada.style.top = "";
                 piezaAgarrada.zIndex = "";
                 //Añade la piezaHTML a su casillaHTML
                 casillaDestino.appendChild(piezaAgarrada);
@@ -345,8 +348,9 @@ async function soltarClick(evento){
         if(movimientoPermitido.tipo === "coronacion"){
             procesandoJugada = true;
 
-                    let color = movimientoPermitido.pieza.color;
-                    pieza = await abrirModalCoronacion(color);
+                let color = movimientoPermitido.pieza.color;
+                pieza = await abrirModalCoronacion(color);
+                console.warn(pieza)
                     const clases = {
                         "dama": Dama,
                         "torre": Torre,
@@ -369,6 +373,7 @@ async function soltarClick(evento){
 
                     // tableroDigital[casillaDestino] = pieza;
                     piezaAgarrada.src = pieza.img;
+                    piezaAgarrada.id = nuevoId;
 
                     casillaDestino.classList.add("anim-arcano");
                     casillaDestino.style.position = "relative";
@@ -405,8 +410,8 @@ async function soltarClick(evento){
                 
             }
         };
-                        procesandoJugada = false;
-                piezaAgarrada = null;
+        procesandoJugada = false;
+        piezaAgarrada = null;
 
 
     }
@@ -608,42 +613,52 @@ function avanzarPieza(pieza, casillaPermitida){
 const modalCoronacion = document.getElementById("modalCoronacion");
 const opcionesPiezas = document.querySelectorAll(".opcion-pieza");
 
+
+let resolver = null;
 // Función para abrir el modal y esperar la selección del jugador
 function abrirModalCoronacion(color) {
-  // 1. Asignamos la ruta de las imágenes según el color del peón que corona
+  //Asigna img de las piezas del modal segun el color del peon que corona
   document.getElementById("img-dama").src = `/img/piezas/${color}-dama.webp`;
   document.getElementById("img-torre").src = `/img/piezas/${color}-torre.webp`;
   document.getElementById("img-alfil").src = `/img/piezas/${color}-alfil.webp`;
   document.getElementById("img-caballo").src = `/img/piezas/${color}-caballo.webp`;
 
-  // 2. Mostramos el modal retirando la clase que lo oculta
+  //Muestra el modal
   modalCoronacion.classList.remove("oculto");
 
-  // 3. Devolvemos una promesa que esperará a que el usuario pinche una opción
+  //Devolvemos una promesa que esperará a que el usuario pinche una opción
   return new Promise((resolve) => {
-    function manejarSeleccion(e) {
+    // function manejarSeleccion(e) {
+    //   // Limpiamos los listeners para que no se acumulen clics en futuras coronaciones
+    //   opcionesPiezas.forEach((opcion) => {
+    //     opcion.removeEventListener("click", manejarSeleccion);
+    //   });
 
+    //   // Cerramos el modal
+    //   cerrarModalCoronacion();
 
+    //   // Resolvemos entregando el tipo elegido a quien llamó a la función
+    //   resolve(e.currentTarget.dataset.pieza);
 
+        resolver = resolve;
+    // }
 
-      // Limpiamos los listeners para que no se acumulen clics en futuras coronaciones
-      opcionesPiezas.forEach((opcion) => {
-        opcion.removeEventListener("click", manejarSeleccion);
-      });
-
-      // Cerramos el modal
-      cerrarModalCoronacion();
-
-      // Resolvemos entregando el tipo elegido a quien llamó a la función
-      resolve(e.currentTarget.dataset.pieza);
-    }
-
-    opcionesPiezas.forEach((opcion) => {
-      opcion.addEventListener("click", manejarSeleccion);
-    });
+    // opcionesPiezas.forEach((opcion) => {
+    //   opcion.addEventListener("click", manejarSeleccion);
+    // });
   });
 }
 
 function cerrarModalCoronacion() {
   modalCoronacion.classList.add("oculto");
 }
+
+modalCoronacion.addEventListener("click", (e) => {
+
+    const opcion = e.target.closest("[data-pieza]");
+    if(!opcion) return;
+
+    cerrarModalCoronacion()
+  resolver?.(opcion.dataset.pieza);
+  resolver = null;
+});
