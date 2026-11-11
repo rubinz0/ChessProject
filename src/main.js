@@ -80,7 +80,7 @@ cargarFEN.addEventListener("click", function(){
 //rnbqkbnr/p3pppp/8/1p1p4/4P3/1N1K4/PPPP1PPP/R1B3NR w kq - 0 1
 //r1bqkbn1/pppp1ppP/2n5/4p3/4P3/5N2/PPPP1PP1/RNBQKB1R w KQq - 0 1
 //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
-let fen = "r1bqkbn1/pppp1ppP/2n5/4p3/4P3/5N2/PPPP1PP1/RNBQKB1R w KQq - 0 1";
+let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 lectorFEN(fen);
 function lectorFEN(FEN){
     console.log(inputFEN.value)
@@ -206,14 +206,26 @@ function clicarPieza(evento){
     evento.preventDefault();
     piezaAgarrada = evento.target;
     
-    //Pongo la pieza en la capa mas alta 
-    piezaAgarrada.style.position = "absolute";
-    piezaAgarrada.style.zIndex = "100";
-    //Restamos la posicion del raton menos la esquina de la img para no solo anclarla al raton sino anclarla 
-    // con el mismo margen sin que haya un salto hay que añadirle el scroll de la pantalla ya que mide cuanta distancia
-    //hay desde el principio del documento
-    agarreX = evento.clientX - piezaAgarrada.getBoundingClientRect().left;
-    agarreY = evento.clientY - piezaAgarrada.getBoundingClientRect().top - window.scrollY;
+    // 1. Mides primero, mientras la pieza sigue en reposo en el flujo natural
+const rect = piezaAgarrada.getBoundingClientRect();
+agarreX = evento.clientX - rect.left;
+agarreY = evento.clientY - rect.top;
+
+// 2. Si usas coordenadas absolutas de pantalla, usa position: fixed
+piezaAgarrada.style.position = "fixed"; // 'fixed' ignora si la casilla tiene relative o no
+piezaAgarrada.style.zIndex = "100";
+piezaAgarrada.style.left = `${rect.left}px`;
+piezaAgarrada.style.top = `${rect.top}px`;
+    // //Pongo la pieza en la capa mas alta 
+    // piezaAgarrada.style.position = "absolute";
+    // piezaAgarrada.style.zIndex = "100";
+    // //Restamos la posicion del raton menos la esquina de la img para no solo anclarla al raton sino anclarla 
+    // // con el mismo margen sin que haya un salto hay que añadirle el scroll de la pantalla ya que mide cuanta distancia
+    // //hay desde el principio del documento
+    // agarreX = evento.clientX - piezaAgarrada.getBoundingClientRect().left;
+    // agarreY = evento.clientY - piezaAgarrada.getBoundingClientRect().top - window.scrollY;
+
+
     let casillaInicio = evento.target.parentElement;
     let pieza = tableroDigital[casillaInicio.id];
 
@@ -254,42 +266,54 @@ function moverPieza(evento){
 
 }
 
-let procesandoJugada = false;
 document.addEventListener("mouseup", soltarClick);
+//Se deja fuera para que no dependa de los clics asi si durante la coronacion se clica fuera del tablero no se sobrescribe a false
+let procesandoJugada = false;
 async function soltarClick(evento){
-    console.warn("Soltar", procesandoJugada)
-    let casillaInicio = evento.target.parentElement;
-    let pieza = tableroDigital[casillaInicio.id];
 
-    let casillaDestino;
     if(piezaAgarrada === null || procesandoJugada){
         return;
-    }if(!(piezaAgarrada === null)){
-        //Con esto hacemos que se suelte la pieza y reseteamos sus valores para que no pase por encima de otras y este en la misma capa que la casilla        piezaAgarrada.style.position = "";
-        piezaAgarrada.style.zIndex = "";
-        piezaAgarrada.style.left = "";
-        piezaAgarrada.style.top = "";
+    }
+
+    let casillaInicio = piezaAgarrada.parentElement.closest(".casilla");
+    let pieza = tableroDigital[casillaInicio.id];
+
+
         //Oculta la pieza para poder lanzar el "rayo" que impacta contra la casilla de debajo
         piezaAgarrada.style.visibility = "hidden"
-        //Lannzo el "rayo"
-        let piezaComida;
-        casillaDestino = document.elementFromPoint(evento.clientX,evento.clientY);
-        //Si detecta una pieza en vez de una casilla la marca como pieza comida
-        if(casillaDestino.className == "pieza"){
-            casillaDestino = casillaDestino.parentElement;
-            piezaComida = casillaDestino.querySelector(".pieza");
+        let casillaDestino = null;
+        //Selecciona el elemento que halla en esas cordenadas
+        let elemento = document.elementFromPoint(evento.clientX, evento.clientY);
+        //Si existe un elemento que sea de clase casilla lo añade a casillaDestino
+        if(elemento !== null){
+            casillaDestino = elemento.closest(".casilla");
         }
+        //Vuelve a hacerlo visible
+        piezaAgarrada.style.visibility = "visible";
         
-        let casillaInicio = piezaAgarrada.closest(".casilla");
+        //Resetea los estilos de la pieza cuando la agarramos (y las casillas marcadas)
+        limpiarPiezaHTML(piezaAgarrada);
+
+        //Si no existe la casilla destino o la pieza cancela el movimiento dejandola donde estaba
+        if(!casillaDestino || !pieza){
+            casillaInicio.appendChild(piezaAgarrada);
+            piezaAgarrada = null;
+            return;
+        }
+
         // Calcula los movimientos permitidos (Segun reglas de la pieza seleccionada)
         let movimientosPermitidos = calcularMovimientos(pieza);
         // Comprueba que el movimiento sea valido (Si esta en el tablero, no hay una pieza aliada etc..)
         movimientosPermitidos.splice(0, movimientosPermitidos.length, ...simularMovimiento(pieza, movimientosPermitidos));
         
-        //Recorre los movimientos permitidos y validados
-        for(const movimientoPermitido of movimientosPermitidos) {
-            //Si la casilla donde sueltas la pieza esta como casilla destino de algun movimiento ejecuta el movimiento
-            if(casillaDestino.id === movimientoPermitido.casillaDestino){
+
+        //Recorre los movimientos permitidos y validados y si encuentra uno que coincida con la casilla destino lo añade
+        const movimientoPermitido = movimientosPermitidos.find(movimiento => movimiento.casillaDestino === casillaDestino.id);
+            //Si encuentra ese movimiento ejecuta dependiendo del tipo de movimiento que sea
+            if(movimientoPermitido){
+                //Añade la pieza a la casilla
+                casillaDestino.appendChild(piezaAgarrada);
+
                 //AL CAMBIAR CASILLA POR INSTANCIA NO HACE FALTA CASILLA COMER DIRECTAMENTE SE PONE LA CASILLA SIN #
                 //
                 //-------------------------------
@@ -331,26 +355,13 @@ async function soltarClick(evento){
                         movimientoPermitido.tipo = "enroque-largo";
                     }
                 } 
-                //Resetea los estilos
-                piezaAgarrada.style.position = "";
-                piezaAgarrada.style.left = "";
-                piezaAgarrada.style.top = "";
-                piezaAgarrada.zIndex = "";
-                //Añade la piezaHTML a su casillaHTML
-                casillaDestino.appendChild(piezaAgarrada);
-                piezaAgarrada.style.visibility = "visible";
-                //Reseteamos estilo de las casillas a las que podemos mover
-                let casillasPermitidasHTML = document.querySelectorAll(".casillaPermitida");
-                casillasPermitidasHTML.forEach(casilla => {
-                    casilla.classList.remove("casillaPermitida");
-                });
+                //Coronacion
+                if (movimientoPermitido.tipo === "coronacion") {
+                    procesandoJugada = true;
 
-        if(movimientoPermitido.tipo === "coronacion"){
-            procesandoJugada = true;
-
-                let color = movimientoPermitido.pieza.color;
-                pieza = await abrirModalCoronacion(color);
-                console.warn(pieza)
+                    let color = movimientoPermitido.pieza.color;
+                    let tipoPieza = await abrirModalCoronacion(color);
+                    console.warn(tipoPieza)
                     const clases = {
                         "dama": Dama,
                         "torre": Torre,
@@ -358,38 +369,49 @@ async function soltarClick(evento){
                         "caballo": Caballo
                     }
 
-                    
-                        // 2. Generar el nuevo ID y la ruta de imagen
-                    contadorPiezas[color][pieza]++
-                    const nuevoId = `${color}-${pieza}-${contadorPiezas[color][pieza]}`;
-                    const nuevaImg = `/img/piezas/${color}-${pieza}.webp`;
 
-                            console.warn(nuevoId, nuevaImg)
-                            // 3. Instanciar y actualizar
-                    pieza = new clases[pieza](nuevoId, color, movimientoPermitido.casillaDestino, nuevaImg);
-                    console.warn(pieza)
+                    //Suma uno al contador de piezas dependiendo de la pieza que corones
+                    contadorPiezas[color][tipoPieza]++;
+                    //Crea el nuevoId y la img
+                    const nuevoId = `${color}-${tipoPieza}-${contadorPiezas[color][tipoPieza]}`;
+                    const nuevaImg = `/img/piezas/${color}-${tipoPieza}.webp`;
+
+                    //Crea la instancia de la nueva pieza
+                    let piezaCoronada = new clases[tipoPieza](nuevoId, color, movimientoPermitido.casillaDestino, nuevaImg);
+
+                    //Guarda la pieza antigua para saber cual corono
                     movimientoPermitido.piezaAntesCoronar = movimientoPermitido.pieza;
-                    movimientoPermitido.pieza = pieza;
+                    //Cambia la pieza por la pieza coronada
+                    movimientoPermitido.pieza = piezaCoronada;
 
-                    // tableroDigital[casillaDestino] = pieza;
-                    piezaAgarrada.src = pieza.img;
+                    //Cambia la img el id y el src de la piezaHTML
+                    piezaAgarrada.src = piezaCoronada.img;
                     piezaAgarrada.id = nuevoId;
+                    piezaAgarrada.alt = nuevoId;
 
+                    //Añade la animacion de coronar
                     casillaDestino.classList.add("anim-arcano");
                     casillaDestino.style.position = "relative";
 
+                    //Crea el div donde se aplica la animacion
                     const efecto = document.createElement("div");
                     efecto.classList.add("efecto-animacion", "fusion");
                     casillaDestino.appendChild(efecto);
 
-                    // Si quieres animar la entrada de la imagen:
+                    //Anima la entrada de la imagen
                     piezaAgarrada.classList.add("pieza-spawn");
+                    //Guarda la pieza agarrada porque el codigo se sigue ejecutando y se pierde la referencia global
                     let imgPieza = piezaAgarrada;
+                    //Elimina el div la clase y la position cuando termina la animacion
                     setTimeout(() => {
-                    efecto.remove();
+                        efecto.remove();
                         imgPieza.classList.remove("pieza-spawn");
+                        casillaDestino.style.position = "";
                     }, 350);
-                    console.warn(movimientoPermitido)
+                    //Cambia el peon por la pieza coronada
+                    pieza = piezaCoronada;
+                    //Termina el procesamiento de la jugada
+                    procesandoJugada = false;
                 }
                 //Actualiza tablero en memoria con la jugada actual
                 //Vacia la casilla de inicio
@@ -399,30 +421,35 @@ async function soltarClick(evento){
                 //Actualiza la casilla dentro de la instancia de la pieza
                 pieza.casilla = casillaDestino.id;
                 //Si la pieza no se habia movido la marca como pieza movida
-                if(!pieza.seHaMovido) pieza.seHaMovido = true;
-                console.log(movimientoPermitido)
-                console.warn(JSON.parse(JSON.stringify(tableroDigital)))
+                if (!pieza.seHaMovido) pieza.seHaMovido = true;
                 //Guardar el movimiento en memoria
                 guardarMovimiento(movimientoPermitido);
 
-                
-
-                
+            } else {
+                //Si la jugada no es valida (no es una casilla permitida) devuelve la pieza ha su sitio
+                casillaInicio.appendChild(piezaAgarrada)
             }
-        };
-        procesandoJugada = false;
+        //Elimina la referencia a la piezaHTML
         piezaAgarrada = null;
-
-
-    }
 }
 
+function limpiarPiezaHTML(piezaAgarrada){
+    //Resetea los estilos de cuando clica la pieza
+    piezaAgarrada.style.position = "";
+    piezaAgarrada.style.left = "";
+    piezaAgarrada.style.top = "";
+    piezaAgarrada.style.zIndex = "";
+
+    //Borra las casillas permitidas
+    let casillasPermitidasHTML = document.querySelectorAll(".casillaPermitida");
+    casillasPermitidasHTML.forEach(casilla => {
+        casilla.classList.remove("casillaPermitida");
+    });
+}
 
 function calcularMovimientos(pieza){
     console.log("Calcular movimientos");
     let movimientosPermitidos = [];
-    console.log(pieza)
-    console.log(JSON.parse(JSON.stringify(tableroDigital)))
     movimientosPermitidos.push(...pieza.calcularMovimientos(tableroDigital));
 
     return movimientosPermitidos;
@@ -465,6 +492,7 @@ function generarPGN(movimiento){
 function guardarMovimiento(movimientoPermitido){
     //Volvemos a calcular movimientos posibles pero desde la casilla que aterriza simulando que en el siguiente turno podriamos comer el rey
     const posiblesJaques = calcularMovimientos(movimientoPermitido.pieza);
+
     let jaque = false;
     //Comprobamos que en esa casilla halla una pieza y que sea el rey
     posiblesJaques.forEach(movimiento => {
