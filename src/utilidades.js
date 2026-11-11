@@ -53,3 +53,15 @@ export let contadorPiezas = {
         blanco: { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 },
         negro:  { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 }
 }
+
+
+export function generarCoordenadas() {
+        const columnas = ["a", "b", "c", "d", "e", "f", "g", "h"];
+        const coordenadas = [];
+        for (let fila = 8; fila >= 1; fila--) {
+            for (const columna of columnas) {
+                coordenadas.push(columna + fila);
+            }
+        }
+        return coordenadas;
+    }
