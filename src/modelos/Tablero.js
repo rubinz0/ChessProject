@@ -4,22 +4,31 @@ import { Caballo } from "./piezas/Caballo.js";
 import { Alfil } from "./piezas/Alfil.js";
 import { Dama } from "./piezas/Dama.js";
 import { Rey } from "./piezas/Rey.js";
-import { generarCoordenadas, letras, numeroColumna } from "../utilidades.js";
+import { generarCoordenadas, letras, numeroColumna, comprobacionesEnroque, movimientos } from "../utilidades.js";
 
 
 const FEN_INICIAL = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 export class Tablero {
-    coordenadasArray = generarCoordenadas();
-    constructor() {
-        //Guarda las casillas y su pieza asociada
-        this.tableroDigital = {};
 
-        //Aqui se cuentan cuantas piezas hay de cada tipo, para su id
-        this.contadorPiezas = {
-            blanco: { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 },
-            negro: { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 }
-        };
+    tablero = document.querySelector("#tablero");
+
+    coordenadasArray = generarCoordenadas();
+    
+    //Guarda las casillas y su pieza asociada
+    tableroDigital = {};
+
+    historialMovimientos = [];
+
+    pgn = "PGN: ";
+
+    //Aqui se cuentan cuantas piezas hay de cada tipo, para su id
+    contadorPiezas = {
+    blanco: { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 },
+    negro: { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 }
+    };
+
+    constructor() {
 
         this.ultimoMovimiento = null;
 
@@ -125,9 +134,69 @@ export class Tablero {
         }
     }
 
+    //==== Funciones para guardar informacion del tablero ====
 
+    guardarMovimiento(movimientoPermitido) {
+        //Volvemos a calcular movimientos posibles pero desde la casilla que aterriza simulando que en el siguiente turno podriamos comer el rey
+        const posiblesJaques = this.calcularMovimientos(movimientoPermitido.pieza);
+
+        let jaque = false;
+        //Comprobamos que en esa casilla halla una pieza y que sea el rey
+        posiblesJaques.forEach(movimiento => {
+            if (this.tablero.querySelector("#" + movimiento.casillaDestino).querySelector(".pieza") != null && this.tablero.querySelector("#" + movimiento.casillaDestino).querySelector(".pieza").id.split("-")[1] === "rey") jaque = true;
+        });
+        //Si movemos algun rey o torre lo guardamos para saber si podemos enrocar
+        if (movimientoPermitido.pieza.id === "blanco-rey-1") comprobacionesEnroque["blanco-rey-1"] = true;
+        if (movimientoPermitido.pieza.id === "blanco-torre-1") comprobacionesEnroque["blanco-torre-1"] = true;
+        if (movimientoPermitido.pieza.id === "blanco-torre-2") comprobacionesEnroque["blanco-torre-2"] = true;
+        if (movimientoPermitido.pieza.id === "negro-rey-1") comprobacionesEnroque["negro-rey-1"] = true;
+        if (movimientoPermitido.pieza.id === "negro-torre-1") comprobacionesEnroque["negro-torre-1"] = true;
+        if (movimientoPermitido.pieza.id === "negro-torre-2") comprobacionesEnroque["negro-torre-2"] = true;
+
+        //Añade a movimiento el jaque y que piezas del enroque se han movido en ese instante 
+        let movimiento = movimientoPermitido;
+        movimiento.jaque = jaque;
+        movimiento.fotografiaEnroque = { ...comprobacionesEnroque }
+        movimientos.push(movimiento);
+        this.generarPGN(movimiento);
+    }
+
+    generarPGN(movimiento){
+        //Con esto consigo cambiar las letras a ingles que es la notacion oficial sin tener que hacer bucles (tambien consigo vaciar la letra en caso de ser peon)
+        const diccionario = {
+            "P": "",
+            "T": "R",
+            "C": "N",
+            "A": "B",
+            "D": "Q",
+            "R": "K"
+        };
+        let casilla = "";
+        let pieza;
+        //Compruebo si es un enroque corto o largo para cancelar la logica del PGN y poner 0-0 o 0-0-0
+        if (!(movimiento.tipo.startsWith("enroque"))) {
+            pieza = diccionario[(movimiento.pieza.id.split("-")[1][0]).toUpperCase()];
+            casilla = movimiento.casillaDestino;
+            if (movimiento.captura && !(pieza === "")) pieza += "x";
+            //Si captura un peon añadimos su columna
+            if (movimiento.captura && pieza === "") {
+                pieza += movimiento.casillaInicio[0] + "x";
+            }
+        } else {
+            if (movimiento.tipo === "enroque-corto") {
+                pieza = "0-0";
+            } else {
+                pieza = "0-0-0";
+            }
+        }
+        this.pgn = this.pgn + pieza + casilla + " + ";
+    }
 
     //==== Funciones para leer informacion del tablero ====
+
+    obtenerUltimoMovimiento() {
+        return this.historialMovimientos.at(-1) || null;
+    }
 
     obtenerPieza(casillaId) {
         return this.tableroDigital[casillaId];
@@ -280,14 +349,14 @@ export class Tablero {
 
     //==== Modificar tablero ====
 
-    moverPieza(casillaInicio, casillaDestino) {
+    moverPieza(pieza, casillaDestinoId) {
         //Actualiza tablero en memoria con la jugada actual
         //Vacia la casilla de inicio
-        this.tableroDigital[casillaInicio.id] = null;
+        this.tableroDigital[pieza.casilla] = null;
         //Mueve la pieza a su casilla destino
-        this.tableroDigital[casillaDestino.id] = pieza;
+        this.tableroDigital[casillaDestinoId] = pieza;
         //Actualiza la casilla dentro de la instancia de la pieza
-        pieza.casilla = casillaDestino.id;
+        pieza.casilla = casillaDestinoId;
         //Si la pieza no se habia movido la marca como pieza movida
         if (!pieza.seHaMovido) pieza.seHaMovido = true;
     }

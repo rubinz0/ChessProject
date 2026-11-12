@@ -3,9 +3,13 @@ export class VistaTablero {
     coordenadasArray = generarCoordenadas();
     resolverCoronacion = null;
 
+
+    tablero = document.querySelector("#tablero");
+    modalCoronacion = document.querySelector("#modalCoronacion");
+    pgn = document.querySelector("#contenedorPGN")
+
     constructor() {
-        this.tablero = document.querySelector("#tablero");
-        this.modalCoronacion = document.querySelector("#modalCoronacion");
+
         
         //Diccionario con las casillas HTML
         this.casillasHTML = {};
@@ -121,16 +125,15 @@ export class VistaTablero {
     //==== Marcadores Visuales ====
 
     iluminarCasillasPermitidas(movimientosPermitidos) {
-        console.log(this.casillasHTML.length)
-        //Recorre las casillas del tablero y si esta en la lista de movimientosPermitidos las añade la clase permitida
-        for(let i = 0; i < this.casillasHTML.length; i++){
+        //Recorre las casillas del tablero y si esta en la lista de movimientosPermitidos las añade la clase permitida (Se apoya del array de coordenadas porque casillas es un diccionario)
+        this.coordenadasArray.forEach(coordenada => {
             for(let j = 0; j < movimientosPermitidos.length; j++){
-                if(this.casillasHTML[i].id === movimientosPermitidos[j].casillaDestino){
-                    this.casillasHTML[i].classList.add("casillaPermitida");
-                    j = movimientosPermitidos.length;
+                if(this.casillasHTML[coordenada].id === movimientosPermitidos[j].casillaDestino){
+                    this.casillasHTML[coordenada].classList.add("casillaPermitida");
+                    j = movimientosPermitidos.length; //Cambiar por return ?
                 }
             }
-        }
+        });
     }
 
     limpiarCasillasIluminadas() {
@@ -153,7 +156,7 @@ export class VistaTablero {
     //==== Manipular piezas ====
 
     moverPiezaDOM(piezaHTML, casillaDestinoId) {
-        this.tablero.querySelector(casillaDestinoId).appendChild(piezaHTML);
+        this.tablero.querySelector("#"+casillaDestinoId).appendChild(piezaHTML);
         this.limpiarEstilosPieza(piezaHTML);
     }
 
@@ -167,7 +170,7 @@ export class VistaTablero {
     }
 
     eliminarPieza(casillaId) {
-        this.tablero.querySelector(casillaId).querySelector(".pieza").remove();
+        this.tablero.querySelector("#"+casillaId).querySelector(".pieza").remove();
     }
 
     moverTorreEnroqueDOM(casillaInicioId, casillaDestinoId) {
@@ -195,7 +198,7 @@ export class VistaTablero {
         piezaAgarrada.style.top = `${y}px`;
     }
 
-    obtenerCasillaDestino(piezaAgarrada){
+    obtenerCasillaDestino(piezaAgarrada, evento){
         //Oculta la pieza para poder lanzar el "rayo" que impacta contra la casilla de debajo
         piezaAgarrada.style.visibility = "hidden"
         let casillaDestino = null;
@@ -210,6 +213,12 @@ export class VistaTablero {
         return casillaDestino;
     }
 
+    //==== PGN ====
+    insertarPGN(PGN){
+        //Añade el movimiento al html
+        contenedorPGN.textContent = PGN;
+    }
+
     // ==== Modales e Interfaces ==== 
 
 
@@ -219,9 +228,9 @@ export class VistaTablero {
         const opcion = evento.target.closest("[data-pieza]");
         if (!opcion) return;
 
-        cerrarModalCoronacion()
-        resolver?.(opcion.dataset.pieza);
-        resolver = null;
+        // cerrarModalCoronacion()
+        this.resolverCoronacion?.(opcion.dataset.pieza);
+        this.resolverCoronacion = null;
     }
 
     abrirModalCoronacion(color) {
@@ -237,7 +246,7 @@ export class VistaTablero {
 
         //Devolvemos una promesa que esperará a que el usuario pinche una opción
         return new Promise((resolve) => {
-            resolver = resolve;
+            this.resolverCoronacion = resolve;
         });
     }
 

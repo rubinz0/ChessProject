@@ -44,7 +44,7 @@ export class Peon extends Pieza {
             }
         }
         
-
+        console.log(movimientos)
         let ultimoMovimiento = movimientos[movimientos.length - 1];
         //Calcula que en el ultimo movimiento se moviese un peon de diferente color
         if (movimientos.length > 0 && ultimoMovimiento.pieza.id.split("-")[1] === "peon" && ultimoMovimiento.pieza.id.split("-")[0] !== piezaAgarrada.split("-")[0]) {

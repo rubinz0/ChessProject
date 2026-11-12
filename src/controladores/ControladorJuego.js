@@ -63,6 +63,7 @@ export class ControladorJuego {
         
         // 3. Delegar a la Vista el resaltado de casillas
         this.vista.iluminarCasillasPermitidas(this.movimientosActuales);
+        console.log(this.movimientosActuales)
     }
 
     moverPieza(evento) {
@@ -80,7 +81,7 @@ export class ControladorJuego {
         if (!this.piezaHTML || this.parado) return;
 
         // 2. Pedir a la vista la casilla que está bajo el cursor
-        const casillaDestinoId = this.vista.obtenerCasillaDestino(this.piezaHTML);
+        const casillaDestinoId = this.vista.obtenerCasillaDestino(this.piezaHTML, evento).id;
 
         // 3. Comprobar si esa casilla es un movimiento legal precalculado
         const movimientoValido = this.movimientosActuales.find(
@@ -110,33 +111,32 @@ export class ControladorJuego {
             }
 
             // B) Caso Enroque (mover la torre que acompaña al rey)
-            if (movimientoValido.enroque) {
+            if (movimientoValido.tipo.split("-")[0] === "enroque") {
                 this.tablero.ejecutarEnroqueMemoria(movimientoValido);
                 this.vista.moverTorreEnroqueDOM(movimientoValido.origenTorre, movimientoValido.destinoTorre);
             }
-
             // C) Caso Captura (si hay pieza rival en la casilla destino o al paso)
-            const casillaCapturaId = movimientoValido.alPaso
-                ? movimientoValido.casillaPeonCapturado
-                : casillaDestinoId;
-
-            if (this.tablero.tableroDigital[casillaCapturaId] && casillaCapturaId !== this.pieza.casillaActual) {
-                this.vista.eliminarPiezaDOM(casillaCapturaId);
+            if(movimientoValido.captura){
+                this.vista.eliminarPieza(movimientoValido.casillaCaptura);
             }
 
             // D) Actualizar posición en Modelo y en Vista
-            this.tablero.moverPiezaMemoria(this.pieza, casillaDestinoId);
+            this.tablero.moverPieza(this.pieza, casillaDestinoId);
             this.vista.moverPiezaDOM(this.piezaHTML, casillaDestinoId);
+
+            this.tablero.guardarMovimiento(movimientoValido);
+            this.vista.insertarPGN(this.tablero.pgn);
 
         } else {
             // --- JUGADA INVÁLIDA ---
             // Vuelve a colocar la pieza en su casilla de origen sin cambios
-            this.vista.restablecerEstilosPieza(this.piezaHTML);
+            this.vista.limpiarEstilosPieza(this.piezaHTML);
         }
 
         // 5. Resetear el estado del controlador
         this.pieza = null;
         this.piezaHTML = null;
         this.movimientosActuales = [];
+
     }
 }

@@ -76,25 +76,29 @@ export class Pieza {
             movimientoPermitido.casillaDestino = columna+fila;
             movimientoPermitido.pieza = pieza;
 
+            const tipoPieza = pieza.id.split("-")[1];
+
             //Si no hay pieza en la casillaDestino asigna false a captura
             if(tableroDigital[columna+fila] === null){
                 //Si es peon se separa porque tiene captura al paso y coronacion
-                if(pieza.id.split("-")[1] === "peon"){
+                if(tipoPieza === "peon"){
                     //Si un peon se mueve a una casilla nula y avanza hacia un lado es captura al paso
                     if(Math.abs(movimiento[0]) === 1) {
                         movimientoPermitido.tipo = "captura-paso";
                         movimientoPermitido.captura = true;
                         movimientoPermitido.casillaCaptura = columna + casilla[1];
                         movimientoPermitido.piezaCapturada = tableroDigital[columna+casilla[1]];
+                    }else if(fila === 1 || fila === 8){
+                    //Si un peon esta en la fila 1 o 8 esta coronando (REPETIDO EN CAPTURA)
+                        movimientoPermitido.tipo = "coronacion";
+                        movimientoPermitido.captura = false;
                     }else{
-                        //Si un peon esta en la fila 1 o 8 esta coronando (REPETIDO EN CAPTURA)
-                        if(fila === 1 || fila === 8) {
-                            movimientoPermitido.tipo = "coronacion"
-                        }else{
-                            movimientoPermitido.tipo = "normal";
-                            movimientoPermitido.captura = false;
-                        }
+                        movimientoPermitido.tipo = "normal";
+                        movimientoPermitido.captura = false;
                     }
+                }else if(tipoPieza === "rey" && Math.abs(movimiento[0]) === 2){
+                //Enroques
+                    movimiento.captura = false
                 }else{
                     movimientoPermitido.tipo = "normal";
                     movimientoPermitido.captura = false;
