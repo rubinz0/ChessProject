@@ -68,6 +68,8 @@ export class ControladorJuego {
 
     moverPieza(evento) {
         if (!this.piezaHTML) return;
+        //Cancela el arrastre si estas coronando
+        if(this.parado) return;
 
         const x = evento.clientX - this.agarreX;
         const y = evento.clientY - this.agarreY;
@@ -107,13 +109,31 @@ export class ControladorJuego {
                 // Transforma la imagen en el DOM
                 this.vista.transformarPiezaCoronada(this.piezaHTML, nuevaPieza);
 
+                this.vista.cerrarModalCoronacion();
+
+                this.vista.animarCoronacion(this.piezaHTML, movimientoValido.casillaDestino);
+
+                
+                this.pieza = nuevaPieza;
                 this.parado = false;
             }
 
             // B) Caso Enroque (mover la torre que acompaña al rey)
+            console.log(movimientoValido)
             if (movimientoValido.tipo.split("-")[0] === "enroque") {
                 this.tablero.ejecutarEnroqueMemoria(movimientoValido);
-                this.vista.moverTorreEnroqueDOM(movimientoValido.origenTorre, movimientoValido.destinoTorre);
+                let origenTorre;
+                let destinoTorre;
+                //La fila la saco del rey que enroca
+                if(movimientoValido.tipo.split("-")[1] === "corto"){
+                    console.log(movimientoValido)
+                    origenTorre = "h" + movimientoValido.casillaInicio[1];
+                    destinoTorre = "f" + movimientoValido.casillaDestino[1];
+                }else{
+                    origenTorre = "a" + movimientoValido.casillaInicio[1];
+                    destinoTorre = "d" + movimientoValido.casillaDestino[1];
+                }
+                this.vista.moverTorreEnroqueDOM(origenTorre, destinoTorre);
             }
             // C) Caso Captura (si hay pieza rival en la casilla destino o al paso)
             if(movimientoValido.captura){
@@ -126,6 +146,7 @@ export class ControladorJuego {
 
             this.tablero.guardarMovimiento(movimientoValido);
             this.vista.insertarPGN(this.tablero.pgn);
+            console.log(this.tablero.tableroDigital)
 
         } else {
             // --- JUGADA INVÁLIDA ---

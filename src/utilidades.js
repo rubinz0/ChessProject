@@ -41,10 +41,10 @@ export function juntarListas(lista1, lista2){
 }
 
 export let comprobacionesEnroque = {
-    "blanco-rey":false,
+    "blanco-rey-1":false,
     "blanco-torre-1":false,
     "blanco-torre-2":false,
-    "negro-rey":false,
+    "negro-rey-1":false,
     "negro-torre-1":false,
     "negro-torre-2":false
 }

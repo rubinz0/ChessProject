@@ -80,40 +80,51 @@ export class Pieza {
 
             //Si no hay pieza en la casillaDestino asigna false a captura
             if(tableroDigital[columna+fila] === null){
-                //Si es peon se separa porque tiene captura al paso y coronacion
-                if(tipoPieza === "peon"){
+
+                movimientoPermitido.captura = false;
+
+                //Si es peon se separa porque tiene movimiento doble y coronacion
+                if (tipoPieza === "peon") {
                     //Si un peon se mueve a una casilla nula y avanza hacia un lado es captura al paso
-                    if(Math.abs(movimiento[0]) === 1) {
+                    if (tipoPieza === "peon" && Math.abs(movimiento[0]) === 1) {
                         movimientoPermitido.tipo = "captura-paso";
                         movimientoPermitido.captura = true;
                         movimientoPermitido.casillaCaptura = columna + casilla[1];
-                        movimientoPermitido.piezaCapturada = tableroDigital[columna+casilla[1]];
-                    }else if(fila === 1 || fila === 8){
-                    //Si un peon esta en la fila 1 o 8 esta coronando (REPETIDO EN CAPTURA)
+                        movimientoPermitido.piezaCapturada = tableroDigital[columna + casilla[1]];
+                    } else if (Math.abs(movimiento[1]) === 2) {
+                        movimientoPermitido.tipo = "doble";
+                    } else if (fila === 1 || fila === 8) {
+                        //Si un peon esta en la fila 1 o 8 esta coronando (REPETIDO EN CAPTURA)
                         movimientoPermitido.tipo = "coronacion";
-                        movimientoPermitido.captura = false;
-                    }else{
+                    } else {
                         movimientoPermitido.tipo = "normal";
-                        movimientoPermitido.captura = false;
                     }
                 }else if(tipoPieza === "rey" && Math.abs(movimiento[0]) === 2){
-                //Enroques
-                    movimiento.captura = false
+                    //Enroques
+
+                    //Si el rey acaba en la fila g es enroque corto
+                    if (columna === "g") {
+                        movimientoPermitido.tipo = "enroque-corto";
+                    }else if (columna === "c") {
+                        //Si el rey acaba en la fila c es enroque largo
+                        movimientoPermitido.tipo = "enroque-largo";
+                    }
                 }else{
+                    //Caballos y movimientos normales de rey
                     movimientoPermitido.tipo = "normal";
-                    movimientoPermitido.captura = false;
                 }
                 movimientosPermitidos.push(movimientoPermitido);
             }
             //Si hay una pieza y no es del mismo color que la pieza, asigna la captura, su casilla, su pieza y añade el movimiento
             if(tableroDigital[columna+fila] != null && tableroDigital[columna+fila].color !== pieza.color){
-                movimientoPermitido.tipo = "normal";
                 movimientoPermitido.captura = true;
                 movimientoPermitido.casillaCaptura = columna + fila;
                 movimientoPermitido.piezaCapturada = tableroDigital[columna+fila];
                 //Si un peon esta en la fila 1 o 8 esta coronando (REPETIDO SIN CAPTURA)
-                if (fila === 1 || fila === 8) {
+                if (tipoPieza === "peon" && (fila === 1 || fila === 8)) {
                     movimientoPermitido.tipo = "coronacion"
+                }else{
+                    movimientoPermitido.tipo = "normal"
                 }
                 movimientosPermitidos.push(movimientoPermitido);
             }

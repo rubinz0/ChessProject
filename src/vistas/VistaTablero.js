@@ -174,14 +174,15 @@ export class VistaTablero {
     }
 
     moverTorreEnroqueDOM(casillaInicioId, casillaDestinoId) {
-        this.casillasDOM[casillaDestinoId].appendChild(this.casillasDOM[casillaInicioId].querySelector(".pieza"));
+        console.log(this.casillasHTML[casillaDestinoId])
+        this.casillasHTML[casillaDestinoId].appendChild(this.casillasHTML[casillaInicioId].querySelector(".pieza"));
     }
 
     transformarPiezaCoronada(piezaAgarrada, piezaCoronada) {
         //Cambia la img el id y el src de la piezaHTML
         piezaAgarrada.src = piezaCoronada.img;
-        piezaAgarrada.id = nuevoId;
-        piezaAgarrada.alt = nuevoId;
+        piezaAgarrada.id = piezaCoronada.id;
+        piezaAgarrada.alt = piezaCoronada.id;
     }
 
     //Arrastrar pieza
@@ -235,7 +236,7 @@ export class VistaTablero {
 
     abrirModalCoronacion(color) {
 
-                //Asigna img de las piezas del modal segun el color del peon que corona
+        //Asigna img de las piezas del modal segun el color del peon que corona
         document.getElementById("img-dama").src = `/img/piezas/${color}-dama.webp`;
         document.getElementById("img-torre").src = `/img/piezas/${color}-torre.webp`;
         document.getElementById("img-alfil").src = `/img/piezas/${color}-alfil.webp`;
@@ -253,5 +254,28 @@ export class VistaTablero {
     cerrarModalCoronacion(){
         modalCoronacion.classList.add("oculto");
     }
+
+    animarCoronacion(piezaHTML, casillaDestinoId) {
+    const casillaHTML = this.casillasHTML[casillaDestinoId];
+
+    // 1. Prepara la casilla y crea el nodo del efecto
+    casillaHTML.classList.add("anim-arcano");
+    casillaHTML.style.position = "relative";
+
+    const efecto = document.createElement("div");
+    efecto.classList.add("efecto-animacion", "fusion");
+    casillaHTML.appendChild(efecto);
+
+    // 2. Anima la entrada de la nueva pieza
+    piezaHTML.classList.add("pieza-spawn");
+
+    // 3. Limpia todo al terminar los 350ms
+    setTimeout(() => {
+        efecto.remove();
+        piezaHTML.classList.remove("pieza-spawn");
+        casillaHTML.classList.remove("anim-arcano");
+        casillaHTML.style.position = "";
+    }, 350);
+}
 
 }
