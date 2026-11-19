@@ -6,7 +6,10 @@ import { Dama } from "./piezas/Dama.js";
 import { Rey } from "./piezas/Rey.js";
 import { generarCoordenadas, letras, numeroColumna, comprobacionesEnroque, movimientos } from "../utilidades.js";
 
-
+//Coronar
+//r1bqkbn1/pppp1ppP/2n5/4p3/4P3/5N2/PPPP1PP1/RNBQKB1R w KQq - 0 1
+//Normal
+//rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 const FEN_INICIAL = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 export class Tablero {
@@ -22,6 +25,10 @@ export class Tablero {
 
     pgn = "PGN: ";
 
+    modoPartida = false;
+    
+    turno = "w";
+
     //Aqui se cuentan cuantas piezas hay de cada tipo, para su id
     contadorPiezas = {
     blanco: { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 },
@@ -35,8 +42,8 @@ export class Tablero {
         this.inicializarCasillasVacias();
 
         this.piezasCapturadas = {
-            blancas: [],
-            negras: []
+            blanco: [],
+            negro: []
         };
     }
 
@@ -177,12 +184,23 @@ export class Tablero {
         if (!(movimiento.tipo.startsWith("enroque"))) {
             pieza = diccionario[(movimiento.pieza.id.split("-")[1][0]).toUpperCase()];
             casilla = movimiento.casillaDestino;
+
+            //Si corona la pieza es siempre peon (De normal ya ha coronado y no es un peon) por eso fuerzo a que sea ""
+            if(movimiento.tipo === "coronacion"){
+                pieza = "";
+            }
+            //Si la captura no es de un peon
             if (movimiento.captura && !(pieza === "")) pieza += "x";
             //Si captura un peon añadimos su columna
             if (movimiento.captura && pieza === "") {
                 pieza += movimiento.casillaInicio[0] + "x";
             }
-        } else {
+
+            //Cuando ya tenemos el movimiento añade a que corona
+            if (movimiento.tipo === "coronacion") {
+                casilla += "=" + diccionario[(movimiento.pieza.id.split("-")[1][0]).toUpperCase()];
+            }
+        }else {
             if (movimiento.tipo === "enroque-corto") {
                 pieza = "0-0";
             } else {
@@ -205,10 +223,6 @@ export class Tablero {
     estaVacia(casillaId) {
         return this.tableroDigital[casillaId] === null;
     }
-
-    // obtenerRey(color) {
-    //     // Tu función que busca la casilla o instancia del rey de un color
-    // }
 
 
     //==== Reglas y Validacion ====
@@ -361,8 +375,11 @@ export class Tablero {
         if (!pieza.seHaMovido) pieza.seHaMovido = true;
     }
 
-    registrarCaptura(piezaRival) {
-        this.piezasCapturadas[piezaRival.color].push(piezaRival);
+    registrarCaptura(movimientoValido) {
+        //Guarda la pieza capturada
+        this.piezasCapturadas[movimientoValido.piezaCapturada.color].push(movimientoValido.piezaCapturada);
+        //Elimina la pieza del tablero
+        this.tableroDigital[movimientoValido.casillaCaptura] = null;
     }
 
     ejecutarEnroqueMemoria(movimientoPermitido) {
@@ -394,9 +411,7 @@ export class Tablero {
         }
     }
 
-
-
-    coronarPeon(pieza, tipoPieza, movimientoPermitido) {
+    coronarPeon(tipoPieza, movimientoPermitido) {
         let color = movimientoPermitido.pieza.color;
         const clases = {
             "dama": Dama,
@@ -404,7 +419,6 @@ export class Tablero {
             "alfil": Alfil,
             "caballo": Caballo
         }
-
 
         //Suma uno al contador de piezas dependiendo de la pieza que corones
         this.contadorPiezas[color][tipoPieza]++;
@@ -420,10 +434,26 @@ export class Tablero {
         //Cambia la pieza por la pieza coronada
         movimientoPermitido.pieza = piezaCoronada;
 
-
-        //Cambia el peon por la pieza coronada
-        pieza = piezaCoronada;
+        //Limpia la casilla donde estaba el peon antes de coronar
+        this.tableroDigital[movimientoPermitido.casillaInicio] = null;
 
         return piezaCoronada;
+    }
+
+
+    cambiarTurno(){
+        if(this.turno === "w"){
+            this.turno = "b";
+        }else{
+            this.turno = "w";
+        }
+    }
+
+    cambiarModoPartida(){
+        if(this.modoPartida){
+            this.modoPartida = false;
+        }else{
+            this.modoPartida = true;
+        }
     }
 }

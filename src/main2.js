@@ -15,9 +15,14 @@
 // const movimientoValido = this.movimientosActuales.find(m => m.casillaDestino === casillaDestino.id);
 
 
+
+import { Tablero } from "./modelos/Tablero.js";
+import { VistaTablero } from "./vistas/VistaTablero.js";
+import { VistaModal } from "./vistas/VistaModal.js";
 import { ControladorJuego } from "./controladores/ControladorJuego.js";
 
-// Arranca el juego al cargar el DOM
-document.addEventListener("DOMContentLoaded", () => {
-    new ControladorJuego();
-});
+const tablero = new Tablero();
+const vistaTablero = new VistaTablero();
+const vistaModal = new VistaModal();
+
+const controlador = new ControladorJuego(tablero, vistaTablero, vistaModal);

@@ -9,14 +9,8 @@ export class VistaTablero {
     pgn = document.querySelector("#contenedorPGN")
 
     constructor() {
-
-        
         //Diccionario con las casillas HTML
         this.casillasHTML = {};
-        console.log(this.modalCoronacion)
-        console.log(this.tablero)
-        //Modal coronacion
-        this.modalCoronacion.addEventListener("click", (evento) => this.crearModalCoronacion(evento));
     }
 
     //==== Crear y colocar casillas y piezas ====
@@ -225,57 +219,29 @@ export class VistaTablero {
 
     //Coronacion
 
-    crearModalCoronacion(evento){
-        const opcion = evento.target.closest("[data-pieza]");
-        if (!opcion) return;
-
-        // cerrarModalCoronacion()
-        this.resolverCoronacion?.(opcion.dataset.pieza);
-        this.resolverCoronacion = null;
-    }
-
-    abrirModalCoronacion(color) {
-
-        //Asigna img de las piezas del modal segun el color del peon que corona
-        document.getElementById("img-dama").src = `/img/piezas/${color}-dama.webp`;
-        document.getElementById("img-torre").src = `/img/piezas/${color}-torre.webp`;
-        document.getElementById("img-alfil").src = `/img/piezas/${color}-alfil.webp`;
-        document.getElementById("img-caballo").src = `/img/piezas/${color}-caballo.webp`;
-
-        //Muestra el modal
-        modalCoronacion.classList.remove("oculto");
-
-        //Devolvemos una promesa que esperará a que el usuario pinche una opción
-        return new Promise((resolve) => {
-            this.resolverCoronacion = resolve;
-        });
-    }
-
-    cerrarModalCoronacion(){
-        modalCoronacion.classList.add("oculto");
-    }
-
     animarCoronacion(piezaHTML, casillaDestinoId) {
-    const casillaHTML = this.casillasHTML[casillaDestinoId];
+        const casillaHTML = this.casillasHTML[casillaDestinoId];
 
-    // 1. Prepara la casilla y crea el nodo del efecto
-    casillaHTML.classList.add("anim-arcano");
-    casillaHTML.style.position = "relative";
+        //Prepara los estilos para la casilla destino
+        casillaHTML.classList.add("anim-arcano");
+        casillaHTML.style.position = "relative";
 
-    const efecto = document.createElement("div");
-    efecto.classList.add("efecto-animacion", "fusion");
-    casillaHTML.appendChild(efecto);
+        //Crea el div sobre el que se ejecutan los efectos
+        const efecto = document.createElement("div");
+        efecto.classList.add("efecto-animacion", "fusion");
 
-    // 2. Anima la entrada de la nueva pieza
-    piezaHTML.classList.add("pieza-spawn");
+        casillaHTML.appendChild(efecto);
 
-    // 3. Limpia todo al terminar los 350ms
-    setTimeout(() => {
-        efecto.remove();
-        piezaHTML.classList.remove("pieza-spawn");
-        casillaHTML.classList.remove("anim-arcano");
-        casillaHTML.style.position = "";
-    }, 350);
-}
+        //Añade la animacion a la pieza
+        piezaHTML.classList.add("pieza-spawn");
+
+        //Resetea los estilos despues de 350 ms
+        setTimeout(() => {
+            efecto.remove();
+            piezaHTML.classList.remove("pieza-spawn");
+            casillaHTML.classList.remove("anim-arcano");
+            casillaHTML.style.position = "";
+        }, 350);
+    }
 
 }
