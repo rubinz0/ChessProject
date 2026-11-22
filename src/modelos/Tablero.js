@@ -27,13 +27,18 @@ export class Tablero {
 
     modoPartida = false;
     
-    turno = "w";
+    turno = "blanco";
 
     //Aqui se cuentan cuantas piezas hay de cada tipo, para su id
     contadorPiezas = {
     blanco: { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 },
     negro: { peon: 0, torre: 0, caballo: 0, alfil: 0, dama: 0, rey: 0 }
     };
+
+    posicionesReyes = {
+        blanco : "e1",
+        negro: "e8"
+    }
 
     constructor() {
 
@@ -212,17 +217,21 @@ export class Tablero {
 
     //==== Funciones para leer informacion del tablero ====
 
-    obtenerUltimoMovimiento() {
-        return this.historialMovimientos.at(-1) || null;
+    buscarCasillaRey(color){
+        return this.posicionesReyes[color]
     }
+
+    // obtenerUltimoMovimiento() {
+    //     return this.historialMovimientos.at(-1) || null;
+    // }
 
     obtenerPieza(casillaId) {
         return this.tableroDigital[casillaId];
     }
 
-    estaVacia(casillaId) {
-        return this.tableroDigital[casillaId] === null;
-    }
+    // estaVacia(casillaId) {
+    //     return this.tableroDigital[casillaId] === null;
+    // }
 
 
     //==== Reglas y Validacion ====
@@ -355,12 +364,6 @@ export class Tablero {
     }
 
 
-
-    validarJugada(movimientosLegales, casillaDestino) {
-        return movimientosLegales.find(movimiento => movimiento.casillaDestino === casillaDestino.id);
-    }
-
-
     //==== Modificar tablero ====
 
     moverPieza(pieza, casillaDestinoId) {
@@ -373,6 +376,8 @@ export class Tablero {
         pieza.casilla = casillaDestinoId;
         //Si la pieza no se habia movido la marca como pieza movida
         if (!pieza.seHaMovido) pieza.seHaMovido = true;
+        //Actualiza las posiciones del rey
+        if(pieza.id.split("-")[1] === "rey") this.posicionesReyes[pieza.color] = pieza.casilla;
     }
 
     registrarCaptura(movimientoValido) {
@@ -442,10 +447,10 @@ export class Tablero {
 
 
     cambiarTurno(){
-        if(this.turno === "w"){
-            this.turno = "b";
+        if(this.turno === "blanco"){
+            this.turno = "negro";
         }else{
-            this.turno = "w";
+            this.turno = "blanco";
         }
     }
 

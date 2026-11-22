@@ -439,7 +439,11 @@ Peon despues de añadir movimientos directos e implementar captura al paso
 
 
     TO DO:
-    Coronar
-    RESTRUCTURACION TOTAL: Pasar a un modelo de clases toda la logica
+    Coronar _/
+    RESTRUCTURACION TOTAL: Pasar a un modelo de clases toda la logica _/
 
     Diseñar homepage
+
+
+
+    

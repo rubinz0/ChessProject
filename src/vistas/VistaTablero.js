@@ -6,7 +6,9 @@ export class VistaTablero {
 
     tablero = document.querySelector("#tablero");
     modalCoronacion = document.querySelector("#modalCoronacion");
-    pgn = document.querySelector("#contenedorPGN")
+    pgn = document.querySelector("#contenedorPGN");
+
+    cambiarModo = document.querySelector("#cambiarModo");
 
     constructor() {
         //Diccionario con las casillas HTML
@@ -113,7 +115,11 @@ export class VistaTablero {
         }
     }
 
-
+    vincularListeners(cambiarModo){
+        this.cambiarModo.addEventListener("click", () =>{
+            cambiarModo();
+        });
+    }
 
 
     //==== Marcadores Visuales ====
@@ -244,4 +250,24 @@ export class VistaTablero {
         }, 350);
     }
 
+
+    //==== Modificar pagina ====
+
+    cambiarModoPartida(){
+        const texto = document.querySelector("#texto");
+        if (texto.textContent === "Editor") {
+            texto.textContent = "Partida";
+        } else {
+            texto.textContent = "Editor"
+        }
+    }
+
+    cambiarTurno(){
+        const texto = document.querySelector("#textoTurno");
+        if (texto.textContent === "Blanco") {
+            texto.textContent = "Negro";
+        } else {
+            texto.textContent = "Blanco"
+        }
+    }
 }

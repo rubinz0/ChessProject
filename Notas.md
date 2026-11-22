@@ -375,4 +375,68 @@ CSS
 
 
 
-cambiar el movimiento.tipo = enroque en pieza en vez de main igual que captura al paso
+Para alternar limpiamente entre un Modo Partida (con turnos estrictos y reglas completas) y un Modo Libre / Editor (sin restricciones de turno, ideal para probar posiciones desde FEN), el secreto en MVC está en no llenar tu código de if (modoEditor) por todas partes, sino centralizar el estado en el Modelo (Tablero.js) y poner un único filtro de entrada en el Controlador (ControladorJuego.js).
+
+Aquí tienes el plan detallado de cómo organizarlo paso a paso:
+
+1. El estado vive en el Modelo (Tablero.js)
+Tu clase Tablero debe ser la única fuente de verdad sobre qué está pasando en la partida. Añade dos propiedades de estado a su instancia:
+
+turnoActual: Un string que empieza en "blancas" (o el turno que indique el FEN si cargas uno, ya que el segundo bloque de un FEN es "w" o "b").
+
+modoPartida (o respetarTurnos): Un booleano (true para partida normal con reglas de turno, false para modo libre/editor).
+
+Y dentro del mismo Tablero, crea dos métodos pequeños:
+
+Un método para alternar el turno: Cambia "blancas" por "negras" y viceversa.
+
+Un método para cambiar de modo: Activa o desactiva modoPartida (y, si pasas de modo libre a modo partida, te permite fijar a quién le toca mover).
+
+2. El Controlador actúa como portero (ControladorJuego.js)
+No modifiques cómo las piezas calculan sus movimientos (Peon, Caballo, Rey siguen calculando sus movimientos exactamente igual que ahora). El bloqueo de turno se hace en un único punto: al hacer clic para agarrar una pieza (agarrarClick o seleccionarPieza).
+
+Al detectar que el usuario hace clic sobre una pieza:
+
+Compruebas si tablero.modoPartida está activado (true).
+
+Si está activado, comparas el color de la pieza clicada con tablero.turnoActual.
+
+Si no coinciden, cortas la ejecución inmediatamente (return): ni se levanta la pieza, ni se iluminan sus casillas, ni se permite arrastrarla.
+
+Si modoPartida está desactivado (false), te saltas esa comprobación y dejas mover cualquier pieza de cualquier color en cualquier momento, exactamente como te funciona ahora.
+
+3. Cuándo y dónde cambia el turno
+El turno nunca debe cambiar al agarrar una pieza ni al soltarla en una casilla inválida. Solo cambia al final de soltarClick, una vez que:
+
+Se ha confirmado que el movimiento es válido.
+
+Si había coronación, el jugador ya eligió la pieza en el modal y se completó la transformación.
+
+El movimiento ya se ejecutó en tableroDigital, en la Vista y se guardó en el historial/PGN.
+
+Justo como último paso de una jugada completada, llamas al método del tablero que alterna el turno (puedes hacerlo siempre o solo cuando modoPartida === true; si lo alternas siempre en segundo plano, incluso en modo libre sabrás a quién le tocaría si activas el modo partida en ese instante).
+
+4. Qué pasa al cargar un FEN
+Como ya tienes soporte para FEN, aprovecha ese mismo flujo para sincronizar el turno:
+
+Cuando cargues un FEN estándar (por ejemplo ... w KQkq - 0 1), lee el segundo campo ("w" o "b") para establecer tablero.turnoActual en "blancas" o "negras".
+
+Si cargas un FEN incompleto (solo las piezas, típico de un editor rápido), deja "blancas" por defecto o permite que un selector en la interfaz elija quién empieza.
+
+5. La Vista (VistaTablero o interfaz) solo refleja el estado
+Para que el usuario sepa en qué modo está y a quién le toca:
+
+Indicador de turno: Cuando cambie el turno en el Modelo, el Controlador le pide a la Vista que actualice un indicador visual (un texto "Turno: Blancas", un punto de color o el resaltado del reloj). En modo libre, ese indicador puede mostrar "Modo libre".
+
+Botón/Interruptor de modo: Un simple botón en la interfaz escuchado por el Controlador que llama al método del tablero para alternar modoPartida y actualiza el indicador visual.
+
+Resumen del orden de implementación recomendado
+Paso 1: Añade turnoActual y modoPartida a Tablero.js con sus métodos para alternarlos.
+
+Paso 2: Añade la barrera de comprobación al inicio de agarrarClick en ControladorJuego.js y la llamada a cambiar turno al final de soltarClick.
+
+Paso 3: Conecta la lectura del turno (w/b) en tu cargador de FEN.
+
+Paso 4: Añade el botón de cambio de modo y el indicador de turno en la interfaz.
+
+Paso 5 (Siguiente fase): Una vez que los turnos estén cerrados, ya tendrás el dato clave (turnoActual del rival) para comprobar jaque mate y ahogado justo después de cada cambio de turno.

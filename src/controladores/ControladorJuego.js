@@ -24,6 +24,9 @@ export class ControladorJuego {
         this.vincularEventos();
     }
 
+    //==== Funciones para iniciar el controlador ====
+
+
     inicializarPartida() {
         this.vistaTablero.generarTablero();
         this.tablero.cargarDesdeFEN();
@@ -35,9 +38,12 @@ export class ControladorJuego {
         //La añadimos al documento porque si se añade a pieza y muevo el raton muy rapido la puede perder
         document.addEventListener("mousemove", (e) => this.moverPieza(e));
         document.addEventListener("mouseup", (e) => this.soltarClick(e));
-
+        this.vistaTablero.vincularListeners(() => {
+            this.cambiarModo();
+        });
     }
 
+    //==== Clicar, mover, arrastrar, soltar ====
 
     clicarPieza(evento){
         if (this.parado) return;
@@ -50,22 +56,28 @@ export class ControladorJuego {
         const casillaInicioId = this.piezaHTML.parentElement.id;
         this.pieza = this.tablero.tableroDigital[casillaInicioId];
 
-        // // Validación de turno
+        //Comprobacion del turno (Si hay partida y no es tu turno lo cancela)
+        if(this.tablero.modoPartida && this.pieza.color !== this.tablero.turno) {
+            this.piezaHTML = null;
+            this.pieza = null;
+            return
+        }
+
         // if (!piezaModelo || piezaModelo.color !== this.turno) return;
 
 
-        // Medir distancias relativas
+        //Mide distancias con la pieza para agarrarla en el punto exacto (Que no se agarre por el centro siempre)
         const rect = this.piezaHTML.getBoundingClientRect();
         this.agarreX = evento.clientX - rect.left;
         this.agarreY = evento.clientY - rect.top;
 
-        // 1. Delegar a la Vista la manipulación visual
+        //La vista asigna los estilos a la pieza para el arrastre (cambia la posicion y "levanta" la pieza en el eje y)
         this.vistaTablero.prepararArrastre(this.piezaHTML, rect.left, rect.top);
 
-        // 2. Pedir al Modelo los cálculos
+        //Procesa toda la logica de los movimientos legales
         this.movimientosActuales = this.tablero.obtenerMovimientosLegales(this.pieza);
         
-        // 3. Delegar a la Vista el resaltado de casillas
+        //Ilumina las casillas a las que se puede mover
         this.vistaTablero.iluminarCasillasPermitidas(this.movimientosActuales);
     }
 
@@ -77,7 +89,7 @@ export class ControladorJuego {
         const x = evento.clientX - this.agarreX;
         const y = evento.clientY - this.agarreY;
 
-        // Solo llama a la vista
+        //Pasa los datos a la vista para que arrastre la pieza
         this.vistaTablero.actualizarPosicionArrastre(this.piezaHTML, x, y);
     }
 
@@ -172,6 +184,10 @@ export class ControladorJuego {
             //Inserta el pgn
             this.vistaTablero.insertarPGN(this.tablero.pgn);
 
+            //Si esta en partida cambia el turno
+            if (this.tablero.modoPartida) {
+                this.cambiarTurno();
+            }
         } else {
             //Jugada ilegal
             //Vuelve a colocar la pieza en su casilla de inicio sin cambios
@@ -182,5 +198,18 @@ export class ControladorJuego {
         this.pieza = null;
         this.piezaHTML = null;
         this.movimientosActuales = [];
+        console.log(movimientoValido)
+    }
+
+    //==== Modificar partida ====
+
+    cambiarModo(){
+        this.tablero.cambiarModoPartida();
+        this.vistaTablero.cambiarModoPartida();
+    }
+
+    cambiarTurno(){
+        this.tablero.cambiarTurno();
+        this.vistaTablero.cambiarTurno();
     }
 }
