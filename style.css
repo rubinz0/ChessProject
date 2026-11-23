@@ -29,6 +29,15 @@ body{
     opacity: 50%;
 }
 
+.casillaJaque {
+  background-image: radial-gradient(
+    circle 30px at center,
+    rgba(255, 0, 0, 0.85) 0%,
+    rgba(230, 0, 0, 0.6) 55%,
+    rgba(200, 0, 0, 0) 100%
+  );
+}
+
 .casillaCoord{
     /*Para no poder subrayar y arrastrar las coordenadas*/
     user-select: none;

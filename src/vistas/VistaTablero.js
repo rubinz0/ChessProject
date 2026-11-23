@@ -144,12 +144,13 @@ export class VistaTablero {
         });
     }
 
-    marcarJaque(casillaReyId) {
-        // Añade clase de alerta/rojo a la casilla del rey amenazado
+    marcarJaque(casillaId) {
+        this.casillasHTML[casillaId].classList.add("casillaJaque");
     }
 
-    limpiarJaque() {
-        // Retira el indicador de jaque
+    limpiarJaque(casillas) {
+        this.casillasHTML[casillas["blanco"]].classList.remove("casillaJaque");
+        this.casillasHTML[casillas["negro"]].classList.remove("casillaJaque");
     }
 
 

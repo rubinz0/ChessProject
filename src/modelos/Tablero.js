@@ -10,7 +10,9 @@ import { generarCoordenadas, letras, numeroColumna, comprobacionesEnroque, movim
 //r1bqkbn1/pppp1ppP/2n5/4p3/4P3/5N2/PPPP1PP1/RNBQKB1R w KQq - 0 1
 //Normal
 //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
-const FEN_INICIAL = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+//Ahogado
+//7k/5K2/8/5Q2/8/8/8/8 w - - 0 1
+const FEN_INICIAL = "7k/5K2/8/5Q2/8/8/8/8 w - - 0 1";
 
 export class Tablero {
 
@@ -135,13 +137,18 @@ export class Tablero {
 
                     //Instancia la pieza
                     pieza = new piezaInfo.clase(color + "-" + piezaInfo.nombre + "-" + this.contadorPiezas[color][piezaInfo.nombre], color, casilla, imgURL + color + "-" + piezaInfo.nombre + ".webp");
+                    
+                    //Actualizar posicion del rey
+                    if(letraMayuscula === "K" && color === "blanco") this.posicionesReyes["blanco"] = casilla;
+                    if(letraMayuscula === "K" && color === "negro") this.posicionesReyes["negro"] = casilla;
+
                     //Coloca la pieza en el tableroDigital
                     this.tableroDigital[casilla] = pieza;
 
                     indiceLetras++;
                 }
             }
-            //Quit la letra que se acaba de analizar
+            //Quita la letra que se acaba de analizar
             fen = fen.slice(1);
         }
     }
@@ -150,13 +157,10 @@ export class Tablero {
 
     guardarMovimiento(movimientoPermitido) {
         //Volvemos a calcular movimientos posibles pero desde la casilla que aterriza simulando que en el siguiente turno podriamos comer el rey
-        const posiblesJaques = this.calcularMovimientos(movimientoPermitido.pieza);
+        const colorRival = movimientoPermitido.pieza.color === "blanco" ? "negro" : "blanco";
+        const jaque = this.estaEnJaque(colorRival);
+        
 
-        let jaque = false;
-        //Comprobamos que en esa casilla halla una pieza y que sea el rey
-        posiblesJaques.forEach(movimiento => {
-            if (this.tablero.querySelector("#" + movimiento.casillaDestino).querySelector(".pieza") != null && this.tablero.querySelector("#" + movimiento.casillaDestino).querySelector(".pieza").id.split("-")[1] === "rey") jaque = true;
-        });
         //Si movemos algun rey o torre lo guardamos para saber si podemos enrocar
         if (movimientoPermitido.pieza.id === "blanco-rey-1") comprobacionesEnroque["blanco-rey-1"] = true;
         if (movimientoPermitido.pieza.id === "blanco-torre-1") comprobacionesEnroque["blanco-torre-1"] = true;
@@ -218,7 +222,19 @@ export class Tablero {
     //==== Funciones para leer informacion del tablero ====
 
     buscarCasillaRey(color){
-        return this.posicionesReyes[color]
+        let colorRival = "negro";
+        if(color === "negro") colorRival = "blanco";
+        return this.posicionesReyes[colorRival]
+    }
+
+    casillasRey(){
+        return this.posicionesReyes;
+    }
+
+    estaEnJaque(color){
+        const casillaRey = this.posicionesReyes[color];
+        const casillasAmenazadas = this.calcularCasillasAmenazadas(color);
+        return casillasAmenazadas.includes(casillaRey);
     }
 
     // obtenerUltimoMovimiento() {
@@ -233,6 +249,24 @@ export class Tablero {
     //     return this.tableroDigital[casillaId] === null;
     // }
 
+    hayMovimientosLegales(color){
+        //Comprueba si hay movimientos legales para piezas de ese color
+        const columnas = ["a", "b", "c", "d", "e", "f", "g", "h"];
+
+        for (let fila = 1; fila <= 8; fila++) {
+            for (const columna of columnas) {
+                const pieza = this.tableroDigital[columna + fila];
+                if (pieza !== null && pieza.color === color) {
+                    const movimientosLegales = this.obtenerMovimientosLegales(pieza);
+                    if (movimientosLegales.length > 0) {
+                        //Si hay almenos una jugada no es ni ahogado ni mate
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     //==== Reglas y Validacion ====
 
@@ -352,6 +386,7 @@ export class Tablero {
 
             }
         }
+
         //Añade la clase amenazada para marcar las casillas amenazadas por el rival (usar solo para visualizar las amenazadas)
         // for(let i = 0; i < casillasHTML.length; i++){
         //     for(let j = 0; j < casillasAmenazadas.length; j++){

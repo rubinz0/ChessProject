@@ -63,9 +63,6 @@ export class ControladorJuego {
             return
         }
 
-        // if (!piezaModelo || piezaModelo.color !== this.turno) return;
-
-
         //Mide distancias con la pieza para agarrarla en el punto exacto (Que no se agarre por el centro siempre)
         const rect = this.piezaHTML.getBoundingClientRect();
         this.agarreX = evento.clientX - rect.left;
@@ -124,6 +121,9 @@ export class ControladorJuego {
 
         //Si el movimiento es valido se comprueba el tipo de movimiento y se mueve
         if (movimientoValido) {
+            //Elimina el jaque en caso de que halla
+            this.vistaTablero.limpiarJaque(this.tablero.casillasRey());
+
             //Coronacion
             if (movimientoValido.tipo === "coronacion") {
                 //Bloquea el controlador mientras estamos coronando
@@ -188,6 +188,18 @@ export class ControladorJuego {
             if (this.tablero.modoPartida) {
                 this.cambiarTurno();
             }
+
+
+            const colorRival = this.tablero.turno;
+            const movimientosLegales = this.tablero.hayMovimientosLegales(colorRival)
+
+            if(movimientoValido.jaque){
+                this.vistaTablero.marcarJaque(this.tablero.buscarCasillaRey(movimientoValido.pieza.color));
+                if(this.tablero.movimientosLegalesColor(movimientoValido.pieza.color).length === 0) console.log("MATE");
+            }else{
+                if(this.tablero.movimientosLegalesColor(movimientoValido.pieza.color).length === 0) console.log("Ahogado");
+                console.log(this.tablero.tableroDigital)
+            }
         } else {
             //Jugada ilegal
             //Vuelve a colocar la pieza en su casilla de inicio sin cambios
@@ -198,7 +210,6 @@ export class ControladorJuego {
         this.pieza = null;
         this.piezaHTML = null;
         this.movimientosActuales = [];
-        console.log(movimientoValido)
     }
 
     //==== Modificar partida ====
