@@ -190,15 +190,21 @@ export class ControladorJuego {
             }
 
 
-            const colorRival = this.tablero.turno;
-            const movimientosLegales = this.tablero.hayMovimientosLegales(colorRival)
 
+            const movimientosLegales = this.tablero.hayMovimientosLegales(movimientoValido.pieza.color);
+            console.log(movimientosLegales)
             if(movimientoValido.jaque){
                 this.vistaTablero.marcarJaque(this.tablero.buscarCasillaRey(movimientoValido.pieza.color));
-                if(this.tablero.movimientosLegalesColor(movimientoValido.pieza.color).length === 0) console.log("MATE");
+
+                if(movimientosLegales){
+                    this.parado = true;
+                    console.log("MATE gana: " , movimientoValido.pieza.color);
+                }
             }else{
-                if(this.tablero.movimientosLegalesColor(movimientoValido.pieza.color).length === 0) console.log("Ahogado");
-                console.log(this.tablero.tableroDigital)
+                if(movimientosLegales){
+                    this.parado = true;
+                    console.log("Ahogado: ");
+                }
             }
         } else {
             //Jugada ilegal

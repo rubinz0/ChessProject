@@ -4,7 +4,7 @@ import { Caballo } from "./piezas/Caballo.js";
 import { Alfil } from "./piezas/Alfil.js";
 import { Dama } from "./piezas/Dama.js";
 import { Rey } from "./piezas/Rey.js";
-import { generarCoordenadas, letras, numeroColumna, comprobacionesEnroque, movimientos } from "../utilidades.js";
+import { generarCoordenadas, letras, numeroColumna, movimientos } from "../utilidades.js";
 
 //Coronar
 //r1bqkbn1/pppp1ppP/2n5/4p3/4P3/5N2/PPPP1PP1/RNBQKB1R w KQq - 0 1
@@ -41,6 +41,16 @@ export class Tablero {
         blanco : "e1",
         negro: "e8"
     }
+
+    comprobacionesEnroque = {
+        "blanco-rey-1": true,
+        "blanco-torre-1": true,
+        "blanco-torre-2": true,
+        "negro-rey-1": true,
+        "negro-torre-1": true,
+        "negro-torre-2": true
+    }
+
 
     constructor() {
 
@@ -147,6 +157,8 @@ export class Tablero {
 
                     indiceLetras++;
                 }
+
+                fen[]
             }
             //Quita la letra que se acaba de analizar
             fen = fen.slice(1);
@@ -250,14 +262,18 @@ export class Tablero {
     // }
 
     hayMovimientosLegales(color){
+        let colorRival = "negro";
+        if(color === "negro") colorRival = "blanco";
+
         //Comprueba si hay movimientos legales para piezas de ese color
         const columnas = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
+        const movimientosLegales = [];
         for (let fila = 1; fila <= 8; fila++) {
             for (const columna of columnas) {
                 const pieza = this.tableroDigital[columna + fila];
-                if (pieza !== null && pieza.color === color) {
-                    const movimientosLegales = this.obtenerMovimientosLegales(pieza);
+                if (pieza !== null && pieza.color === colorRival) {
+                    movimientosLegales.push(this.obtenerMovimientosLegales(pieza));
                     if (movimientosLegales.length > 0) {
                         //Si hay almenos una jugada no es ni ahogado ni mate
                         return true;
