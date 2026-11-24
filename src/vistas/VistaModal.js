@@ -1,5 +1,6 @@
 export class VistaModal {
     modalCoronacion = document.querySelector("#modalCoronacion");
+    modalFinPartida = document.querySelector("#modal-fin");
     
     constructor() {
         //Diccionario con las casillas HTML
@@ -41,6 +42,25 @@ export class VistaModal {
         this.resolverCoronacion?.(opcion.dataset.pieza);
         //Limpia la promesa para que no devuelva dos veces si se clica muy rapido
         this.resolverCoronacion = null;
+    }
+
+    //Fin de partida
+    abrirModalFinPartida(resultado, ganador = null) {
+        document.querySelector("#modal-resultado").textContent = resultado;
+        const textoGanador = document.querySelector("#modal-ganador");
+
+        if (ganador) {
+            textoGanador.textContent = `Ganan las ${ganador}s`;
+            textoGanador.style.display = "block";
+        } else {
+            textoGanador.style.display = "none";
+        }
+
+        this.modalFinPartida.classList.remove("oculto");
+    }
+
+    cerrarModalFinPartida() {
+        this.modalFinPartida.classList.add("oculto");
     }
 
 }

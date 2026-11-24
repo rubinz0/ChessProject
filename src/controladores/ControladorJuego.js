@@ -192,18 +192,20 @@ export class ControladorJuego {
 
 
             const movimientosLegales = this.tablero.hayMovimientosLegales(movimientoValido.pieza.color);
-            console.log(movimientosLegales)
+
             if(movimientoValido.jaque){
                 this.vistaTablero.marcarJaque(this.tablero.buscarCasillaRey(movimientoValido.pieza.color));
 
-                if(movimientosLegales){
+                if(!movimientosLegales){
                     this.parado = true;
                     console.log("MATE gana: " , movimientoValido.pieza.color);
+                    this.vistaModal.abrirModalFinPartida("Mate", movimientoValido.pieza.color);
                 }
             }else{
-                if(movimientosLegales){
+                if(!movimientosLegales){
                     this.parado = true;
                     console.log("Ahogado: ");
+                    this.vistaModal.abrirModalFinPartida("Ahogado");
                 }
             }
         } else {

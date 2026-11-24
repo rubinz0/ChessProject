@@ -12,7 +12,7 @@ import { generarCoordenadas, letras, numeroColumna, movimientos } from "../utili
 //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 //Ahogado
 //7k/5K2/8/5Q2/8/8/8/8 w - - 0 1
-const FEN_INICIAL = "7k/5K2/8/5Q2/8/8/8/8 w - - 0 1";
+const FEN_INICIAL = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 export class Tablero {
 
@@ -43,12 +43,12 @@ export class Tablero {
     }
 
     comprobacionesEnroque = {
-        "blanco-rey-1": true,
-        "blanco-torre-1": true,
-        "blanco-torre-2": true,
-        "negro-rey-1": true,
-        "negro-torre-1": true,
-        "negro-torre-2": true
+        "blanco-rey-1": false,
+        "blanco-torre-1": false,
+        "blanco-torre-2": false,
+        "negro-rey-1": false,
+        "negro-torre-1": false,
+        "negro-torre-2": false
     }
 
 
@@ -158,7 +158,6 @@ export class Tablero {
                     indiceLetras++;
                 }
 
-                fen[]
             }
             //Quita la letra que se acaba de analizar
             fen = fen.slice(1);
@@ -174,17 +173,17 @@ export class Tablero {
         
 
         //Si movemos algun rey o torre lo guardamos para saber si podemos enrocar
-        if (movimientoPermitido.pieza.id === "blanco-rey-1") comprobacionesEnroque["blanco-rey-1"] = true;
-        if (movimientoPermitido.pieza.id === "blanco-torre-1") comprobacionesEnroque["blanco-torre-1"] = true;
-        if (movimientoPermitido.pieza.id === "blanco-torre-2") comprobacionesEnroque["blanco-torre-2"] = true;
-        if (movimientoPermitido.pieza.id === "negro-rey-1") comprobacionesEnroque["negro-rey-1"] = true;
-        if (movimientoPermitido.pieza.id === "negro-torre-1") comprobacionesEnroque["negro-torre-1"] = true;
-        if (movimientoPermitido.pieza.id === "negro-torre-2") comprobacionesEnroque["negro-torre-2"] = true;
+        if (movimientoPermitido.pieza.id === "blanco-rey-1") this.comprobacionesEnroque["blanco-rey-1"] = true;
+        if (movimientoPermitido.pieza.id === "blanco-torre-1") this.comprobacionesEnroque["blanco-torre-1"] = true;
+        if (movimientoPermitido.pieza.id === "blanco-torre-2") this.comprobacionesEnroque["blanco-torre-2"] = true;
+        if (movimientoPermitido.pieza.id === "negro-rey-1") this.comprobacionesEnroque["negro-rey-1"] = true;
+        if (movimientoPermitido.pieza.id === "negro-torre-1") this.comprobacionesEnroque["negro-torre-1"] = true;
+        if (movimientoPermitido.pieza.id === "negro-torre-2") this.comprobacionesEnroque["negro-torre-2"] = true;
 
         //Añade a movimiento el jaque y que piezas del enroque se han movido en ese instante 
         let movimiento = movimientoPermitido;
         movimiento.jaque = jaque;
-        movimiento.fotografiaEnroque = { ...comprobacionesEnroque }
+        movimiento.fotografiaEnroque = { ...this.comprobacionesEnroque }
         movimientos.push(movimiento);
         this.generarPGN(movimiento);
     }
@@ -262,19 +261,16 @@ export class Tablero {
     // }
 
     hayMovimientosLegales(color){
-        let colorRival = "negro";
-        if(color === "negro") colorRival = "blanco";
+        const colorRival = color === "blanco" ? "negro" : "blanco";
 
         //Comprueba si hay movimientos legales para piezas de ese color
         const columnas = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
-        const movimientosLegales = [];
         for (let fila = 1; fila <= 8; fila++) {
             for (const columna of columnas) {
                 const pieza = this.tableroDigital[columna + fila];
                 if (pieza !== null && pieza.color === colorRival) {
-                    movimientosLegales.push(this.obtenerMovimientosLegales(pieza));
-                    if (movimientosLegales.length > 0) {
+                    if (this.obtenerMovimientosLegales(pieza).length > 0) {
                         //Si hay almenos una jugada no es ni ahogado ni mate
                         return true;
                     }
@@ -295,7 +291,7 @@ export class Tablero {
     }
 
     calcularMovimientos(pieza) {
-        return pieza.calcularMovimientos(this.tableroDigital);
+        return pieza.calcularMovimientos(this.tableroDigital, this.comprobacionesEnroque);
     }
 
     simularMovimiento(pieza, movimientosPermitidos) {

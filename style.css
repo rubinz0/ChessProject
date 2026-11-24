@@ -190,6 +190,96 @@ body{
   transition: transform 0.2s ease, filter 0.2s ease;
 }
 
+/* Modal fin de partida */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.65);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-overlay.oculto {
+    display: none;
+}
+
+.modal-caja {
+    background-color: #262421;
+    color: #ffffff;
+    padding: 28px 36px;
+    border-radius: 10px;
+    text-align: center;
+    min-width: 280px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    border: 1px solid #3c3a37;
+    
+    /* Aplica la animación de crecimiento al aparecer */
+    animation: aparecerModal 0.75s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes aparecerModal {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+#modal-resultado {
+    margin: 0 0 8px 0;
+    font-size: 1.6rem;
+}
+
+.modal-subtitulo {
+    margin: 0 0 24px 0;
+    font-size: 1.1rem;
+    color: #bababa;
+}
+
+.modal-botones {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.modal-botones button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.modal-botones button:active {
+    transform: scale(0.97);
+}
+
+/* Azul con alto contraste para el texto blanco */
+.btn-primario {
+    background-color: #2563eb;
+    color: #ffffff;
+}
+
+.btn-primario:hover {
+    background-color: #1d4ed8;
+}
+
+.btn-secundario {
+    background-color: #4f4c48;
+    color: #e0e0e0;
+}
+
+.btn-secundario:hover {
+    background-color: #3c3a37;
+}
 /* ========================================================
    EFECTOS HOVER & ACTIVE (FEEDBACK TIPO JUEGO)
    ======================================================== */
