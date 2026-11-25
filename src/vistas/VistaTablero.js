@@ -7,6 +7,7 @@ export class VistaTablero {
     tablero = document.querySelector("#tablero");
     modalCoronacion = document.querySelector("#modalCoronacion");
     pgn = document.querySelector("#contenedorPGN");
+    turno = document.querySelector("#turno");
 
     cambiarModo = document.querySelector("#cambiarModo");
 
@@ -154,6 +155,7 @@ export class VistaTablero {
     }
 
 
+
     //==== Manipular piezas ====
 
     moverPiezaDOM(piezaHTML, casillaDestinoId) {
@@ -267,8 +269,10 @@ export class VistaTablero {
         const texto = document.querySelector("#textoTurno");
         if (texto.textContent === "Blanco") {
             texto.textContent = "Negro";
+            this.turno.style.backgroundColor = "black";
         } else {
             texto.textContent = "Blanco"
+            this.turno.style.backgroundColor = "white";
         }
     }
 }

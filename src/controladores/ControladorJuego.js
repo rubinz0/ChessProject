@@ -189,8 +189,6 @@ export class ControladorJuego {
                 this.cambiarTurno();
             }
 
-
-
             const movimientosLegales = this.tablero.hayMovimientosLegales(movimientoValido.pieza.color);
 
             if(movimientoValido.jaque){

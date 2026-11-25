@@ -4,7 +4,7 @@ body{
 
 #tablero{
     margin-top: 100px;
-    justify-self: center;
+    /* justify-self: center; */
 }
 
 /*Casillas */
@@ -96,6 +96,42 @@ body{
 /* #home:active{
 
 } */
+
+
+/* Turnos + tiempo */
+
+.partida {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.turno p{
+  text-align: center;
+}
+
+#color-turno{
+  height: 40px;
+  width: 60px;
+  background-color: white;
+  border: 2px solid;
+}
+
+.tiempo{
+  display: flex;
+  border: 2px solid;
+}
+
+.contador{
+  height: 40px;
+  width: 60px;
+  background-color: white;
+  text-align: center;
+  justify-content: center;
+}
+
+
 
 /* ========================================================
    ESTILOS BASE DEL MODAL (TEMA VIDEOJUEGO / FANTASÍA)
