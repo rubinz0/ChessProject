@@ -7,7 +7,10 @@ export class VistaTablero {
     tablero = document.querySelector("#tablero");
     modalCoronacion = document.querySelector("#modalCoronacion");
     pgn = document.querySelector("#contenedorPGN");
-    turno = document.querySelector("#turno");
+    turno = document.querySelector("#color-turno");
+
+    contadorBlanco = document.querySelector(".contador-blanco");
+    contadorNegro = document.querySelector(".contador-negro");
 
     cambiarModo = document.querySelector("#cambiarModo");
 
@@ -270,9 +273,13 @@ export class VistaTablero {
         if (texto.textContent === "Blanco") {
             texto.textContent = "Negro";
             this.turno.style.backgroundColor = "black";
+            this.contadorBlanco.style.backgroundColor = "#727272";
+            this.contadorNegro.style.backgroundColor = "black";
         } else {
             texto.textContent = "Blanco"
             this.turno.style.backgroundColor = "white";
+            this.contadorNegro.style.backgroundColor = "#727272";
+            this.contadorBlanco.style.backgroundColor = "white";
         }
     }
 }

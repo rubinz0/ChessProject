@@ -126,12 +126,24 @@ body{
 .contador{
   height: 40px;
   width: 60px;
-  background-color: white;
-  text-align: center;
+  display: flex;
+  align-items: center;
   justify-content: center;
 }
 
+.contador-blanco{
+  background-color: white;
+}
 
+.contador-negro{
+  color: white;
+  background-color: #727272;
+}
+
+.turno2{
+  width: 460px;
+  justify-content: center;
+}
 
 /* ========================================================
    ESTILOS BASE DEL MODAL (TEMA VIDEOJUEGO / FANTASÍA)
