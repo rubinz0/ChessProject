@@ -9,8 +9,9 @@ export class VistaTablero {
     pgn = document.querySelector("#contenedorPGN");
     turno = document.querySelector("#color-turno");
 
-    contadorBlanco = document.querySelector(".contador-blanco");
-    contadorNegro = document.querySelector(".contador-negro");
+    relojBlanco = document.querySelector(".reloj-blanco");
+    relojNegro = document.querySelector(".reloj-negro");
+    imgTurno = document.querySelector(".img-turno");
 
     cambiarModo = document.querySelector("#cambiarModo");
 
@@ -272,14 +273,22 @@ export class VistaTablero {
         const texto = document.querySelector("#textoTurno");
         if (texto.textContent === "Blanco") {
             texto.textContent = "Negro";
-            this.turno.style.backgroundColor = "black";
-            this.contadorBlanco.style.backgroundColor = "#727272";
-            this.contadorNegro.style.backgroundColor = "black";
+            // this.turno.style.backgroundColor = "black";
+            // this.contadorBlanco.style.backgroundColor = "#727272";
+            // this.contadorNegro.style.backgroundColor = "black";
+
+            this.relojBlanco.classList.remove("reloj-activo");
+            this.relojNegro.classList.add("reloj-critico");
+            this.imgTurno.src = "../../img/piezas/negro-rey.webp";
         } else {
             texto.textContent = "Blanco"
-            this.turno.style.backgroundColor = "white";
-            this.contadorNegro.style.backgroundColor = "#727272";
-            this.contadorBlanco.style.backgroundColor = "white";
+            // this.turno.style.backgroundColor = "white";
+            // this.contadorNegro.style.backgroundColor = "#727272";
+            // this.contadorBlanco.style.backgroundColor = "white";
+
+            this.relojNegro.classList.remove("reloj-activo");
+            this.relojBlanco.classList.add("reloj-activo");
+            this.imgTurno.src = "img/piezas/blanco-rey.webp";
         }
     }
 }

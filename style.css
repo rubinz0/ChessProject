@@ -3,7 +3,7 @@ body{
 }
 
 #tablero{
-    margin-top: 100px;
+    margin-top: 20px;
     /* justify-self: center; */
 }
 
@@ -104,47 +104,95 @@ body{
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
 }
 
-.turno p{
-  text-align: center;
-}
-
-#color-turno{
-  height: 40px;
-  width: 60px;
-  background-color: white;
-  border: 2px solid;
-}
-
-.tiempo{
+/*Coloca la line de info al mismo tamaño que el tablero*/
+.contenedor-tablero {
   display: flex;
-  border: 2px solid;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.contador{
-  height: 40px;
-  width: 60px;
+.partida-info {
+  margin-left: 60px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.turno-indicador {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.img-turno {
+  width: 36px;
+  height: 36px;
+}
+
+.tiempo {
+  margin-left: 60px;
+  display: flex;
+  border: 2px solid #3c3a37;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.reloj {
+  height: 36px;
+  width: 65px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: bold;
+
+  /* Transición suave para el cambio de color y brillo */
+
+    transition: opacity 0.2s, box-shadow 0.25s ease, color 0.25s ease;
+
 }
 
-.contador-blanco{
-  background-color: white;
+.reloj-blanco {
+  background-color: #ffffff;
+  color: #1e1e1e;
 }
 
-.contador-negro{
-  color: white;
-  background-color: #727272;
+.reloj-negro {
+  background-color: black;
+  color: #ffffff;
 }
 
-.turno2{
-  width: 460px;
-  justify-content: center;
+
+/* 1. Reloj activo normal (borde interior amarillo + resplandor sutil) */
+.reloj-activo {
+  opacity: 1;
+  box-shadow: inset 0 0 0 3px #facc15, 0 0 8px rgba(250, 204, 21, 0.35);
 }
 
+/* 2. Queda poco tiempo (ej. menos de 30 segundos -> anaranjado) */
+.reloj-poco-tiempo {
+  opacity: 1;
+  box-shadow: inset 0 0 0 3px #f97316, 0 0 8px rgba(249, 115, 22, 0.4);
+}
+
+/* 3. Queda muy poco tiempo (ej. menos de 10 segundos -> rojo con pulso suave) */
+.reloj-critico {
+  opacity: 1;
+  box-shadow: inset 0 0 0 3px #ef4444, 0 0 10px rgba(239, 68, 68, 0.55);
+  animation: pulsoReloj 1s infinite alternate;
+}
+@keyframes pulsoReloj {
+  from {
+    box-shadow: inset 0 0 0 3px #ef4444, 0 0 4px rgba(239, 68, 68, 0.3);
+  }
+  to {
+    box-shadow: inset 0 0 0 3px #ef4444, 0 0 12px rgba(239, 68, 68, 0.8);
+  }
+}
 /* ========================================================
    ESTILOS BASE DEL MODAL (TEMA VIDEOJUEGO / FANTASÍA)
    ======================================================== */

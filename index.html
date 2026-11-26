@@ -16,20 +16,22 @@
     <p id="textoTurno">Blanco</p>
     
     <div class="partida">
-      <div class="turno2">      
-        <div>Turno: </div>
-        <!-- <img src="img/piezas/blanco-rey.webp" alt="rey-blanco" class="imgTurno"> -->
-      </div>
+      <div class="contenedor-tablero">
+        
+        <div class="partida-info">
+          <div class="turno-indicador">
+            <span>Turno:</span>
+            <img id="img-turno" src="img/piezas/blanco-rey.webp" alt="Turno actual" class="img-turno">
+          </div>
 
-      <div id="tablero">
-      </div>
-      <div class="turno">
-        <p>Turno</p>
-        <div id="color-turno"></div>
-      </div>
-      <div class="tiempo">
-        <div class="contador contador-blanco">5:00</div>
-        <div class="contador contador-negro">5:00</div>
+          <div class="tiempo">
+            <div class="reloj reloj-blanco reloj-activo">5:00</div>
+            <div class="reloj reloj-negro">5:00</div>
+          </div>
+        </div>
+
+        <div id="tablero"></div>
+
       </div>
     </div>
 
