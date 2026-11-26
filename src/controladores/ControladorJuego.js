@@ -13,24 +13,34 @@ export class ControladorJuego {
     agarreX = 0;
     agarreY = 0;
 
-    constructor(tablero, vistaTablero, vistaModal) {
+    intervaloTiempo = null;
+
+    constructor(tablero, vistaTablero, vistaModal, configuracionPartida) {
         //Modelos y Vistas
         this.tablero = tablero;
         this.vistaTablero = vistaTablero;
         this.vistaModal = vistaModal;
 
 
-        this.inicializarPartida();
+        this.inicializarPartida(configuracionPartida);
         this.vincularEventos();
     }
 
     //==== Funciones para iniciar el controlador ====
 
 
-    inicializarPartida() {
+    inicializarPartida(configuracionPartida) {
         this.vistaTablero.generarTablero();
         this.tablero.cargarDesdeFEN();
         this.vistaTablero.colocarPiezasHTML(this.tablero.tableroDigital);
+        
+        this.tablero.configurarPartida(configuracionPartida);
+        if(configuracionPartida.modoPartida && configuracionPartida.tiempo) {
+            this.tablero.configurarTiempo(configuracionPartida);
+            this.vistaTablero.mostrarTiempo();
+            this.tablero.iniciarTiempo();
+        }
+
     }
 
     vincularEventos() {
@@ -43,6 +53,7 @@ export class ControladorJuego {
         });
     }
 
+    
     //==== Clicar, mover, arrastrar, soltar ====
 
     clicarPieza(evento){
@@ -186,6 +197,12 @@ export class ControladorJuego {
 
             //Si esta en partida cambia el turno
             if (this.tablero.modoPartida) {
+
+                if(this.tablero.tiempo){
+                    const tiempoIncrementado = this.tablero.sumarIntervaloTiempo(this.pieza.color);
+                    this.vistaTablero.actualizarReloj
+                }
+
                 this.cambiarTurno();
             }
 
@@ -229,4 +246,32 @@ export class ControladorJuego {
         this.tablero.cambiarTurno();
         this.vistaTablero.cambiarTurno();
     }
+
+    //==== Tiempo ====
+
+    iniciarTiempo() {
+        this.intervaloTiempo = setInterval(() => {
+
+            const colorActivo = this.tablero.turno;
+            const tiempoRestante = this.tablero.restarTiempo(colorActivo);
+
+            this.vistaTablero.actualizarReloj(colorActivo, tiempoRestante, true);
+
+            if (tiempoRestante === 0) {
+                this.detenerTiempo();
+                this.parado = true;
+                const ganador = colorActivo === "blanco" ? "negro" : "blanco";
+                this.vistaModal.abrirModalFinPartida("¡Tiempo agotado!", ganador);
+            }
+        }, 100);
+    }
+
+    detenerTiempo() {
+        if (this.intervaloTiempo) {
+            clearInterval(this.intervaloTiempo);
+            this.intervaloTiempo = null;
+        }
+    }
+
+
 }

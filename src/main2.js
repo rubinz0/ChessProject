@@ -25,4 +25,12 @@ const tablero = new Tablero();
 const vistaTablero = new VistaTablero();
 const vistaModal = new VistaModal();
 
-const controlador = new ControladorJuego(tablero, vistaTablero, vistaModal);
+const configuracionPartida = {
+    modoPartida: true,
+    tiempo: true,
+    tiempoBlancas: 300,
+    tiempoNegras: 300,
+    incrementoBlancas: 0,
+    incrementoNegras: 0
+}
+const controlador = new ControladorJuego(tablero, vistaTablero, vistaModal, configuracionPartida);

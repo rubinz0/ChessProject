@@ -9,9 +9,12 @@ export class VistaTablero {
     pgn = document.querySelector("#contenedorPGN");
     turno = document.querySelector("#color-turno");
 
+    tiempo = document.querySelector(".tiempo");
     relojBlanco = document.querySelector(".reloj-blanco");
     relojNegro = document.querySelector(".reloj-negro");
     imgTurno = document.querySelector(".img-turno");
+
+    turnoIndicador = document.querySelector(".turno-indicador");
 
     cambiarModo = document.querySelector("#cambiarModo");
 
@@ -290,5 +293,13 @@ export class VistaTablero {
             this.relojBlanco.classList.add("reloj-activo");
             this.imgTurno.src = "img/piezas/blanco-rey.webp";
         }
+    }
+
+    mostrarTiempo(){
+        //Muestra el reloj con el tiempo
+        this.tiempo.classList.remove("oculto");
+
+        //Cambiar porque no se generara en partida tendra su propia pagina
+        this.turnoIndicador.classList.add("oculto");
     }
 }

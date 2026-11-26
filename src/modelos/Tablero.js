@@ -27,7 +27,16 @@ export class Tablero {
 
     pgn = "PGN: ";
 
-    modoPartida = false;
+    modoPartida;
+    tiempo;
+    tiempoRestante = {
+        //blanco: 300,
+        //negro: 300
+    };
+    incrementoTiempo = {
+        //blanco: 2,
+        //negro: 2
+    };
     
     turno = "blanco";
 
@@ -162,6 +171,23 @@ export class Tablero {
             //Quita la letra que se acaba de analizar
             fen = fen.slice(1);
         }
+    }
+
+    configurarPartida(configuracionPartida){
+        this.modoPartida = configuracionPartida.modoPartida;
+        if(this.modoPartida) this.tiempo = configuracionPartida.tiempo;
+    }
+
+    configurarTiempo(configuracionPartida){
+        this.tiempoRestante["blanco"] = configuracionPartida.tiempoBlancas;
+        this.tiempoRestante["negro"] = configuracionPartida.tiempoNegras;
+
+        this.incrementoTiempo["blanco"] = configuracionPartida.incrementoBlancas;
+        this.incrementoTiempo["negro"] = configuracionPartida.incrementoNegras;
+    }
+    
+    iniciarTiempo(){
+
     }
 
     //==== Funciones para guardar informacion del tablero ====
@@ -508,4 +534,15 @@ export class Tablero {
             this.modoPartida = true;
         }
     }
+
+    //==== Tiempo ====
+
+    restarTiempo(color){
+        this.tiempoRestante[color] -= 0.1;
+    }
+
+    sumarIntervaloTiempo(color){
+        this.tiempoRestante[color] += this.incrementoTiempo[color];
+    }
+
 }

@@ -445,5 +445,5 @@ Peon despues de añadir movimientos directos e implementar captura al paso
     Diseñar homepage
 
 
-
+    Cuando se acabe el tiempo y tengas el modal de coronar que se corone dama automaticamente y te cierre el modal
     
