@@ -295,11 +295,39 @@ export class VistaTablero {
         }
     }
 
+    //Tiempo
     mostrarTiempo(){
         //Muestra el reloj con el tiempo
         this.tiempo.classList.remove("oculto");
 
         //Cambiar porque no se generara en partida tendra su propia pagina
         this.turnoIndicador.classList.add("oculto");
+
+        this.actualizarTiempo("blanco", tiempoBlanco, turnoInicial === "blanco");
+        this.actualizarTiempo("negro", tiempoNegro, turnoInicial === "negro");
+    }
+
+    actualizarTiempo(color, tiempo){
+        reloj = color === "blanco" ? document.querySelector("reloj-blanco") : document.querySelector("reloj-negro");
+        
+        reloj.textContent.formatearTiempo(tiempo);
+
+        reloj.classList.remove("reloj-activo", "reloj-poco-tiempo", "reloj-critico");
+        
+
+    }
+
+    formatearTiempo(tiempo){
+        //Divide entre 60 los segundos para sacar los minutos
+        const minutos = Math.floor(tiempo / 60);
+        //El pad Start añade el 0 delante para que sea 05s no 5s
+        const segundos = Math.floor(tiempo % 60).toString().padStart(2, "0");
+
+        //Si hay menos de 10 segundos de tiempo añade decimas de segundos
+        if (tiempo < 10) {
+            const decimas = Math.floor((segundos % 1) * 10);
+            return minutos + ":" + segundos + "." + decimas;
+        }
+        return minutos + ":" + segundos;
     }
 }

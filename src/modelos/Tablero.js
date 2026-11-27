@@ -538,11 +538,11 @@ export class Tablero {
     //==== Tiempo ====
 
     restarTiempo(color){
-        this.tiempoRestante[color] -= 0.1;
+        return this.tiempoRestante[color] -= 0.1;
     }
 
     sumarIntervaloTiempo(color){
-        this.tiempoRestante[color] += this.incrementoTiempo[color];
+        return this.tiempoRestante[color] += this.incrementoTiempo[color];
     }
 
 }

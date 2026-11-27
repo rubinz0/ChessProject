@@ -37,7 +37,7 @@ export class ControladorJuego {
         this.tablero.configurarPartida(configuracionPartida);
         if(configuracionPartida.modoPartida && configuracionPartida.tiempo) {
             this.tablero.configurarTiempo(configuracionPartida);
-            this.vistaTablero.mostrarTiempo();
+            this.vistaTablero.mostrarTiempo(this.tablero.tiempoRestante["blanco"], this.tablero.tiempoRestante["negro"], this.tablero.turno);
             this.tablero.iniciarTiempo();
         }
 
@@ -198,12 +198,18 @@ export class ControladorJuego {
             //Si esta en partida cambia el turno
             if (this.tablero.modoPartida) {
 
+                //Sumar incremento
                 if(this.tablero.tiempo){
                     const tiempoIncrementado = this.tablero.sumarIntervaloTiempo(this.pieza.color);
-                    this.vistaTablero.actualizarReloj
+                    this.vistaTablero.actualizarReloj(this.tablero.turno, tiempoIncrementado, false)
                 }
 
                 this.cambiarTurno();
+                
+                //Cambiar el reloj activo
+                if(this.tablero.tiempo){
+                    this.vistaTablero.actualizarReloj(this.tablero.turno, this.tablero.tiempoRestante[this.tablero.turno], true);
+                }
             }
 
             const movimientosLegales = this.tablero.hayMovimientosLegales(movimientoValido.pieza.color);
